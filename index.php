@@ -29,7 +29,11 @@ if (isset($_FILES['csvfile'])) {
   $contacts = new HRContacts();
   $return = $contacts->process($_FILES['csvfile']['tmp_name']);
   $initial_line = array_keys($return[0]);
-  echo $twig->render('data.twig', array('header' => $initial_line, 'rows' => $return));
+  echo $twig->render('data.twig', array(
+    'header' => $initial_line,
+    'rows' => $return,
+    'json_rows' => json_encode($return),
+  ));
 }
 else {
   echo $twig->render('home.twig');
