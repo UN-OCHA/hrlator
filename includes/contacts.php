@@ -203,9 +203,9 @@ class HRContacts {
 
   function process($filename) {
 
-    $this->organizations = load_data($this->site_url.'organizations.xml', array('Name', 'Acronym'));
+    $this->organizations = $this->load_data($this->site_url.'organizations.xml', array('Name', 'Acronym'));
 
-    $this->clusters = load_data($this->site_url.'clusters.xml', array('Name', 'Prefix'));
+    $this->clusters = $this->load_data($this->site_url.'clusters.xml', array('Name', 'Prefix'));
 
     $csv = csv_to_array($argv[1]);
 
