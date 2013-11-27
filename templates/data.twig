@@ -19,7 +19,7 @@
                 </thead>
                 <tbody>
                   {% for row in rows %}
-                  <tr>
+                  <tr class="{{ row.valid }}">
                     {% for item in row %}
                       <td>{{ item }}</td>
                     {% endfor %}

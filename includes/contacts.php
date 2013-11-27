@@ -282,9 +282,15 @@ class HRContacts {
       }
       else {
         $contact_exists = $this->contact_exists($line);
-        $contact_exists ? $line['Comments'] .= "Contact already exists in the database. See ".$site_url."profile/".$contact_exists : $line['Comments'] .= "Contact does not exist in database; ";
+        $contact_exists ? $line['Comments'] .= "Contact already exists in the database. See ".$site_url."profile/".$contact_exists : $line['Comments'] .= "";
       }
       
+      if (empty($line["Comments"])) {
+        $line['valid'] = 'success';
+      }
+      else {
+        $line['valid'] = 'danger';
+      }
     }
 
    return $csv;
