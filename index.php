@@ -1,30 +1,7 @@
 <?php
 
 require __DIR__ . '/vendor/autoload.php';
-
-/**
- * @link http://gist.github.com/385876
- */
-function csv_to_array($filename='', $delimiter=',')
-{
-    if(!file_exists($filename) || !is_readable($filename))
-        return FALSE;
-
-    $header = NULL;
-    $data = array();
-    if (($handle = fopen($filename, 'r')) !== FALSE)
-    {
-        while (($row = fgetcsv($handle, 1000, $delimiter)) !== FALSE)
-        {
-            if(!$header)
-                $header = $row;
-            else
-                $data[] = array_combine($header, $row);
-        }
-        fclose($handle);
-    }
-    return $data;
-}
+require __DIR__. '/includes/contacts.php';
 
 
 /* Load Twig */
@@ -49,7 +26,9 @@ $twig->addGlobal('version', $versionDetails);
 $twig->addFunction('get_class', new Twig_Function_Function('get_class'));
 
 if (isset($_FILES['csvfile'])) {
-  var_dump(csv_to_array($_FILES['csvfile']['tmp_name']));
+  $return = process_contacts($_FILES['csvfile']['tmp_name']);
+  $initial_line = array_keys($return[0]);
+  echo $twig->render('data.twig', array('header' => $initial_line, 'rows' => $return));
 }
 else {
   echo $twig->render('home.twig');

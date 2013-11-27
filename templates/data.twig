@@ -1,0 +1,33 @@
+{% extends '_page.twig' %}
+{% block title %}HRLator{% endblock %}
+{% block content %}
+    {% set tableWidth=6 %}
+    <p class="lead"><a href="{{ baseurl }}">&laquo; Back to form</a></p>
+
+    <hr/>
+
+    <h2>CSV File</h2>
+    <div class="row">
+        <div class="col-sm-{{ tableWidth }}">
+            <table class="table table-striped table-bordered">
+                <thead>
+                <tr>
+                    {% for item in header %}
+                      <th>{{ item }}</th>
+                    {% endfor %}
+                </tr>
+                </thead>
+                <tbody>
+                  {% for row in rows %}
+                  <tr>
+                    {% for item in row %}
+                      <td>{{ item }}</td>
+                    {% endfor %}
+                  </tr>
+                  {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+{% endblock %}
