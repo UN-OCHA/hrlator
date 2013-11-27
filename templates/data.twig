@@ -3,6 +3,25 @@
 {% block content %}
     {% set tableWidth=6 %}
     <p class="lead"><a href="{{ baseurl }}">&laquo; Back to form</a></p>
+    
+    <script>
+
+            var data = <?php json_encode($rows); ?>;
+
+            $('#editable').handsontable({
+              data: data,
+              colHeaders: true,
+              rowHeaders: true,
+              minSpareRows: 1
+            });
+
+            $('#editable table').addClass('table');
+
+    </script>
+    
+    <div class="row">
+      <div id="editable"></div>
+    </div>
 
     <hr/>
 
