@@ -2,6 +2,31 @@
 
 require __DIR__ . '/vendor/autoload.php';
 
+/**
+ * @link http://gist.github.com/385876
+ */
+function csv_to_array($filename='', $delimiter=',')
+{
+    if(!file_exists($filename) || !is_readable($filename))
+        return FALSE;
+
+    $header = NULL;
+    $data = array();
+    if (($handle = fopen($filename, 'r')) !== FALSE)
+    {
+        while (($row = fgetcsv($handle, 1000, $delimiter)) !== FALSE)
+        {
+            if(!$header)
+                $header = $row;
+            else
+                $data[] = array_combine($header, $row);
+        }
+        fclose($handle);
+    }
+    return $data;
+}
+
+
 /* Load Twig */
 $twig = new Twig_Environment(new Twig_Loader_Filesystem(__DIR__ . '/templates/'));
 
@@ -23,4 +48,10 @@ $twig->addGlobal('version', $versionDetails);
 
 $twig->addFunction('get_class', new Twig_Function_Function('get_class'));
 
-echo $twig->render('home.twig');
+if (isset($_FILES['csvfile'])) {
+  var_dump($_FILES['csvfile']['tmp_name']);
+  var_dump(csv_to_array($_FILES['csvfile']['tmp_name']));
+}
+else {
+  echo $twig->render('home.twig');
+}
