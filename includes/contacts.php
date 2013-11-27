@@ -213,6 +213,7 @@ class HRContacts {
 
     foreach ($csv as &$line) {
       $line['Comments'] = "";
+      $line['valid'] = 'success';
       
       // Organization
       $org = trim($line['Organization']);
@@ -224,6 +225,7 @@ class HRContacts {
         }
         else {
           $line['Comments'] .= "Organization not found; ";
+          $line['valid'] = 'danger';
         }
       }
       
@@ -243,6 +245,7 @@ class HRContacts {
                 }
                 else {
                   $line['Comments'] .= $cluster_name['Comments'];
+                  $line['valid'] = 'danger';
                 }
               }
               $line['Clusters'] = implode(";", $csv_clusters_array);
@@ -256,6 +259,7 @@ class HRContacts {
             }
             else {
               $line['Comments'] .= $cluster_name['Comments'];
+              $line['valid'] = 'danger';
             }
           }
         }
@@ -268,6 +272,9 @@ class HRContacts {
       if (!empty($line['Telephones'])) {
         $telephones = $this->format_phone($line['Telephones']);
         $line['Comments'] .= $telephones['Comments'];
+        if (empty($telephones['Comments'])) {
+          $line['valid'] = 'danger';
+        }
         $line['Telephones'] = $telephones['Phone'];
       }
       
@@ -279,17 +286,14 @@ class HRContacts {
       $last_name = $line['Last name'];
       if (empty($last_name)) {
         $line['Comments'] .= "Last Name is empty; ";
+        $line['valid'] = 'danger';
       }
       else {
         $contact_exists = $this->contact_exists($line);
-        $contact_exists ? $line['Comments'] .= "Contact already exists in the database. See ".$site_url."profile/".$contact_exists : $line['Comments'] .= "";
-      }
-      
-      if (empty($line["Comments"])) {
-        $line['valid'] = 'success';
-      }
-      else {
-        $line['valid'] = 'danger';
+        if ($contact_exists) {
+          $line['Comments'] .= "Contact already exists in the database. See ".$site_url."profile/".$contact_exists;
+          $line['valid'] = 'danger';
+        }
       }
     }
 

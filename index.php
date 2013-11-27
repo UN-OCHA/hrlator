@@ -33,7 +33,7 @@ if (isset($_FILES['csvfile'])) {
 
   fputcsv($fp, $initial_line);
 
-  foreach ($csv as $cline) {
+  foreach ($return as $cline) {
       fputcsv($fp, $cline);
   }
 
