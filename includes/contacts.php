@@ -207,7 +207,7 @@ class HRContacts {
 
     $this->clusters = $this->load_data($this->site_url.'clusters.xml', array('Name', 'Prefix'));
 
-    $csv = csv_to_array($argv[1]);
+    $csv = csv_to_array($filename);
 
     $initial_line = array_keys($csv[0]);
 
@@ -217,7 +217,7 @@ class HRContacts {
       // Organization
       $org = trim($line['Organization']);
       if (!$this->organization_exists($org)) {
-        $name = $this->find_organization_by_acronym($org, $organizations);
+        $name = $this->find_organization_by_acronym($org);
         if (!empty($name)) {
           $line['Organization'] = $name;
           $line['Comments'] .= "Organization found by acronym; ";
