@@ -29,10 +29,19 @@ if (isset($_FILES['csvfile'])) {
   $contacts = new HRContacts();
   $return = $contacts->process($_FILES['csvfile']['tmp_name']);
   $initial_line = array_keys($return[0]);
+  $fp = fopen('./data/'.$_FILES['csvfile']['name'], 'w');
+
+  fputcsv($fp, $initial_line);
+
+  foreach ($csv as $cline) {
+      fputcsv($fp, $cline);
+  }
+
+  fclose($fp);
   echo $twig->render('data.twig', array(
     'header' => $initial_line,
     'rows' => $return,
-    'json_rows' => json_encode($return),
+    'file_link' => './data/'.$_FILES['csvfile']['name'],
   ));
 }
 else {
