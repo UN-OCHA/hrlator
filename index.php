@@ -49,7 +49,6 @@ $twig->addGlobal('version', $versionDetails);
 $twig->addFunction('get_class', new Twig_Function_Function('get_class'));
 
 if (isset($_FILES['csvfile'])) {
-  var_dump($_FILES['csvfile']['tmp_name']);
   var_dump(csv_to_array($_FILES['csvfile']['tmp_name']));
 }
 else {
