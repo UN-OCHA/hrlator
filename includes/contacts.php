@@ -272,7 +272,7 @@ class HRContacts {
       if (!empty($line['Telephones'])) {
         $telephones = $this->format_phone($line['Telephones']);
         $line['Comments'] .= $telephones['Comments'];
-        if (empty($telephones['Comments'])) {
+        if (!empty($telephones['Comments'])) {
           $line['valid'] = 'danger';
         }
         $line['Telephones'] = $telephones['Phone'];
