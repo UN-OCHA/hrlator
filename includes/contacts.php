@@ -349,7 +349,7 @@ class HRContacts {
       else {
         $contact_exists = $this->contact_exists($line);
         if ($contact_exists) {
-          $line['Comments'] .= "Contact already exists in the database. See ".$site_url."profile/".$contact_exists;
+          $line['Comments'] .= "Contact already exists in the database. See ".$this->site_url."profile/".$contact_exists;
           $line['valid'] = 'danger';
         }
       }
