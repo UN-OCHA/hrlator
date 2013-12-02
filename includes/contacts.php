@@ -278,6 +278,22 @@ class HRContacts {
         $line['Telephones'] = $telephones['Phone'];
       }
       
+      if (empty($line['First name']) && empty($line['Last name']) && !empty($line['Full name'])) {
+        // Try to determine First name and last name from full name
+        $line['Full name'] = trim($line['Full name']);
+        $full_name = explode(' ', $line['Full name']);
+        if (count($full_name) == 2) {
+          $line['First name'] = $full_name[0];
+          $line['Last name'] = $full_name[1];
+          $line['Comments'] = "Separated ".$line['Full name']." into First name: ".$line['First name']." and Last name: ".$line['Last name']."; ";
+          $line['valid'] = 'warning';
+        }
+        else {
+          $line['Comments'] = "Could not determine first name and last name; ";
+          $line['valid'] = 'danger';
+        }
+      }
+      
       // Trim last name and first name
       $line['First name'] = trim($line['First name']);
       $line['Last name'] = trim($line['Last name']);
