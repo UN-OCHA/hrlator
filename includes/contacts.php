@@ -305,7 +305,7 @@ class HRContacts {
       
       // Emails
       $line['Email'] = $this->replace_separator($line['Email']);
-      if (!$this->check_email_address($line['Email'])) {
+      if (!empty($line['Email']) && !$this->check_email_address($line['Email'])) {
         $line['Comments'] .= "Email address is invalid; ";
         $line['valid'] = 'danger';
       }
