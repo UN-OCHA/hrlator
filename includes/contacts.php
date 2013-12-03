@@ -323,6 +323,7 @@ class HRContacts {
       
       // Locations
       $line['Location'] = $this->replace_separator($line['Location']);
+      $line['Location'] = trim($line['Location']);
       $csv_locations = $line['Location'];
       if (!empty($csv_locations)) {
         $array_locations = explode(';', $csv_locations);
