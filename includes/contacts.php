@@ -245,9 +245,9 @@ class HRContacts {
     $number = count($xml->taxonomy_term_data);
     $matched = FALSE;
     if ($number > 0) {
-      // See if we have a matching first name
+      // See if we have a matching location name
       foreach ($xml->taxonomy_term_data as $location) {
-        if ($location->Name == $name) {
+        if (strcasecmp($location, $name) == 0) {
           // Exact match
           $matched = TRUE;
           break;
