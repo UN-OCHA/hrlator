@@ -26,7 +26,7 @@ $twig->addGlobal('version', $versionDetails);
 $twig->addFunction('get_class', new Twig_Function_Function('get_class'));
 
 if (isset($_FILES['csvfile'])) {
-  $contacts = new HRContacts();
+  $contacts = new HRLatorContacts();
   $return = $contacts->process($_FILES['csvfile']['tmp_name']);
   $initial_line = array_keys($return[0]);
   $fp = fopen('./data/'.$_FILES['csvfile']['name'], 'w');
