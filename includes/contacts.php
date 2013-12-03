@@ -1,6 +1,6 @@
 <?php
 
-require_once "./hrlator.php";
+require_once dirname(__FILE__)."/hrlator.php";
 
 /**
  * @link http://gist.github.com/385876
