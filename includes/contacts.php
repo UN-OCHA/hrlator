@@ -2,35 +2,7 @@
 
 require_once dirname(__FILE__)."/hrlator.php";
 
-/**
- * @link http://gist.github.com/385876
- */
-function csv_to_array($filename='', $delimiter=',')
-{
-    if(!file_exists($filename) || !is_readable($filename))
-        return FALSE;
-
-    $header = NULL;
-    $data = array();
-    if (($handle = fopen($filename, 'r')) !== FALSE)
-    {
-        while (($row = fgetcsv($handle, 1000, $delimiter)) !== FALSE)
-        {
-            if(!$header)
-                $header = $row;
-            else
-                $data[] = array_combine($header, $row);
-        }
-        fclose($handle);
-    }
-    return $data;
-}
-
 class HRLatorContacts extends HRLator {
-
-  protected $organizations = array();
-  protected $clusters = array();
-  protected $site_url = "https://philippines.humanitarianresponse.info/";
   
   // Load data with their acronyms
 
@@ -42,7 +14,7 @@ class HRLatorContacts extends HRLator {
     if ($number > 0) {
       // See if we have a matching first name
       foreach ($xml->search_api_index_user_profile as $profile) {
-        if ($profile->firstName == $line['First name']) {
+        if (strcasecmp($profile->firstName, $line['First name']) == 0) {
           // Exact match
           $matched = $profile->profileId;
           break;
