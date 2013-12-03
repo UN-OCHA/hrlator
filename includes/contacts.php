@@ -14,7 +14,7 @@ class HRLatorContacts extends HRLator {
     if ($number > 0) {
       // See if we have a matching first name
       foreach ($xml->search_api_index_user_profile as $profile) {
-        if (strcasecmp($profile->firstName, $line['First name']) == 0) {
+        if (strcasecmp(trim($profile->firstName), $line['First name']) == 0) {
           // Exact match
           $matched = $profile->profileId;
           break;
