@@ -238,6 +238,24 @@ class HRContacts {
     }
     return true;
   }
+  
+  function find_location_by_name($name) {
+    $url = $this->site_url . "/locations/xml?name=".$name;
+    $xml = simplexml_load_file($url);
+    $number = count($xml->search_api_index_user_profile);
+    $matched = FALSE;
+    if ($number > 0) {
+      // See if we have a matching first name
+      foreach ($xml->taxonomy_term_data as $location) {
+        if ($location->Name == $name) {
+          // Exact match
+          $matched = TRUE;
+          break;
+        }
+      }
+    }
+    return $matched;
+  }
 
   function process($filename) {
 
@@ -299,6 +317,19 @@ class HRContacts {
               $line['Comments'] .= $cluster_name['Comments'];
               $line['valid'] = 'danger';
             }
+          }
+        }
+      }
+      
+      // Locations
+      $line['Location'] = $this->replace_separator($line['Location']);
+      $csv_locations = $line['Location'];
+      if (!empty($csv_locations)) {
+        $array_locations = explode(';', $csv_locations);
+        foreach ($array_locations as &$location) {
+          if (!$this->find_location_by_name($location)) {
+            $line['Comments'] .= "Location ".$location." not found; ";
+            $line['valid'] = 'danger';
           }
         }
       }
