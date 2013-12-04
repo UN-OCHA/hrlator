@@ -45,5 +45,16 @@ if (isset($_FILES['csvfile'])) {
   ));
 }
 else {
-  echo $twig->render('home.twig');
+  $template = 'contacts';
+  if (isset($_GET['template'])) {
+    switch ($_GET['template'])) {
+      case 'contacts':
+        $template = 'contacts';
+        break;
+      case 'activities':
+        $template = 'activities';
+        break;
+    }
+  }
+  echo $twig->render($template.'.twig');
 }
