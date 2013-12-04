@@ -82,12 +82,32 @@ class HRLatorActivities extends HRLator {
       if (!empty($csv_locations)) {
         $array_locations = explode(';', $csv_locations);
         foreach ($array_locations as $location) {
-          if (!$this->find_location_by_name($location)) {
+          if (!$this->find_location_by_pcode($location)) {
             $line['Comments'] .= "Location ".$location." not found; ";
             $line['valid'] = 'danger';
           }
         }
       }
+      
+      // Status
+      $line['Status'] = trim($line['Status']);
+      if (!empty($line['Status']) && !in_array($line['Status'], array('Planned', 'Ongoing', 'Completed')) {
+        $line['Comments'] .= 'Status not recognized; ';
+        $line['valid'] = 'danger';
+      }
+      
+      // Start date
+      if (!empty($line['Start Date']) && strtotime($line['Start Date']) === FALSE) {
+        $line['Comments'] .= 'Start date not recognized; ';
+        $line['valid'] = 'danger';
+      }
+      
+      // End date
+      if (!empty($line['End Date']) && strtotime($line['End Date']) === FALSE) {
+        $line['Comments'] .= 'End date not recognized; ';
+        $line['valid'] = 'danger';
+      }
+      
     }
 
    return $csv;

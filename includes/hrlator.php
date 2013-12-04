@@ -237,4 +237,22 @@ abstract class HRLator {
     }
     return $matched;
   }
+  
+  function find_location_by_pcode($pcode) {
+    $url = $this->site_url . "/locations/xml?field_location_pcode_value=".$pcode;
+    $xml = simplexml_load_file($url);
+    $number = count($xml->taxonomy_term_data);
+    $matched = FALSE;
+    if ($number > 0) {
+      // See if we have a matching location name
+      foreach ($xml->taxonomy_term_data as $location) {
+        if (strcasecmp($location->Pcode, $pcode) == 0) {
+          // Exact match
+          $matched = TRUE;
+          break;
+        }
+      }
+    }
+    return $matched;
+  }
 }
