@@ -106,7 +106,7 @@ class HRLatorActivities extends HRLator {
       }
       
       // End date
-      if (!empty($line['End Date']) && strtotime($line['End Date'], $date_format) === FALSE) {
+      if (!empty($line['End Date']) && strptime($line['End Date'], $date_format) === FALSE) {
         $line['Comments'] .= 'End date not recognized; ';
         $line['valid'] = 'danger';
       }

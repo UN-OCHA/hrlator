@@ -3,6 +3,7 @@
 require __DIR__ . '/vendor/autoload.php';
 require __DIR__. '/includes/contacts.php';
 require __DIR__. '/includes/activities.php';
+require __DIR__. '/includes/dictionary.php';
 
 function sanitize_template($template) {
   $return = 'contacts';
@@ -69,6 +70,9 @@ if (isset($_FILES['csvfile'])) {
   ));
 }
 else {
+  $dictionary = new HRLatorDictionary();
+  $dictionary->add('organizations', 'Samaritan Purse', "Samaritan's Purse");
+  echo $dictionary->find('organizations', 'Samaritan Purse');
   $template = sanitize_template("");
   if (isset($_GET['template'])) {
     $template = sanitize_template($_GET['template']);
