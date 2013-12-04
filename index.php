@@ -73,12 +73,15 @@ if (isset($_FILES['csvfile'])) {
   ));
 }
 else {
-  $dictionary = new HRLatorDictionary();
-  $dictionary->add('organizations', 'Samaritan Purse', "Samaritan's Purse");
-  echo $dictionary->find('organizations', 'Samaritan Purse');
   $template = sanitize_template("");
   if (isset($_GET['template'])) {
     $template = sanitize_template($_GET['template']);
   }
-  echo $twig->render($template['template'].'.twig');
+  $parameters = array();
+  if ($template['template'] == 'dictionary') {
+    $dictionary = new HRLatorDictionary();
+    $rows = $dictionary->findAll();
+    $parameters['rows'] = $rows;
+  }
+  echo $twig->render($template['template'].'.twig', $parameters);
 }
