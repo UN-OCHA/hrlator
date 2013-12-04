@@ -39,4 +39,11 @@ class HRLatorDictionary {
     }
   }
   
+  public function findAll() {
+    $return = array();
+    $query = 'SELECT * FROM Dictionary WHERE Type = "'.$type.'" AND Initial = "'.$initial.'";';
+    $result = $this->database->query($query);
+    return $result->fetchArray();
+  }
+  
 }
