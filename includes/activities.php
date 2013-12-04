@@ -97,14 +97,16 @@ class HRLatorActivities extends HRLator {
         $line['valid'] = 'danger';
       }
       
+      $date_format = '%d/%m/%Y';
+      
       // Start date
-      if (!empty($line['Start Date']) && strtotime($line['Start Date']) === FALSE) {
+      if (!empty($line['Start Date']) && strptime($line['Start Date'], $date_format) === FALSE) {
         $line['Comments'] .= 'Start date not recognized; ';
         $line['valid'] = 'danger';
       }
       
       // End date
-      if (!empty($line['End Date']) && strtotime($line['End Date']) === FALSE) {
+      if (!empty($line['End Date']) && strtotime($line['End Date'], $date_format) === FALSE) {
         $line['Comments'] .= 'End date not recognized; ';
         $line['valid'] = 'danger';
       }
