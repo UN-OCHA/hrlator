@@ -2,6 +2,7 @@
 
 require __DIR__ . '/vendor/autoload.php';
 require __DIR__. '/includes/contacts.php';
+require __DIR__. '/includes/activities.php';
 
 function sanitize_template($template) {
   $return = 'contacts';
