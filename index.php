@@ -17,7 +17,7 @@ function sanitize_template($template) {
       $class = 'HRLatorActivities';
       break;
   }
-  return array('template' => $template, 'class' => $class);
+  return array('template' => $return, 'class' => $class);
 }
 
 
