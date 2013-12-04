@@ -17,11 +17,9 @@
                 <tbody>
                   {% for row in rows %}
                   <tr>
-                    {% for item in row %}
-                      <td>{{ item.Type }}</td>
-                      <td>{{ item.Initial }}</td>
-                      <td>{{ item.Replacement }}</td>
-                    {% endfor %}
+                      <td>{{ row.Type }}</td>
+                      <td>{{ row.Initial }}</td>
+                      <td>{{ row.Replacement }}</td>
                   </tr>
                   {% endfor %}
                 </tbody>
