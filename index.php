@@ -82,7 +82,6 @@ else {
     $dictionary = new HRLatorDictionary();
     $rows = $dictionary->findAll();
     $parameters['rows'] = $rows;
-    var_dump($rows);
   }
   echo $twig->render($template['template'].'.twig', $parameters);
 }
