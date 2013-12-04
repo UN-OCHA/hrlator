@@ -45,7 +45,10 @@ $twig->addGlobal('version', $versionDetails);
 $twig->addFunction('get_class', new Twig_Function_Function('get_class'));
 
 if (isset($_FILES['csvfile'])) {
-  $template = sanitize_template($_GET['template']);
+  $template = sanitize_template();
+  if (isset($_GET['template'])) {
+    $template = sanitize_template($_GET['template']);
+  }
   $class = $template['class'];
   $data = new $class();
   $return = $data->process($_FILES['csvfile']['tmp_name']);
@@ -66,6 +69,9 @@ if (isset($_FILES['csvfile'])) {
   ));
 }
 else {
-  $template = sanitize_template($_GET['template']);
+  $template = sanitize_template();
+  if (isset($_GET['template'])) {
+    $template = sanitize_template($_GET['template']);
+  }
   echo $twig->render($template['template'].'.twig');
 }
