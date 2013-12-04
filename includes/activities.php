@@ -18,17 +18,24 @@ class HRLatorActivities extends HRLator {
       $line['Comments'] = "";
       $line['valid'] = 'success';
       
-      // Organization
-      $org = trim($line['Organizations']);
-      if (!$this->organization_exists($org)) {
-        $name = $this->find_organization_by_acronym($org);
-        if (!empty($name)) {
-          $line['Organizations'] = $name;
-          $line['Comments'] .= "Organization found by acronym; ";
-        }
-        else {
-          $line['Comments'] .= "Organization not found; ";
-          $line['valid'] = 'danger';
+      // Organizations
+      $line['Organizations'] = $this->replace_separator($line['Organizations']);
+      $line['Organizations'] = trim($line['Organizations']);
+      $csv_organizations = $line['Organizations'];
+      if (!empty($csv_organizations)) {
+        $array_organizations = explode(';', $csv_organizations);
+        foreach ($array_organizations as &$organization) {
+          if (!$this->organization_exists($organization)) {
+            $name = $this->find_organization_by_acronym($organization);
+            if (!empty($name)) {
+              $organization = $name;
+              $line['Comments'] .= "Organization ".$organization." found by acronym; ";
+            }
+            else {
+              $line['Comments'] .= "Organization ".$organization." not found; ";
+              $line['valid'] = 'danger';
+            }
+          }
         }
       }
       
