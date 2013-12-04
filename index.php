@@ -3,6 +3,22 @@
 require __DIR__ . '/vendor/autoload.php';
 require __DIR__. '/includes/contacts.php';
 
+function sanitize_template($template) {
+  $return = 'contacts';
+  $class = "HRLatorContacts";
+  switch ($template) {
+    case 'contacts':
+      $return = 'contacts';
+      $class = 'HRLatorContacts';
+      break;
+    case 'activities':
+      $return = 'activities';
+      $class = 'HRLatorActivities';
+      break;
+  }
+  return array('template' => $template, 'class' => $class);
+}
+
 
 /* Load Twig */
 $twig = new Twig_Environment(new Twig_Loader_Filesystem(__DIR__ . '/templates/'));
@@ -26,8 +42,10 @@ $twig->addGlobal('version', $versionDetails);
 $twig->addFunction('get_class', new Twig_Function_Function('get_class'));
 
 if (isset($_FILES['csvfile'])) {
-  $contacts = new HRLatorContacts();
-  $return = $contacts->process($_FILES['csvfile']['tmp_name']);
+  $template = sanitize_template($_GET['template']);
+  $class = $template['class'];
+  $data = new $class();
+  $return = $data->process($_FILES['csvfile']['tmp_name']);
   $initial_line = array_keys($return[0]);
   $fp = fopen('./data/'.$_FILES['csvfile']['name'], 'w');
 
@@ -45,16 +63,6 @@ if (isset($_FILES['csvfile'])) {
   ));
 }
 else {
-  $template = 'contacts';
-  if (isset($_GET['template'])) {
-    switch ($_GET['template']) {
-      case 'contacts':
-        $template = 'contacts';
-        break;
-      case 'activities':
-        $template = 'activities';
-        break;
-    }
-  }
-  echo $twig->render($template.'.twig');
+  $template = sanitize_template($_GET['template']);
+  echo $twig->render($template['template'].'.twig');
 }
