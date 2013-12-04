@@ -43,7 +43,11 @@ class HRLatorDictionary {
     $return = array();
     $query = 'SELECT * FROM Dictionary;';
     $result = $this->database->query($query);
-    return $result->fetchArray();
+    $return = array();
+    while ($row = $result->fetchArray()) {
+      $return[] = $row;
+    }
+    return $return;
   }
   
 }
