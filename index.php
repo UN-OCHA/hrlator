@@ -72,6 +72,15 @@ if (isset($_FILES['csvfile'])) {
     'file_link' => './data/'.$_FILES['csvfile']['name'],
   ));
 }
+
+elseif (isset($_POST['type'])) {
+  $dictionary = new HRLatorDictionary();
+  $dictionary->add($_POST['type'], $_POST['initial'], $_POST['replacement']);
+  $rows = $dictionary->findAll();
+  $parameters['rows'] = $rows;
+  echo $twig->render('dictionary.twig', $parameters);
+}
+
 else {
   $template = sanitize_template("");
   if (isset($_GET['template'])) {
