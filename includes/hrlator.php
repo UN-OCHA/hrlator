@@ -1,5 +1,6 @@
 <?php
 
+require_once __DIR__.'/dictionary.php';
 /**
  * @link http://gist.github.com/385876
  */
@@ -26,9 +27,18 @@ function csv_to_array($filename='', $delimiter=',')
 
 abstract class HRLator {
   
+  protected $dictionary = NULL;
   protected $organizations = array();
   protected $clusters = array();
   protected $site_url = "https://philippines.humanitarianresponse.info/";
+  
+  public function __construct() {
+    $this->dictionary = new HRLatorDictionary();
+  }
+  
+  protected function consult_dictionary($type, $initial) {
+    return $this->dictionary->find($type, $initial);
+  }
 
   protected function load_data($file, $fields) {
     $xml = simplexml_load_file($file);
