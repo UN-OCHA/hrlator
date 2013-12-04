@@ -40,6 +40,10 @@ class HRLatorContacts extends HRLator {
       
       // Organization
       $org = trim($line['Organization']);
+      $org_dictionary = $this->consult_dictionary('organizations', $org);
+      if (!empty($org_dictionary)) {
+        $org = $org_dictionary;
+      }
       if (!$this->organization_exists($org)) {
         $name = $this->find_organization_by_acronym($org);
         if (!empty($name)) {
