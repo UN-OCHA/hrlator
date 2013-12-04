@@ -47,7 +47,7 @@ if (isset($_FILES['csvfile'])) {
 else {
   $template = 'contacts';
   if (isset($_GET['template'])) {
-    switch ($_GET['template'])) {
+    switch ($_GET['template']) {
       case 'contacts':
         $template = 'contacts';
         break;
