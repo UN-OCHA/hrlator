@@ -31,7 +31,7 @@ class HRLatorDictionary {
   public function find($type, $initial) {
     $query = 'SELECT * FROM Dictionary WHERE Type = "'.$type.'" AND Initial = "'.$initial.'";';
     if($result = $this->database->query($query)) {
-      $row = $result->fetch();
+      $row = $result->fetchArray();
       return $row['Replacement'];
     }
     else {
