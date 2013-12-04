@@ -19,11 +19,11 @@ class HRLatorActivities extends HRLator {
       $line['valid'] = 'success';
       
       // Organization
-      $org = trim($line['Organization']);
+      $org = trim($line['Organizations']);
       if (!$this->organization_exists($org)) {
         $name = $this->find_organization_by_acronym($org);
         if (!empty($name)) {
-          $line['Organization'] = $name;
+          $line['Organizations'] = $name;
           $line['Comments'] .= "Organization found by acronym; ";
         }
         else {
@@ -69,9 +69,9 @@ class HRLatorActivities extends HRLator {
       }
       
       // Locations
-      $line['Location'] = $this->replace_separator($line['Location']);
-      $line['Location'] = trim($line['Location']);
-      $csv_locations = $line['Location'];
+      $line['Locations'] = $this->replace_separator($line['Locations']);
+      $line['Locations'] = trim($line['Locations']);
+      $csv_locations = $line['Locations'];
       if (!empty($csv_locations)) {
         $array_locations = explode(';', $csv_locations);
         foreach ($array_locations as $location) {
