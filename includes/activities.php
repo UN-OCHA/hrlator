@@ -37,6 +37,7 @@ class HRLatorActivities extends HRLator {
             }
           }
         }
+        $line['Organizations'] = implode(';', $array_organizations);
       }
       
       // Clusters
