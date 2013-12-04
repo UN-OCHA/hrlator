@@ -1,9 +1,9 @@
 <?php
 
-require __DIR__ . '/vendor/autoload.php';
-require __DIR__. '/includes/contacts.php';
-require __DIR__. '/includes/activities.php';
-require __DIR__. '/includes/dictionary.php';
+require_once (__DIR__ . '/vendor/autoload.php');
+require_once (__DIR__. '/includes/contacts.php');
+require_once (__DIR__. '/includes/activities.php');
+require_once (__DIR__. '/includes/dictionary.php');
 
 function sanitize_template($template) {
   $return = 'contacts';
