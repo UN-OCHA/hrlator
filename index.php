@@ -18,6 +18,9 @@ function sanitize_template($template) {
         $return = 'activities';
         $class = 'HRLatorActivities';
         break;
+      case 'dictionary':
+        $return = 'dictionary';
+        break;
     }
   }
   return array('template' => $return, 'class' => $class);
