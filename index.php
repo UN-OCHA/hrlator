@@ -7,15 +7,17 @@ require __DIR__. '/includes/activities.php';
 function sanitize_template($template) {
   $return = 'contacts';
   $class = "HRLatorContacts";
-  switch ($template) {
-    case 'contacts':
-      $return = 'contacts';
-      $class = 'HRLatorContacts';
-      break;
-    case 'activities':
-      $return = 'activities';
-      $class = 'HRLatorActivities';
-      break;
+  if (!empty($template)) {
+    switch ($template) {
+      case 'contacts':
+        $return = 'contacts';
+        $class = 'HRLatorContacts';
+        break;
+      case 'activities':
+        $return = 'activities';
+        $class = 'HRLatorActivities';
+        break;
+    }
   }
   return array('template' => $return, 'class' => $class);
 }
