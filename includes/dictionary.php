@@ -41,7 +41,7 @@ class HRLatorDictionary {
   
   public function findAll() {
     $return = array();
-    $query = 'SELECT * FROM Dictionary WHERE Type = "'.$type.'" AND Initial = "'.$initial.'";';
+    $query = 'SELECT * FROM Dictionary;';
     $result = $this->database->query($query);
     return $result->fetchArray();
   }
