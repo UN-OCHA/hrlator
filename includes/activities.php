@@ -26,7 +26,7 @@ class HRLatorActivities extends HRLator {
         $array_organizations = explode(';', $csv_organizations);
         foreach ($array_organizations as &$organization) {
           $org_dictionary = $this->consult_dictionary('organizations', $organization);
-          if (!empty($org_dictionary) {
+          if (!empty($org_dictionary)) {
             $organization = $org_dictionary;
           }
           if (!$this->organization_exists($organization)) {
