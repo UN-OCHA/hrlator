@@ -7,3 +7,6 @@ Translates data sources in HR standard CSV format.
 # Requirements
 Install Composer (http://getcomposer.org/doc/00-intro.md)
 
+# Install dependencies
+php composer.phar install
+
