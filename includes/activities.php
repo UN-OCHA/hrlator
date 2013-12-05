@@ -96,7 +96,7 @@ class HRLatorActivities extends HRLator {
       
       // Status
       $line['Status'] = trim($line['Status']);
-      if (!empty($line['Status']) && !in_array($line['Status'], array('Planned', 'Ongoing', 'Completed'))) {
+      if (!empty($line['Status']) && !in_array($line['Status'], array('planned', 'ongoing', 'completed'))) {
         $line['Comments'] .= 'Status not recognized; ';
         $line['valid'] = 'danger';
       }
