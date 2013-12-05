@@ -102,17 +102,52 @@ class HRLatorActivities extends HRLator {
       }
       
       $date_format = '%d/%m/%Y';
+      $date_alt_format = '%m/%d/%Y';
       
       // Start date
-      if (!empty($line['Start Date']) && strptime($line['Start Date'], $date_format) === FALSE) {
-        $line['Comments'] .= 'Start date not recognized; ';
-        $line['valid'] = 'danger';
+      if (!empty($line['Start Date'])) {
+        $time = 0;
+        $date_array = strptime($line['Start Date'], $date_format);
+        if ($date_array != FALSE && checkdate($date_array['tm_mon'] + 1, $date_array['tm_mday'], $date_array['tm_year'] + 1900)) {
+          $time = mktime(23, 0, 0, $date_array['tm_mon'] + 1, $date_array['tm_mday'], $date_array['tm_year'] + 1900);
+        }
+        else {
+          $date_array = strptime($line['Start Date'], $date_alt_format);
+          if ($date_array != FALSE && checkdate($date_array['tm_mon'] + 1, $date_array['tm_mday'], $date_array['tm_year'] + 1900)) {
+            $time = mktime(23, 0, 0, $date_array['tm_mon'] + 1, $date_array['tm_mday'], $date_array['tm_year'] + 1900);
+          }
+          else {
+            $line['Comments'] .= 'Start date not recognized; ';
+            $line['valid'] = 'danger';
+          }
+        }
+        
+        if ($time != 0) {
+          $line['Start Date'] = date('Y-m-d', $time);
+        }
       }
       
       // End date
-      if (!empty($line['End Date']) && strptime($line['End Date'], $date_format) === FALSE) {
-        $line['Comments'] .= 'End date not recognized; ';
-        $line['valid'] = 'danger';
+      if (!empty($line['End Date'])) {
+        $time = 0;
+        $date_array = strptime($line['End Date'], $date_format);
+        if ($date_array != FALSE && checkdate($date_array['tm_mon'] + 1, $date_array['tm_mday'], $date_array['tm_year'] + 1900)) {
+          $time = mktime(23, 0, 0, $date_array['tm_mon'] + 1, $date_array['tm_mday'], $date_array['tm_year'] + 1900);
+        }
+        else {
+          $date_array = strptime($line['End Date'], $date_alt_format);
+          if ($date_array != FALSE && checkdate($date_array['tm_mon'] + 1, $date_array['tm_mday'], $date_array['tm_year'] + 1900)) {
+            $time = mktime(23, 0, 0, $date_array['tm_mon'] + 1, $date_array['tm_mday'], $date_array['tm_year'] + 1900);
+          }
+          else {
+            $line['Comments'] .= 'End Date not recognized; ';
+            $line['valid'] = 'danger';
+          }
+        }
+        
+        if ($time != 0) {
+          $line['End Date'] = date('Y-m-d', $time);
+        }
       }
       
     }
