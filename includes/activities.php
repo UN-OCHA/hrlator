@@ -108,6 +108,15 @@ class HRLatorActivities extends HRLator {
         }
       }*/
       
+      // Primary Beneficiary
+      if (!empty($line['Primary Beneficiary'])) {
+        $line['Primary Beneficiary'] = trim($line['Primary Beneficiary']);
+        $primary_benef = $this->consult_dictionary('population_types', $line['Primary Beneficiary']);
+        if (!empty($primary_benef)) {
+          $line['Primary Beneficiary'] = $primary_benef;
+        }
+      }
+            
       // Status
       $line['Status'] = trim($line['Status']);
       if (!empty($line['Status']) && !in_array($line['Status'], array('planned', 'ongoing', 'completed'))) {
