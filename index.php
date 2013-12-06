@@ -75,7 +75,12 @@ if (isset($_FILES['csvfile'])) {
 
 elseif (isset($_POST['type'])) {
   $dictionary = new HRLatorDictionary();
-  $dictionary->add($_POST['type'], $_POST['initial'], $_POST['replacement']);
+  if (isset($_POST['replacement'])) {
+    $dictionary->add($_POST['type'], $_POST['initial'], $_POST['replacement']);
+  }
+  else {
+    $dictionary->delete($_POST['type'], $_POST['initial']);
+  }
   $rows = $dictionary->findAll();
   $parameters['rows'] = $rows;
   echo $twig->render('dictionary.twig', $parameters);
