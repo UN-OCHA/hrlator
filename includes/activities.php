@@ -13,6 +13,7 @@ class HRLatorActivities extends HRLator {
     $csv = csv_to_array($filename);
 
     $initial_line = array_keys($csv[0]);
+    $initial_line[] = 'Organizations Acronym';
 
     foreach ($csv as &$line) {
       $line['Comments'] = "";
@@ -54,7 +55,7 @@ class HRLatorActivities extends HRLator {
           $acronym_index++;
         }
         $line['Organizations'] = implode(';', $array_organizations);
-        $lines['Organizations Acronym'] = implode(';', $array_org_acronyms);
+        $line['Organizations Acronym'] = implode(';', $array_org_acronyms);
       }
       
       // Clusters
