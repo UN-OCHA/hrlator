@@ -95,7 +95,7 @@ class HRLatorActivities extends HRLator {
       }
       
       // Locations
-      $line['Locations'] = $this->replace_separator($line['Locations']);
+      /*$line['Locations'] = $this->replace_separator($line['Locations']);
       $line['Locations'] = trim($line['Locations']);
       $csv_locations = $line['Locations'];
       if (!empty($csv_locations)) {
@@ -106,7 +106,7 @@ class HRLatorActivities extends HRLator {
             $line['valid'] = 'danger';
           }
         }
-      }
+      }*/
       
       // Status
       $line['Status'] = trim($line['Status']);
