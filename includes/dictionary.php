@@ -30,7 +30,7 @@ class HRLatorDictionary {
   
   public function delete($type, $initial) {
     $query = 'DELETE FROM Dictionary WHERE ' .
-      'Type = "'.$type.'" AND Initial = "'.$initial.'"); ';
+      'Type = "'.$type.'" AND Initial = "'.$initial.'"; ';
     $this->database->exec($query);
   }
   
