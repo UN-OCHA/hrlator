@@ -19,20 +19,27 @@ class HRLatorActivities extends HRLator {
       $line['valid'] = 'success';
       
       // Organizations
+      $line['Organizations Acronyms'] = '';
       $line['Organizations'] = $this->replace_separator($line['Organizations']);
       $line['Organizations'] = trim($line['Organizations']);
       $csv_organizations = $line['Organizations'];
       if (!empty($csv_organizations)) {
         $array_organizations = explode(';', $csv_organizations);
+        $array_org_acronyms = array();
+        $acronym_index = 0;
         foreach ($array_organizations as &$organization) {
           $org_dictionary = $this->consult_dictionary('organizations', $organization);
           if (!empty($org_dictionary)) {
             $organization = $org_dictionary;
+            $org_array = $this->find_organization_by_name($organization);
+            $array_org_acronyms[$acronym_index] = $org_array['Acronym'];
           }
           if (!$this->organization_exists($organization)) {
             $name = $this->find_organization_by_acronym($organization);
             if (!empty($name)) {
               $organization = $name;
+              $org_array = $this->find_organization_by_name($organization);
+              $array_org_acronyms[$acronym_index] = $org_array['Acronym'];
               $line['Comments'] .= "Organization ".$organization." found by acronym; ";
             }
             else {
@@ -40,8 +47,14 @@ class HRLatorActivities extends HRLator {
               $line['valid'] = 'danger';
             }
           }
+          else {
+            $org_array = $this->find_organization_by_name($organization);
+            $array_org_acronyms[$acronym_index] = $org_array['Acronym'];
+          }
+          $acronym_index++;
         }
         $line['Organizations'] = implode(';', $array_organizations);
+        $lines['Organizations Acronym'] = implode(';', $array_org_acronyms);
       }
       
       // Clusters

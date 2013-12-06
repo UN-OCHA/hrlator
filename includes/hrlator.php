@@ -64,17 +64,26 @@ abstract class HRLator {
     }
     return $name;
   }
-
-  protected function organization_exists($name) {
+  
+  protected function find_organization_by_name($name) {
     $organizations = $this->organizations;
     $return = FALSE;
     foreach ($organizations as $organization) {
       if (strcasecmp($organization['Name'], $name) == 0) {
-        $return = TRUE;
+        $return = $organization;
         break;
       }
     }
     return $return;
+  }
+
+  protected function organization_exists($name) {
+    if ($this->find_organization_by_name($name) !== FALSE) {
+      return TRUE;
+    }
+    else {
+      return FALSE;
+    }
   }
 
   protected function cluster_exists($name) {
