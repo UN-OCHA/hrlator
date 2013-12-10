@@ -132,6 +132,7 @@ class HRLatorActivities extends HRLator {
         '%Y-%m-%d',
         '%d %m %Y',
         '%m %d %Y',
+        '%d-%b.-%y',
       );
       
       // Start date
