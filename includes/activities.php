@@ -124,6 +124,10 @@ class HRLatorActivities extends HRLator {
             
       // Status
       $line['Status'] = trim($line['Status']);
+      $tmp_status = $this->consult_dictionary('activity_status', $line['Status']);
+      if (!empty($tmp_status)) {
+        $line['Status'] = $tmp_status;
+      }
       if (!empty($line['Status']) && !in_array($line['Status'], array('planned', 'ongoing', 'completed'))) {
         $line['Comments'] .= 'Status not recognized; ';
         $line['valid'] = 'danger';
