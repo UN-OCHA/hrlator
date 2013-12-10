@@ -25,6 +25,11 @@ class HRLatorActivities extends HRLator {
       $line['Organizations'] = trim($line['Organizations']);
       $csv_organizations = $line['Organizations'];
       if (!empty($csv_organizations)) {
+        // Consult dictionary
+        $tmp_org = $this->consult_dictionary('organizations', $csv_organizations);
+        if (!empty($tmp_org)) {
+          $csv_organizations = $tmp_org;
+        }
         $array_organizations = explode(';', $csv_organizations);
         $array_org_acronyms = array();
         $acronym_index = 0;
