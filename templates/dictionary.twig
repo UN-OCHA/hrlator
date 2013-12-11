@@ -12,6 +12,8 @@
             <div class="col-sm-3">
               <select id="type" name="type">
                 <option value="organizations">Organizations</option>
+                <option value="population_types">Population Types</option>
+                <option value="activity_status">Activity Status</option>
               </select>
             </div>
         </div>
@@ -44,6 +46,7 @@
                     <th>Type</th>
                     <th>Initial</th>
                     <th>Replacement</th>
+                    <th>Actions</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -52,6 +55,11 @@
                       <td>{{ row.Type }}</td>
                       <td>{{ row.Initial }}</td>
                       <td>{{ row.Replacement }}</td>
+                      <th><form class="form-horizontal" name="delete" method="post" action="">
+                          <input type="hidden" name="type" value="{{ row.Type }}">
+                          <input type="hidden" name="initial" value="{{ row.Initial }}">
+                          <button type="submit" class="btn btn-default">Delete</button>
+                          </form></th>
                   </tr>
                   {% endfor %}
                 </tbody>

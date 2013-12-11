@@ -13,26 +13,39 @@ class HRLatorActivities extends HRLator {
     $csv = csv_to_array($filename);
 
     $initial_line = array_keys($csv[0]);
+    $initial_line[] = 'Organizations Acronym';
 
     foreach ($csv as &$line) {
       $line['Comments'] = "";
       $line['valid'] = 'success';
       
       // Organizations
+      $line['Organizations Acronyms'] = '';
       $line['Organizations'] = $this->replace_separator($line['Organizations']);
       $line['Organizations'] = trim($line['Organizations']);
       $csv_organizations = $line['Organizations'];
       if (!empty($csv_organizations)) {
+        // Consult dictionary
+        $tmp_org = $this->consult_dictionary('organizations', $csv_organizations);
+        if (!empty($tmp_org)) {
+          $csv_organizations = $tmp_org;
+        }
         $array_organizations = explode(';', $csv_organizations);
+        $array_org_acronyms = array();
+        $acronym_index = 0;
         foreach ($array_organizations as &$organization) {
           $org_dictionary = $this->consult_dictionary('organizations', $organization);
           if (!empty($org_dictionary)) {
             $organization = $org_dictionary;
+            $org_array = $this->find_organization_by_name($organization);
+            $array_org_acronyms[$acronym_index] = $org_array['Acronym'];
           }
           if (!$this->organization_exists($organization)) {
             $name = $this->find_organization_by_acronym($organization);
             if (!empty($name)) {
               $organization = $name;
+              $org_array = $this->find_organization_by_name($organization);
+              $array_org_acronyms[$acronym_index] = $org_array['Acronym'];
               $line['Comments'] .= "Organization ".$organization." found by acronym; ";
             }
             else {
@@ -40,8 +53,14 @@ class HRLatorActivities extends HRLator {
               $line['valid'] = 'danger';
             }
           }
+          else {
+            $org_array = $this->find_organization_by_name($organization);
+            $array_org_acronyms[$acronym_index] = $org_array['Acronym'];
+          }
+          $acronym_index++;
         }
         $line['Organizations'] = implode(';', $array_organizations);
+        $line['Organizations Acronym'] = implode(';', $array_org_acronyms);
       }
       
       // Clusters
@@ -81,7 +100,7 @@ class HRLatorActivities extends HRLator {
       }
       
       // Locations
-      $line['Locations'] = $this->replace_separator($line['Locations']);
+      /*$line['Locations'] = $this->replace_separator($line['Locations']);
       $line['Locations'] = trim($line['Locations']);
       $csv_locations = $line['Locations'];
       if (!empty($csv_locations)) {
@@ -92,60 +111,75 @@ class HRLatorActivities extends HRLator {
             $line['valid'] = 'danger';
           }
         }
-      }
+      }*/
       
+      // Primary Beneficiary
+      if (!empty($line['Primary Beneficiary'])) {
+        $line['Primary Beneficiary'] = trim($line['Primary Beneficiary']);
+        $primary_benef = $this->consult_dictionary('population_types', $line['Primary Beneficiary']);
+        if (!empty($primary_benef)) {
+          $line['Primary Beneficiary'] = $primary_benef;
+        }
+      }
+            
       // Status
       $line['Status'] = trim($line['Status']);
-      if (!empty($line['Status']) && !in_array($line['Status'], array('Planned', 'Ongoing', 'Completed'))) {
+      $tmp_status = $this->consult_dictionary('activity_status', $line['Status']);
+      if (!empty($tmp_status)) {
+        $line['Status'] = $tmp_status;
+      }
+      if (!empty($line['Status']) && !in_array($line['Status'], array('planned', 'ongoing', 'completed'))) {
         $line['Comments'] .= 'Status not recognized; ';
         $line['valid'] = 'danger';
       }
       
-      $date_format = '%d/%m/%Y';
-      $date_alt_format = '%m/%d/%Y';
+      $date_formats = array(
+        '%d/%m/%Y',
+        '%m/%d/%Y',
+        '%d.%m.%Y',
+        '%m.%d.%Y',
+        '%Y-%m-%d',
+        '%d %m %Y',
+        '%m %d %Y',
+        '%d-%b.-%y',
+      );
       
       // Start date
       if (!empty($line['Start Date'])) {
         $time = 0;
-        $date_array = strptime($line['Start Date'], $date_format);
-        if ($date_array != FALSE && checkdate($date_array['tm_mon'] + 1, $date_array['tm_mday'], $date_array['tm_year'] + 1900)) {
-          $time = mktime(23, 0, 0, $date_array['tm_mon'] + 1, $date_array['tm_mday'], $date_array['tm_year'] + 1900);
-        }
-        else {
-          $date_array = strptime($line['Start Date'], $date_alt_format);
+        foreach ($date_formats as $date_format) {
+          $date_array = strptime($line['Start Date'], $date_format);
           if ($date_array != FALSE && checkdate($date_array['tm_mon'] + 1, $date_array['tm_mday'], $date_array['tm_year'] + 1900)) {
             $time = mktime(23, 0, 0, $date_array['tm_mon'] + 1, $date_array['tm_mday'], $date_array['tm_year'] + 1900);
-          }
-          else {
-            $line['Comments'] .= 'Start date not recognized; ';
-            $line['valid'] = 'danger';
+            break;
           }
         }
         
-        if ($time != 0) {
+        if ($time == 0) {
+          $line['Comments'] .= 'Start date not recognized; ';
+          $line['valid'] = 'danger';
+        }
+        else {
           $line['Start Date'] = date('Y-m-d', $time);
         }
       }
       
-      // End date
+      // End Date
       if (!empty($line['End Date'])) {
         $time = 0;
-        $date_array = strptime($line['End Date'], $date_format);
-        if ($date_array != FALSE && checkdate($date_array['tm_mon'] + 1, $date_array['tm_mday'], $date_array['tm_year'] + 1900)) {
-          $time = mktime(23, 0, 0, $date_array['tm_mon'] + 1, $date_array['tm_mday'], $date_array['tm_year'] + 1900);
-        }
-        else {
-          $date_array = strptime($line['End Date'], $date_alt_format);
+        foreach ($date_formats as $date_format) {
+          $date_array = strptime($line['End Date'], $date_format);
           if ($date_array != FALSE && checkdate($date_array['tm_mon'] + 1, $date_array['tm_mday'], $date_array['tm_year'] + 1900)) {
             $time = mktime(23, 0, 0, $date_array['tm_mon'] + 1, $date_array['tm_mday'], $date_array['tm_year'] + 1900);
-          }
-          else {
-            $line['Comments'] .= 'End Date not recognized; ';
-            $line['valid'] = 'danger';
+            break;
           }
         }
         
-        if ($time != 0) {
+        if ($time == 0) {
+          $line['Comments'] .= 'End Date not recognized; ';
+          $line['valid'] = 'danger';
+        }
+        else {
           $line['End Date'] = date('Y-m-d', $time);
         }
       }

@@ -28,6 +28,12 @@ class HRLatorDictionary {
     $this->database->exec($query);
   }
   
+  public function delete($type, $initial) {
+    $query = 'DELETE FROM Dictionary WHERE ' .
+      'Type = "'.$type.'" AND Initial = "'.$initial.'"; ';
+    $this->database->exec($query);
+  }
+  
   public function find($type, $initial) {
     $query = 'SELECT * FROM Dictionary WHERE Type = "'.$type.'" AND Initial = "'.$initial.'";';
     if($result = $this->database->query($query)) {
