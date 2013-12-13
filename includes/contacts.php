@@ -213,7 +213,7 @@ class HRLatorContacts extends HRLator {
       }
 
       // cleaned line
-      $this->add($line);
+      // $this->add($line);
     }
 
    return $csv;

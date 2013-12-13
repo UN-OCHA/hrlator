@@ -57,7 +57,7 @@ if (isset($_FILES['csvfile'])) {
   $data = new $class();
   $return = $data->process($_FILES['csvfile']['tmp_name']);
   $initial_line = array_keys($return[0]);
-
+/*
   // save to file
   $fp = fopen('./data/'.$_FILES['csvfile']['name'], 'w');
   fputcsv($fp, $initial_line);
@@ -66,7 +66,7 @@ if (isset($_FILES['csvfile'])) {
       fputcsv($fp, $cline);
   }
   fclose($fp);
-
+*/
   // render
   $data = json_encode($return);
   $colHeaders = json_encode($initial_line);
