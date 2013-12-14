@@ -38,8 +38,8 @@ function hrlatorCSV(header, data) {
   colDelim = '","',
   rowDelim = '"\r\n"',
 
-  csv =  '"' + header.join(colDelim) + '"' + rowDelim;
-  csv = csv + '"' + data.map(function (rowObj, index) {
+  csv =  '"' + header.join(colDelim) + rowDelim;
+  csv = csv + data.map(function (rowObj, index) {
 //console.log(rowObj);
       var rowArr = $.map(rowObj, function (value, key) { return value; });
 //console.log(rowArr);
