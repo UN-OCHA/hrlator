@@ -32,11 +32,14 @@ $(document).ready(function () {
       var cellProperties = {};
       cellProperties.renderer = rowRenderer.getRenderFunction(15);
       return cellProperties;
-    }
+    },
+
   });
 
   $("#hrlator-download-csv").on('click', function() {
-    alert("zonker says hello!");
+    var header = $('div#hottable').handsontable("getColHeader");
+    var data = $('div#hottable').handsontable("getData");
+    hrlatorCSV(header, data);
   });
 });
 </script>
