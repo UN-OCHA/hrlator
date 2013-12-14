@@ -11,16 +11,15 @@
           <button class="hrlator-button" id="hrlator-download-csv">Download CSV</button>
         </div>
     </div>
-
+<!--
 <pre>{{ data }}</pre>
 <pre>{{ colHeaders }}</pre>
+-->
 <script>
 $(document).ready(function () {
   // get data from twig (BAD)
   var data = {{ data | raw }};
   var colHeaders = {{ colHeaders | raw }};
-
-  // @TODO move to .js
   var rowRenderer = new hrlatorRenderer();
 
   $('div#hottable').handsontable({
@@ -32,9 +31,9 @@ $(document).ready(function () {
       var cellProperties = {};
       cellProperties.renderer = rowRenderer.getRenderFunction(15);
       return cellProperties;
-    },
-
+    }
   });
+  var ht = $('div#hottable').handsontable('getInstance');
 
   $("#hrlator-download-csv").on('click', function() {
     var header = $('div#hottable').handsontable("getColHeader");
@@ -43,7 +42,7 @@ $(document).ready(function () {
   });
 });
 </script>
-
+<!--
     <h2>CSV File</h2>
     <a class="btn btn-default" href="{{ file_link }}" role="button">Download file</a>
     <div class="row">
@@ -68,5 +67,5 @@ $(document).ready(function () {
             </table>
         </div>
     </div>
-
+-->
 {% endblock %}
