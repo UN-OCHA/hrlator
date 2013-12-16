@@ -12,4 +12,10 @@ php composer.phar install
 
 # Check Permission on data/
 SQLite3 needs a writable file, chown or chmod the directory so that
-etiher the database file and the parent directory are writeable by Apache
+either the database file and the parent directory are writeable by Apache
+
+# JS Libraries
+Handsontable - http://handsontable.com/demo/ajax.html
+libphonenumber - http://code.google.com/p/libphonenumber
+html5csv - https://github.com/DrPaulBrewer/html5csv
+
