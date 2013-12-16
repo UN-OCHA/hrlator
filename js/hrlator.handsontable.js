@@ -12,11 +12,12 @@ function hrlatorRenderer(){
         tdcheck = instance.getDataAtCell(row, dangerCol);
 //        console.log("R" + row + "C" + col + " (dangerCol:" + dangerCol + "):" + col + ": " + tdcheck);
 
+        // colors from bootstrap
         if("danger" == tdcheck) {
-          td.style['background-color'] = 'pink';
+          td.style['background-color'] = '#f2dede';
         }
         else if("warning" == tdcheck) {
-          td.style['background-color'] = 'yellow';
+          td.style['background-color'] = '#fcf8e3';
         }
 
         return td;
