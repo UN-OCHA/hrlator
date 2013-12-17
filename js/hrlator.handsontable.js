@@ -6,11 +6,11 @@ function hrlatorRenderer(){
 
   return {
     getRenderFunction: function(dangerCol) {
-      return function(instance, td, row, col, prop, value, cellProperties){
+      return function(instance, td, row, col, prop, value, cellProperties) {
         Handsontable.TextRenderer.apply(this, arguments);
 
         tdcheck = instance.getDataAtCell(row, dangerCol);
-//        console.log("R" + row + "C" + col + " (dangerCol:" + dangerCol + "):" + col + ": " + tdcheck);
+// console.log("R" + row + "C" + col + " (dangerCol:" + dangerCol + "):" + col + ": " + tdcheck);
 
         // colors from bootstrap
         if("danger" == tdcheck) {

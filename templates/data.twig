@@ -20,6 +20,7 @@ $(document).ready(function () {
   // get data from twig (BAD)
   var data = {{ data | raw }};
   var colHeaders = {{ colHeaders | raw }};
+  var colDanger = {{ colDanger | raw }};
   var rowRenderer = new hrlatorRenderer();
 
   $('div#hottable').handsontable({
@@ -29,7 +30,7 @@ $(document).ready(function () {
     contextMenu: true,
     cells: function (row, col, prop) {
       var cellProperties = {};
-      cellProperties.renderer = rowRenderer.getRenderFunction(15);
+      cellProperties.renderer = rowRenderer.getRenderFunction(colDanger);
       return cellProperties;
     }
   });
