@@ -14,12 +14,16 @@ function hrlatorRenderer(){
 
         // colors from bootstrap
         if("danger" == tdcheck) {
-          td.style['background-color'] = '#f2dede';
+//          td.style['background-color'] = '#f2dede';
         }
         else if("warning" == tdcheck) {
-          td.style['background-color'] = '#fcf8e3';
+//          td.style['background-color'] = '#fcf8e3';
         }
-
+        else {
+//          td.style['background-color'] = '#d9edf7';
+        }
+        // add class to parent
+        $(td).parent().addClass("hrlator-" + tdcheck);
         return td;
       }
     }
