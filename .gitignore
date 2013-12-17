@@ -1,0 +1,7 @@
+# composer gitignore
+composer.lock
+composer.phar
+vendor
+
+# data/ needs to be Apache writable!
+data/*

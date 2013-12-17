@@ -4,7 +4,7 @@ class HRLatorDictionaryDB extends SQLite3
 {
     function __construct()
     {
-        $this->open('dictionary.sqlite');
+        $this->open('data/dictionary.sqlite');
     }
 }
 

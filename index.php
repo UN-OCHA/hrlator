@@ -57,18 +57,27 @@ if (isset($_FILES['csvfile'])) {
   $data = new $class();
   $return = $data->process($_FILES['csvfile']['tmp_name']);
   $initial_line = array_keys($return[0]);
+/*
+  // save to file
   $fp = fopen('./data/'.$_FILES['csvfile']['name'], 'w');
-
   fputcsv($fp, $initial_line);
 
   foreach ($return as $cline) {
       fputcsv($fp, $cline);
   }
-
   fclose($fp);
+*/
+  // render
+  $data = json_encode($return);
+  $colHeaders = json_encode($initial_line);
+  $colDanger = count($initial_line) - 1;
+
   echo $twig->render('data.twig', array(
     'header' => $initial_line,
+    'colHeaders' => $colHeaders,
     'rows' => $return,
+    'data' => $data,
+    'colDanger' => $colDanger,
     'file_link' => './data/'.$_FILES['csvfile']['name'],
   ));
 }
