@@ -29,6 +29,7 @@ $(document).ready(function () {
     height: 600,
     colHeaders: colHeaders,
     contextMenu: true,
+    manualColumnResize: true,
     cells: function (row, col, prop) {
       var cellProperties = {};
       cellProperties.renderer = rowRenderer.getRenderFunction(colDanger);
