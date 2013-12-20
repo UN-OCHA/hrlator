@@ -2,63 +2,7 @@
 
 require_once dirname(__FILE__)."/hrlator.php";
 
-class HRLatorContactsDB extends SQLite3 {
-  function __construct() {
-    $this->open('data/contacts.sqlite');
-  }
-}
-
 class HRLatorContacts extends HRLator {
-
-  protected $contactsDB = NULL;
-
-  public function __construct() {
-
-    parent::__construct();
-
-    //create or open the database
-    $this->contactsDB = new HRLatorContactsDB();
-    $query = "CREATE TABLE IF NOT EXISTS Contacts ".
-      "(Clusters TEXT, Salutation TEXT, FirstName TEXT, LastName TEXT, Email TEXT, Telephones TEXT, " .
-      "Organization TEXT, OrganizationType TEXT, Job Title TEXT, Location TEXT, CoordinationHub TEXT, " .
-      "Fundings TEXT, Themes TEXT, Emergencies TEXT, Comments TEXT, Valid TEXT, " .
-      "PRIMARY KEY (FirstName, LastName, Email))";
-    $this->contactsDB->exec($query);
-  }
-
-  public function add($data) {
-    $fields = implode( ",", array_keys($data));
-    $values = array();
-    foreach($data as $key => $value) {
-      $values[] = '"' . $value . '"';
-    }
-    $query_values = implode(",", $values);
-//    $query = 'INSERT INTO Contacts(' . $fields . ') ' .
-    $query = 'INSERT INTO Contacts ' .
-      'VALUES (' . $query_values . '); ';
-    $this->contactsDB->exec($query);
-  }
-
-  public function find($email) {
-    $query = 'SELECT * FROM Contacts WHERE Email = "' . $email . '";';
-    if($result = $this->contactsDB->query($query)) {
-      $row = $result->fetchArray();
-      return $row;
-    }
-    else {
-      return array();
-    }
-  }
-
-  public function findAll() {
-    $query = 'SELECT * FROM Contacts;';
-    $result = $this->contactsDB->query($query);
-    $data = array();
-    while ($row = $result->fetchArray()) {
-      $data[] = $row;
-    }
-    return $data;
-  }
 
   // Load data with their acronyms
   function contact_exists($line) {
@@ -92,7 +36,7 @@ class HRLatorContacts extends HRLator {
     foreach ($csv as &$line) {
       $line['Comments'] = "";
       $line['valid'] = 'success';
-      
+
       // Organization
       $org = trim($line['Organization']);
       $org_dictionary = $this->consult_dictionary('organizations', $org);
@@ -110,7 +54,7 @@ class HRLatorContacts extends HRLator {
           $line['valid'] = 'danger';
         }
       }
-      
+
       // Clusters
       $line['Clusters'] = $this->replace_separator($line['Clusters']);
       $csv_clusters = $line['Clusters'];
@@ -146,7 +90,7 @@ class HRLatorContacts extends HRLator {
           }
         }
       }
-      
+
       // Locations
       $line['Location'] = $this->replace_separator($line['Location']);
       $line['Location'] = trim($line['Location']);
@@ -160,14 +104,14 @@ class HRLatorContacts extends HRLator {
           }
         }
       }
-      
+
       // Emails
       $line['Email'] = $this->replace_separator($line['Email']);
       if (!empty($line['Email']) && !$this->check_email_address($line['Email'])) {
         $line['Comments'] .= "Email address is invalid; ";
         $line['valid'] = 'danger';
       }
-      
+
       // Telephones
       if (!empty($line['Telephones'])) {
         $telephones = $this->format_phone($line['Telephones']);
@@ -177,7 +121,7 @@ class HRLatorContacts extends HRLator {
         }
         $line['Telephones'] = $telephones['Phone'];
       }
-      
+
       if (empty($line['First name']) && empty($line['Last name']) && !empty($line['Full name'])) {
         // Try to determine First name and last name from full name
         $line['Full name'] = trim($line['Full name']);
@@ -193,11 +137,11 @@ class HRLatorContacts extends HRLator {
           $line['valid'] = 'danger';
         }
       }
-      
+
       // Trim last name and first name
       $line['First name'] = trim($line['First name']);
       $line['Last name'] = trim($line['Last name']);
-      
+
       // Contact exists in the database ?
       $last_name = $line['Last name'];
       if (empty($last_name)) {
@@ -211,12 +155,9 @@ class HRLatorContacts extends HRLator {
           $line['valid'] = 'danger';
         }
       }
-
-      // cleaned line
-      // $this->add($line);
     }
 
-   return $csv;
+    return $csv;
   }
 }
 
