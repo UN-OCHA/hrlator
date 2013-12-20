@@ -6,7 +6,7 @@ require_once (__DIR__. '/includes/activities.php');
 require_once (__DIR__. '/includes/dictionary.php');
 
 function sanitize_template($template) {
-  $return = 'contacts';
+  $return = 'home';
   $class = "HRLatorContacts";
   if (!empty($template)) {
     switch ($template) {
