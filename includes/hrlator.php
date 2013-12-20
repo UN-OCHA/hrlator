@@ -162,7 +162,7 @@ abstract class HRLator {
   }
 
   protected function replace_separator($string) {
-    $new_string = str_replace(array(",","/"), ";", $string);
+    $new_string = str_replace(",", ";", $string);
     $array = explode(";", $new_string);
     foreach ($array as &$element) {
       $element = trim($element);
