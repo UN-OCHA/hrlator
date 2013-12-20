@@ -4,3 +4,24 @@
 #hottable.handsontable {
   margin-bottom: 1em;
 }
+
+/* Bootstrap colors */
+#hottable.handsontable tr.hrlator-success td {
+  background-color: #dff0d8;
+  border-color: #d6e9c6;
+  color: #468847;
+}
+
+#hottable.handsontable tr.hrlator-danger td,
+#hottable.handsontable tr.hrlator-error td {
+  background-color: #f2dede;
+  border-color: #eed3d7;
+  color: #b94a48;
+}
+
+#hottable.handsontable tr.hrlator-alert td {
+  background-color: #fcf8e3;
+  border-color: #fbeed5;
+  color: #c09853;
+}
+
