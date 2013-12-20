@@ -64,10 +64,10 @@ class HRLatorActivities extends HRLator {
       }
       
       // Clusters
-      $line['Clusters'] = $this->replace_separator($line['Clusters']);
       $csv_clusters = $line['Clusters'];
       if (!empty($csv_clusters)) {
         if (!$this->cluster_exists($csv_clusters)) {
+          $csv_clusters = $this->replace_separator($csv_clusters);
           if (strpos($csv_clusters, ";")) {
             $csv_clusters_array = explode(';', $csv_clusters);
             foreach ($csv_clusters_array as &$csv_cluster) {
