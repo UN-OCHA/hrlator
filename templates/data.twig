@@ -4,7 +4,7 @@
     {% set tableWidth=12 %}
     <p class="lead"><a href="{{ baseurl }}">&laquo; Back to form!</a></p>
 
-    <h2>Handsontable</h2>
+    <h2>{{ template }}</h2>
     <div class="row">
         <div class="col-sm-{{ tableWidth }}">
           <div id="hottable"></div>
@@ -12,16 +12,16 @@
         </div>
     </div>
 <!--
-<pre>{{ data }}</pre>
 <pre>{{ colHeaders }}</pre>
+<pre>{{ data }}</pre>
 -->
 <script>
 $(document).ready(function () {
   // get data from twig (BAD)
-  var data = {{ data | raw }};
   var colHeaders = {{ colHeaders | raw }};
   var colDanger = {{ colDanger | raw }};
   var rowRenderer = new hrlatorRenderer();
+  var data = {{ data | raw }};
 
   $('div#hottable').handsontable({
     data: data,
@@ -29,6 +29,7 @@ $(document).ready(function () {
     height: 600,
     colHeaders: colHeaders,
     contextMenu: true,
+    manualColumnResize: true,
     cells: function (row, col, prop) {
       var cellProperties = {};
       cellProperties.renderer = rowRenderer.getRenderFunction(colDanger);
