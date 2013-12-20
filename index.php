@@ -57,6 +57,7 @@ if (isset($_FILES['csvfile'])) {
   $data = new $class();
   $return = $data->process($_FILES['csvfile']['tmp_name']);
   $initial_line = array_keys($return[0]);
+
 /*
   // save to file
   $fp = fopen('./data/'.$_FILES['csvfile']['name'], 'w');
@@ -70,9 +71,10 @@ if (isset($_FILES['csvfile'])) {
   // render
   $data = json_encode($return);
   $colHeaders = json_encode($initial_line);
-  $colDanger = count($initial_line) - 1;
+  $colDanger =  array_search('valid', $initial_line);;
 
   echo $twig->render('data.twig', array(
+    'template' => $template['template'],
     'header' => $initial_line,
     'colHeaders' => $colHeaders,
     'rows' => $return,
