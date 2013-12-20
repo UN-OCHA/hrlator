@@ -23,7 +23,7 @@ function hrlatorRenderer(){
 //          td.style['background-color'] = '#d9edf7';
         }
         // add class to parent
-        $(td).parent().addClass("hrlator-" + tdcheck);
+        $(td).parent().removeClass().addClass("hrlator-" + tdcheck);
         return td;
       }
     }
