@@ -48,6 +48,7 @@ $twig->addGlobal('version', $versionDetails);
 
 $twig->addFunction('get_class', new Twig_Function_Function('get_class'));
 
+// data loaded
 if (isset($_FILES['csvfile'])) {
   $template = sanitize_template("");
   if (isset($_GET['template'])) {
@@ -79,7 +80,7 @@ if (isset($_FILES['csvfile'])) {
     'file_link' => './data/'.$_FILES['csvfile']['name'],
   ));
 }
-
+// dictionary post
 elseif (isset($_POST['type'])) {
   $dictionary = new HRLatorDictionary();
   if (isset($_POST['replacement'])) {
@@ -92,9 +93,10 @@ elseif (isset($_POST['type'])) {
   $parameters['rows'] = $rows;
   echo $twig->render('dictionary.twig', $parameters);
 }
-
+// no POST/GET
 else {
   $template = sanitize_template("");
+error_log("template: ". $template['template']);
   if (isset($_GET['template'])) {
     $template = sanitize_template($_GET['template']);
   }
