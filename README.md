@@ -17,5 +17,7 @@ either the database file and the parent directory are writeable by Apache
 # JS Libraries
 Handsontable - http://handsontable.com/demo/ajax.html
 libphonenumber - http://code.google.com/p/libphonenumber
+  Compiled http://stackoverflow.com/questions/18678031/how-to-host-the-google-libphonenumber-locally
 html5csv - https://github.com/DrPaulBrewer/html5csv
+
 
