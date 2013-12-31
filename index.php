@@ -48,8 +48,32 @@ $twig->addGlobal('version', $versionDetails);
 
 $twig->addFunction('get_class', new Twig_Function_Function('get_class'));
 
+// API call
+if (isset($_GET['api'])) {
+  switch ($_GET['api']) {
+    case 'contact_exist':
+      if ( ($line['Last name'] = $_GET['last_name']) && ($line['First name'] = $_GET['first_name']) ) {
+        $data = new HRLatorContacts();
+        $contact_exists = $data->contact_exists($line);
+        if ($contact_exists) {
+          $out = json_encode(array(
+            'valid' => 'danger',
+            'comment' => 'Contact already exists in the database. See ' . $data->site_url . 'profile/' . $contact_exists
+          ));
+        }
+      }
+      else {
+        $out = '{err: last_name and first_name nowhere to be found}';
+      }
+      break;
+    default:
+      $out = '{ver: 0.1}';
+  }
+  echo $out;
+}
+
 // data loaded
-if (isset($_FILES['csvfile'])) {
+elseif (isset($_FILES['csvfile'])) {
   $template = sanitize_template("");
   if (isset($_GET['template'])) {
     $template = sanitize_template($_GET['template']);
@@ -67,7 +91,7 @@ if (isset($_FILES['csvfile'])) {
       fputcsv($fp, $cline);
   }
   fclose($fp);
-  
+
   // render
   $data = json_encode($return);
   $colHeaders = json_encode($initial_line);
