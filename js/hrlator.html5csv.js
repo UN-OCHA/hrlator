@@ -18,8 +18,14 @@ console.log('validate');
 
         var phoneUtil = i18n.phonenumbers.PhoneNumberUtil.getInstance();
 
+        // @TODO hardcoded but should be moved
+        var siteUrl = "https://philippines.humanitarianresponse.info";
+        var contactUri = "/operational-presence/xml?search_api_views_fulltext=";
+
         // check validation columns
 //        var validation = [];
+        var col_firstName = headers.indexOf('First name');
+        var col_lastName = headers.indexOf('Last name');
         var col_email = headers.indexOf('Email');
         var col_phone = headers.indexOf('Telephones');
         var col_valid = headers.indexOf('valid')
@@ -27,17 +33,17 @@ console.log('validate');
 
         // hic sunt leones
         var i, l;
-        for(i=1, l=shared.data.rows.length; i<l; ++i) {
+        for (i=1, l=shared.data.rows.length; i<l; ++i) {
 
           // clear validation
           shared.data.validation[i] = [];
 
           // check email
-          if(col_email >= 0 && shared.data.rows[i][col_email]) {
+          if (col_email >= 0 && shared.data.rows[i][col_email]) {
 console.log("ROW: " + i + " - email: " + shared.data.rows[i][col_email]);
             // http://stackoverflow.com/questions/46155/validate-email-address-in-javascript
             var re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/i;
-            if(!re.exec(shared.data.rows[i][col_email])) {
+            if (!re.exec(shared.data.rows[i][col_email])) {
 //              validation[col_email] = { valid: 'danger', comment: 'Email address is invalid'};
               shared.data.validation[i][col_email] = { valid: 'danger', comment: 'Email address is invalid'};
             }
@@ -57,7 +63,7 @@ console.log("ROW: " + i + " - email: " + shared.data.rows[i][col_email]);
 
           // validate phone
           // 1 format_phone
-          if(col_phone >= 0 && shared.data.rows[i][col_phone]) {
+          if (col_phone >= 0 && shared.data.rows[i][col_phone]) {
             // cleanup numbers and split
             // phones = phones.replace(/[,\/]/g,';').replace(/-/g,' ').replace(/[^0-9+(); ]/, '');
             phones = shared.data.rows[i][col_phone].
@@ -68,19 +74,19 @@ console.log("ROW: " + i + " - email: " + shared.data.rows[i][col_email]);
             var phoneValid = true;
             $.each(phones, function(j, phone) {
               phone = phone.trim();
-              if(phone.length) {
+              if (phone.length) {
 //console.log("Phone " + j + ": " + phone);
                 // @TODO remove hard coded reference to country
                 var countryCode = "PH";
                 var phoneParsed = phoneUtil.parse(phone, countryCode);
 //console.log(phoneParsed);
-                if(!phoneUtil.isValidNumber(phoneParsed)) {
+                if (!phoneUtil.isValidNumber(phoneParsed)) {
                   phoneComments.push("Phone number " + phone + " is invalid");
                   phoneValid = false;
                 }
               }
             });
-            if(!phoneValid) {
+            if (!phoneValid) {
               shared.data.validation[i][col_phone] = {valid: 'danger', comment: phoneComments.join('; ')};
             }
           }
@@ -90,11 +96,37 @@ console.log("ROW: " + i + " - email: " + shared.data.rows[i][col_email]);
 
           // contact exists in DB
           // 1 contact exists
+          if (col_lastName >= 0 && col_firstName >=0) {
+            var lastName = shared.data.rows[i][col_lastName];
+            if (lastName) {
+              var firstName = shared.data.rows[i][col_firstName];
+              if (firstName) {
+                var data = {'api': 'contact_exist', 'last_name': lastName, 'first_name': firstName};
+                $.ajax({
+                  data: data,
+                  success: function(result) {
+                    jsonResult = result;
+                  },
+                  async: false
+                });
+                if (jsonResult) {
+//console.log("result: " + jsonResult);
+                  shared.data.validation[i][col_lastName] = JSON.parse(jsonResult);
+                }
+              }
+              else {
+                shared.data.validation[i][col_firstName] = {valid: 'danger', comment: "First Name is empty"};
+              }
+            }
+            else {
+              shared.data.validation[i][col_lastName] = {valid: 'danger', comment: "Last Name is empty"};
+            }
+          }
 
           // final check
           var valid = 'success';
           var comments = [];
-          for(var j in shared.data.validation[i]) {
+          for (var j in shared.data.validation[i]) {
             valid = ('danger' == shared.data.validation[i][j].valid) ? 'danger' : valid;
             comments.push(shared.data.validation[i][j].comment);
           }
@@ -112,7 +144,7 @@ console.log("ROW: " + i + " - email: " + shared.data.rows[i][col_email]);
         var shared = this; // pick up shared object from this, will be set internally by func.apply
 
         // check step
-        if('init'==step) {
+        if ('init'==step) {
           shared.data.colHeaders = shared.data.rows[0];
           shared.data.validation = [];
         }
