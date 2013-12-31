@@ -26,6 +26,7 @@ console.log('validate');
 //        var validation = [];
         var col_firstName = headers.indexOf('First name');
         var col_lastName = headers.indexOf('Last name');
+        var col_organization = headers.indexOf('Organization');
         var col_email = headers.indexOf('Email');
         var col_phone = headers.indexOf('Telephones');
         var col_valid = headers.indexOf('valid')
@@ -53,6 +54,20 @@ console.log("ROW: " + i + " - email: " + shared.data.rows[i][col_email]);
           // 1 consult_dictionary
           // 2 organization_exists
           // 3 find_organization_by_acronym
+          if (col_organization >=0 && shared.data.rows[i][col_organization]) {
+            var data = {'api': 'contact_organization', 'organization': shared.data.rows[i][col_organization]};
+            $.ajax({
+              data: data,
+              success: function(result) {
+                jsonResult = result;
+              },
+              async: false
+            });
+            if (jsonResult) {
+//console.log("result: " + jsonResult);
+              shared.data.validation[i][col_organization] = JSON.parse(jsonResult);
+            }
+          }
 
           // validate cluster
           // 1 cluster_exists

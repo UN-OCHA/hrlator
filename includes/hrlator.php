@@ -36,7 +36,7 @@ abstract class HRLator {
     $this->dictionary = new HRLatorDictionary();
   }
   
-  protected function consult_dictionary($type, $initial) {
+  public function consult_dictionary($type, $initial) {
     return $this->dictionary->find($type, $initial);
   }
 
@@ -53,7 +53,7 @@ abstract class HRLator {
     return $final_data;
   }
 
-  protected function find_organization_by_acronym($acronym) {
+  public function find_organization_by_acronym($acronym) {
     $organizations = $this->organizations;
     $name = '';
     foreach ($organizations as $organization) {
@@ -64,8 +64,8 @@ abstract class HRLator {
     }
     return $name;
   }
-  
-  protected function find_organization_by_name($name) {
+
+  public function find_organization_by_name($name) {
     $organizations = $this->organizations;
     $return = FALSE;
     foreach ($organizations as $organization) {
@@ -77,7 +77,7 @@ abstract class HRLator {
     return $return;
   }
 
-  protected function organization_exists($name) {
+  public function organization_exists($name) {
     if ($this->find_organization_by_name($name) !== FALSE) {
       return TRUE;
     }

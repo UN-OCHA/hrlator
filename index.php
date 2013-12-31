@@ -51,25 +51,52 @@ $twig->addFunction('get_class', new Twig_Function_Function('get_class'));
 // API call
 if (isset($_GET['api'])) {
   switch ($_GET['api']) {
+
     case 'contact_exist':
       if ( ($line['Last name'] = $_GET['last_name']) && ($line['First name'] = $_GET['first_name']) ) {
         $data = new HRLatorContacts();
         $contact_exists = $data->contact_exists($line);
         if ($contact_exists) {
-          $out = json_encode(array(
+          $out = array(
             'valid' => 'danger',
             'comment' => 'Contact already exists in the database. See ' . $data->site_url . 'profile/' . $contact_exists
-          ));
+          );
         }
       }
       else {
-        $out = '{err: last_name and first_name nowhere to be found}';
+        $out = array('err' => 'last_name and first_name nowhere to be found');
       }
       break;
+
+    case 'contact_organization':
+      if ($org = $_GET['organization']) {
+        $data = new HRLatorContacts();
+        $org_dictionary = $data->consult_dictionary('organizations', $org);
+        if (!empty($org_dictionary)) {
+          $org = $org_dictionary;
+        }
+        if (!$data->organization_exists($org)) {
+          $org_acronym = $data->find_organization_by_acronym($org);
+          if (!empty($org_acronym)) {
+            $out = array(
+              'organization' => $org_acronym,
+              'comment' => 'Organization found by acronym',
+            );
+          }
+          else {
+            $out = array(
+              'valid' => 'danger',
+              'comment' => 'Organization not found',
+            );
+          }
+        }
+      }
+      break;
+
     default:
-      $out = '{ver: 0.1}';
+      $out = array('version' => '0.1');
   }
-  echo $out;
+  echo json_encode($out);
 }
 
 // data loaded
