@@ -30,7 +30,7 @@ abstract class HRLator {
   protected $dictionary = NULL;
   protected $organizations = array();
   protected $clusters = array();
-  protected $site_url = "https://philippines.humanitarianresponse.info/";
+  public $site_url = "https://philippines.humanitarianresponse.info/";
   
   public function __construct() {
     $this->dictionary = new HRLatorDictionary();
