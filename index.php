@@ -52,6 +52,27 @@ $twig->addFunction('get_class', new Twig_Function_Function('get_class'));
 if (isset($_GET['api'])) {
   switch ($_GET['api']) {
 
+    case 'load':
+      // available uri: organizations, clusters
+      $fields = array(
+        'organizations' =>  array('Name', 'Acronym'),
+        'clusters' => array('Name', 'Prefix')
+      );
+      if ( isset($fields[$_GET['uri']]) ) {
+        $hrlator = new HRLatorContacts();
+        $url = $hrlator->site_url . $_GET['uri'] . '.xml';
+        $out = $hrlator->load_data($url, $fields[$_GET['uri']]);
+      }
+      else {
+        $out = array('err' => 'load needs a valuid uri: ' . implode(', ', array_keys($fields)));
+      }
+      break;
+
+    case 'dictionary':
+      $dictionary = new HRLatorDictionary();
+      $out = $dictionary->findAll();
+      break;
+
     case 'contact_exist':
       if ( ($line['Last name'] = $_GET['last_name']) && ($line['First name'] = $_GET['first_name']) ) {
         $data = new HRLatorContacts();
@@ -62,6 +83,9 @@ if (isset($_GET['api'])) {
             'comment' => 'Contact already exists in the database. See ' . $data->site_url . 'profile/' . $contact_exists
           );
         }
+        else {
+          $out = array('valid' => 'success');
+        }
       }
       else {
         $out = array('err' => 'last_name and first_name nowhere to be found');
@@ -69,12 +93,16 @@ if (isset($_GET['api'])) {
       break;
 
     case 'contact_organization':
+      $out = array('valid' => 'success');
       if ($org = $_GET['organization']) {
         $data = new HRLatorContacts();
+        $data->organizations = $data->load_data($data->site_url.'organizations.xml', array('Name', 'Acronym'));
+error_log("ORG: $org");
         $org_dictionary = $data->consult_dictionary('organizations', $org);
         if (!empty($org_dictionary)) {
           $org = $org_dictionary;
         }
+error_log("org_dictionary: $org_dictionary");
         if (!$data->organization_exists($org)) {
           $org_acronym = $data->find_organization_by_acronym($org);
           if (!empty($org_acronym)) {
@@ -143,6 +171,7 @@ elseif (isset($_POST['type'])) {
   else {
     $dictionary->delete($_POST['type'], $_POST['initial']);
   }
+error_log("ADD replacement: " . $_POST['type'] . " - " . $_POST['initial'] . " -" . $_POST['replacement']);
   $rows = $dictionary->findAll();
   $parameters['rows'] = $rows;
   echo $twig->render('dictionary.twig', $parameters);
