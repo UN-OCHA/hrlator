@@ -7,6 +7,17 @@ function replace_separator(string) {
   string = string.replace(/[,\/]/g,';');
 }
 
+function hrlator_api(api_data) {
+  $.ajax({
+    data: api_data,
+    success: function(result) {
+      jsonResult = result;
+    },
+    async: false
+  });
+  return jsonResult;
+}
+
 var extension = {
 
     // validate data
@@ -22,6 +33,10 @@ console.log('validate');
         var siteUrl = "https://philippines.humanitarianresponse.info";
         var contactUri = "/operational-presence/xml?search_api_views_fulltext=";
 
+        // get data (async from the first phase ?
+        var cluster = hrlator_api({'api': 'load', 'uri': 'cluster'});
+console.log(cluster);
+
         // check validation columns
 //        var validation = [];
         var col_firstName = headers.indexOf('First name');
@@ -35,13 +50,13 @@ console.log('validate');
         // hic sunt leones
         var i, l;
         for (i=1, l=shared.data.rows.length; i<l; ++i) {
-
+console.log('ROW: ' + i);
           // clear validation
           shared.data.validation[i] = [];
 
           // check email
           if (col_email >= 0 && shared.data.rows[i][col_email]) {
-console.log("ROW: " + i + " - email: " + shared.data.rows[i][col_email]);
+console.log("check email: " + shared.data.rows[i][col_email]);
             // http://stackoverflow.com/questions/46155/validate-email-address-in-javascript
             var re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/i;
             if (!re.exec(shared.data.rows[i][col_email])) {
@@ -55,9 +70,11 @@ console.log("ROW: " + i + " - email: " + shared.data.rows[i][col_email]);
           // 2 organization_exists
           // 3 find_organization_by_acronym
           if (col_organization >=0 && shared.data.rows[i][col_organization]) {
-            var data = {'api': 'contact_organization', 'organization': shared.data.rows[i][col_organization]};
+            var organization = shared.data.rows[i][col_organization].trim();
+console.log('org: ' + organization);
+            var api_data = {'api': 'contact_organization', 'organization': organization};
             $.ajax({
-              data: data,
+              data: api_data,
               success: function(result) {
                 jsonResult = result;
               },
@@ -72,6 +89,8 @@ console.log("ROW: " + i + " - email: " + shared.data.rows[i][col_email]);
           // validate cluster
           // 1 cluster_exists
           // 2 find_cluster
+          if (col_cluster >= 0 && shared.data.rows[i][col_cluster]) {
+          }
 
           // validate location
           // 1 find_location_by_name
@@ -90,11 +109,11 @@ console.log("ROW: " + i + " - email: " + shared.data.rows[i][col_email]);
             $.each(phones, function(j, phone) {
               phone = phone.trim();
               if (phone.length) {
-//console.log("Phone " + j + ": " + phone);
+console.log("Phone " + j + ": " + phone);
                 // @TODO remove hard coded reference to country
                 var countryCode = "PH";
                 var phoneParsed = phoneUtil.parse(phone, countryCode);
-//console.log(phoneParsed);
+console.log(phoneParsed);
                 if (!phoneUtil.isValidNumber(phoneParsed)) {
                   phoneComments.push("Phone number " + phone + " is invalid");
                   phoneValid = false;
@@ -113,19 +132,21 @@ console.log("ROW: " + i + " - email: " + shared.data.rows[i][col_email]);
           // 1 contact exists
           if (col_lastName >= 0 && col_firstName >=0) {
             var lastName = shared.data.rows[i][col_lastName];
+console.log('last name: ' + lastName);
             if (lastName) {
               var firstName = shared.data.rows[i][col_firstName];
               if (firstName) {
-                var data = {'api': 'contact_exist', 'last_name': lastName, 'first_name': firstName};
+console.log('first name: ' + firstName);
+                var api_data = {'api': 'contact_exist', 'last_name': lastName, 'first_name': firstName};
                 $.ajax({
-                  data: data,
+                  data: api_data,
                   success: function(result) {
                     jsonResult = result;
                   },
                   async: false
                 });
                 if (jsonResult) {
-//console.log("result: " + jsonResult);
+console.log("contact API result: " + jsonResult);
                   shared.data.validation[i][col_lastName] = JSON.parse(jsonResult);
                 }
               }
@@ -143,7 +164,9 @@ console.log("ROW: " + i + " - email: " + shared.data.rows[i][col_email]);
           var comments = [];
           for (var j in shared.data.validation[i]) {
             valid = ('danger' == shared.data.validation[i][j].valid) ? 'danger' : valid;
-            comments.push(shared.data.validation[i][j].comment);
+            if (shared.data.validation[i][j].length) {
+              comments.push(shared.data.validation[i][j].comment);
+            }
           }
           shared.data.rows[i][col_valid] = valid;
           shared.data.rows[i][col_comments] = comments.join('; ');
@@ -165,6 +188,7 @@ console.log("ROW: " + i + " - email: " + shared.data.rows[i][col_email]);
         }
 
         // get data from html5csv
+        // use a copy so we can safely remove the first line
         var data = shared.data.rows.slice(0);
         data.shift();
 
@@ -217,7 +241,7 @@ $(document).ready(function () {
         return '';
       },
       false).
-    call( function(){ alert("pre handsontable") }).
+//    call( function(){ alert("pre handsontable") }).
 
     // display data
     handsontable('init').
@@ -237,7 +261,7 @@ $(document).ready(function () {
     }).
 */
     // edit data
-    handsontable('write').
+    handsontable('edit').
     go();
 /*
   $('#contacts-upload').on('click',
