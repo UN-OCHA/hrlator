@@ -6,17 +6,26 @@
         <div class="form-group">
             <label for="csvfile" class="col-sm-3 control-label">CSV File</label>
 
-            <div class="col-sm-5">
-                <input type="file" class="form-control" id="csvfile" name='csvfile' required="required" accept="text/csv" />
-            </div>
-        </div>
-        <div class="row">
-          <div class="col-sm-12">
-            <div id="hottable"></div>
-            <div id="table"></div>
-            <button class="hrlator-button" id="hrlator-download-csv">Download CSV</button>
+              <div class="col-sm-5">
+                  <input type="file" class="form-control" id="csvfile" name='csvfile' required="required" accept="text/csv" />
+              </div>
           </div>
-        </div>
+          <div class="row">
+            <div class="col-sm-12">
+              <div id="hottable"></div>
+              <div id="table"></div>
+              <button class="hrlator-button" id="hrlator-download-csv">Download CSV</button>
+            </div>
+          </div>
+
+
+<pre>{{ organizations }}</pre>
+<pre>{{ clusters }}</pre>
+
+<script>
+  var hr_organizations = {{ organizations | raw }};
+  var hr_clusters = {{ clusters | raw }};
+</script>
 
         <!--<div class="form-group">
             <label for="country" class="col-sm-3 control-label">Default Country</label>
