@@ -28,8 +28,8 @@ function csv_to_array($filename='', $delimiter=',')
 abstract class HRLator {
   
   protected $dictionary = NULL;
-  protected $organizations = array();
-  protected $clusters = array();
+  public $organizations = array();
+  public $clusters = array();
   public $site_url = "https://philippines.humanitarianresponse.info/";
   
   public function __construct() {
@@ -40,7 +40,7 @@ abstract class HRLator {
     return $this->dictionary->find($type, $initial);
   }
 
-  protected function load_data($file, $fields) {
+  public function load_data($file, $fields) {
     $xml = simplexml_load_file($file);
     $final_data = array();
     foreach ($xml->taxonomy_term_data as $data) {
