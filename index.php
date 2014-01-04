@@ -189,5 +189,11 @@ error_log("template: ". $template['template']);
     $rows = $dictionary->findAll();
     $parameters['rows'] = $rows;
   }
+  elseif ($template['template'] == 'home') {
+    $data = new HRLatorContacts();
+    $parameters['organizations'] = json_encode($data->load_data($data->site_url.'organizations.xml', array('Name', 'Acronym')));
+    $parameters['clusters'] = json_encode($data->load_data($data->site_url.'clusters.xml', array('Name', 'Prefix')));
+  }
+
   echo $twig->render($template['template'].'.twig', $parameters);
 }
