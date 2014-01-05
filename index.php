@@ -68,6 +68,21 @@ if (isset($_GET['api'])) {
       }
       break;
 
+    case 'location_by_name':
+      if ( $location = $_GET['location'] ) {
+        $hrlator = new HRLatorContacts();
+        if ($hrlator->find_location_by_name($location)) {
+          $out = array('valid' => 'success');
+        }
+        else {
+          $out = array('valid' => 'danger', 'comment' => "Location $location not found");
+        }
+      }
+      else {
+        $out = array('err' => 'location by name require a location');
+      }
+      break;
+
     case 'dictionary':
       $dictionary = new HRLatorDictionary();
       $out = $dictionary->findAll();
@@ -162,6 +177,7 @@ elseif (isset($_FILES['csvfile'])) {
     'file_link' => './data/'.$_FILES['csvfile']['name'],
   ));
 }
+
 // dictionary post
 elseif (isset($_POST['type'])) {
   $dictionary = new HRLatorDictionary();
@@ -176,6 +192,7 @@ error_log("ADD replacement: " . $_POST['type'] . " - " . $_POST['initial'] . " -
   $parameters['rows'] = $rows;
   echo $twig->render('dictionary.twig', $parameters);
 }
+
 // no POST/GET
 else {
   $template = sanitize_template("");

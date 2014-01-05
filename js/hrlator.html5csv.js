@@ -47,6 +47,7 @@ var extension = {
         var col_cluster = headers.indexOf('Clusters');
         var col_email = headers.indexOf('Email');
         var col_phone = headers.indexOf('Telephones');
+        var col_location = headers.indexOf('Location');
         var col_valid = headers.indexOf('valid')
         var col_comments = headers.indexOf('comments');
 
@@ -71,7 +72,6 @@ console.log(shared.data.rows[i]);
           // 1 consult_dictionary
           // 2 organization_exists
           // 3 find_organization_by_acronym
-
           if (col_organization >=0 && shared.data.rows[i][col_organization]) {
             var organization = shared.data.rows[i][col_organization].trim();
             var api_json = hrlator_api({'api': 'contact_organization', 'organization': organization});
@@ -161,6 +161,24 @@ console.log(shared.data.rows[i]);
 
           // validate location
           // 1 find_location_by_name
+          if (col_location>= 0 && shared.data.rows[i][col_location]) {
+            locations = {
+              'data':  shared.data.rows[i][col_location].replace(/[,]/g,';').split(';'),
+              'checked' : [],
+              'valid': 'success',
+              'comments': []
+            };
+            $.each(locations.data, function(j, location) {
+              location = location.trim();
+              if (location.length) {
+                var api_json = hrlator_api({'api': 'location_by_name', 'location': location});
+                if (jsonResult) {
+                  shared.data.validation[i][col_location] = JSON.parse(jsonResult);
+                }
+              }
+            });
+console.log(locations);
+          }
 
           // validate phone
           // 1 format_phone

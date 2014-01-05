@@ -239,7 +239,7 @@ abstract class HRLator {
     return true;
   }
   
-  function find_location_by_name($name) {
+  public function find_location_by_name($name) {
     $url = $this->site_url . "/locations/xml?name=".$name;
     $xml = simplexml_load_file($url);
     $number = count($xml->taxonomy_term_data);
