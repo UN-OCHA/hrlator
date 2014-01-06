@@ -18,29 +18,46 @@ function hrlator_api(api_data) {
   return jsonResult;
 }
 
+/**
+ * HRLator contacts row validation
+ */
+function validateRow() {
+  var shared = this;
+console.log('row: ' + shared.rowToValidate);
+console.log(shared.data.rows[shared.rowToValidate]);
+
+  shared.rowToValidate++;
+  if (shared.rowToValidate < shared.data.rows.length) {
+    // http://robinwinslow.co.uk/2012/03/13/javascript-closures-passing-an-object-context-to-a-callback-function/ 
+    // Call the callback function after 1 second
+    window.setTimeout((function(caller) { return function() { caller.validateRow(); } })(shared), 50);
+  }
+  else {
+    return 'zut';
+  }
+}
+
 var extension = {
 
     // validate data
     'validate': function() {
         var shared = this; // pick up shared object from this, will be set internally by func.apply
-
-        var headers = shared.data.rows[0];
+        var headers = shared.data.colHeaders;
+        var data = shared.data;
+        var rows = data.rows;
+        var cols = data.cols;
+        var hrlator = shared.hrlator;
 
         var phoneUtil = i18n.phonenumbers.PhoneNumberUtil.getInstance();
         var PNF = i18n.phonenumbers.PhoneNumberFormat;
-
-        // @TODO hardcoded but should be moved
-        var siteUrl = "https://philippines.humanitarianresponse.info";
-        var contactUri = "/operational-presence/xml?search_api_views_fulltext=";
 
         // get data (async from the first phase ?)
 //        var hr_organizations = JSON.parse(hrlator_api({'api': 'load', 'uri': 'organizations'}));
 //        var hr_clusters = JSON.parse(hrlator_api({'api': 'load', 'uri': 'clusters'}));
 //console.log(hr_organizations);
 //console.log(hr_clusters);
-
+/*
         // check validation columns
-//        var validation = [];
         var col_firstName = headers.indexOf('First name');
         var col_lastName = headers.indexOf('Last name');
         var col_organization = headers.indexOf('Organization');
@@ -50,21 +67,35 @@ var extension = {
         var col_location = headers.indexOf('Location');
         var col_valid = headers.indexOf('valid')
         var col_comments = headers.indexOf('comments');
-
+*/
         // hic sunt leones
         var i, l;
+        data.validation = [];
+        l = shared.data.rows.length;
+        shared.rowToValidate = 1;
+
+//        shared.validateRow();
+
+/*
         for (i=1, l=shared.data.rows.length; i<l; ++i) {
 console.log('ROW: ' + i);
 console.log(shared.data.rows[i]);
+        }
+*/
+//        return shared.nextTask();
+
+        for (i=1, l=rows.length; i<l; ++i) {
+console.log('ROW: ' + i);
+console.log(rows[i]);
           // clear validation
-          shared.data.validation[i] = [];
+          data.validation[i] = [];
 
           // check email
           // http://stackoverflow.com/questions/46155/validate-email-address-in-javascript
-          if (col_email >= 0 && shared.data.rows[i][col_email]) {
+          if (cols.email >= 0 && rows[i][cols.email]) {
             var re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/i;
-            if (!re.exec(shared.data.rows[i][col_email])) {
-              shared.data.validation[i][col_email] = { valid: 'danger', comment: 'Email address is invalid'};
+            if (!re.exec(rows[i][cols.email])) {
+              data.validation[i][cols.email] = { valid: 'danger', comment: 'Email address is invalid'};
             }
           }
 
@@ -72,20 +103,20 @@ console.log(shared.data.rows[i]);
           // 1 consult_dictionary
           // 2 organization_exists
           // 3 find_organization_by_acronym
-          if (col_organization >=0 && shared.data.rows[i][col_organization]) {
-            var organization = shared.data.rows[i][col_organization].trim();
+          if (cols.organization >=0 && rows[i][cols.organization]) {
+            var organization = data.rows[i][cols.organization].trim();
             var api_json = hrlator_api({'api': 'contact_organization', 'organization': organization});
             if (jsonResult) {
-              shared.data.validation[i][col_organization] = JSON.parse(jsonResult);
+              data.validation[i][cols.organization] = JSON.parse(jsonResult);
             }
           }
 
           // validate cluster
           // 1 cluster_exists
           // 2 find_cluster
-          if (col_cluster >= 0 && shared.data.rows[i][col_cluster]) {
+          if (cols.cluster >= 0 && rows[i][cols.cluster]) {
             var clusters = {
-              'data':  shared.data.rows[i][col_cluster].replace(/[,]/g,';').split(';'),
+              'data':  rows[i][cols.cluster].replace(/[,]/g,';').split(';'),
               'checked' : [],
               'valid': 'success',
               'comments': []
@@ -154,16 +185,16 @@ console.log(shared.data.rows[i]);
                 }
               }
             });
-            shared.data.rows[i][col_cluster] = clusters.checked.join(', ');
-            shared.data.validation[i][col_cluster] = {valid: clusters.valid, comment: clusters.comments.join('; ')};
+            rows[i][cols.cluster] = clusters.checked.join(', ');
+            data.validation[i][cols.cluster] = {valid: clusters.valid, comment: clusters.comments.join('; ')};
 
           }
 
           // validate location
           // 1 find_location_by_name
-          if (col_location>= 0 && shared.data.rows[i][col_location]) {
+          if (cols.location >= 0 && rows[i][cols.location]) {
             locations = {
-              'data':  shared.data.rows[i][col_location].replace(/[,]/g,';').split(';'),
+              'data':  rows[i][cols.location].replace(/[,]/g,';').split(';'),
               'checked' : [],
               'valid': 'success',
               'comments': []
@@ -173,7 +204,7 @@ console.log(shared.data.rows[i]);
               if (location.length) {
                 var api_json = hrlator_api({'api': 'location_by_name', 'location': location});
                 if (jsonResult) {
-                  shared.data.validation[i][col_location] = JSON.parse(jsonResult);
+                  data.validation[i][cols.location] = JSON.parse(jsonResult);
                 }
               }
             });
@@ -182,11 +213,11 @@ console.log(locations);
 
           // validate phone
           // 1 format_phone
-          if (col_phone >= 0 && shared.data.rows[i][col_phone]) {
+          if (cols.phone >= 0 && rows[i][cols.phone]) {
             // cleanup numbers and split
             // phones = phones.replace(/[,\/]/g,';').replace(/-/g,' ').replace(/[^0-9+(); ]/, '');
             phones = {
-              'data': shared.data.rows[i][col_phone].
+              'data': rows[i][cols.phone].
                 replace(/[,\/]/g,';').replace(/-/g,' ').replace(/[^0-9+(); ]/, '').
                 split(";"),
               'checked' : [],
@@ -211,8 +242,8 @@ console.log(locations);
 
               }
             });
-            shared.data.rows[i][col_phone] = phones.checked.join(', ');
-            shared.data.validation[i][col_phone] = {valid: phones.valid, comment: phones.comments.join('; ')};
+            rows[i][cols.phone] = phones.checked.join(', ');
+            data.validation[i][cols.phone] = {valid: phones.valid, comment: phones.comments.join('; ')};
           }
 
           // validate first last name
@@ -220,11 +251,11 @@ console.log(locations);
 
           // contact exists in DB
           // 1 contact exists
-          if (col_lastName >= 0 && col_firstName >=0) {
-            var lastName = shared.data.rows[i][col_lastName];
+          if (cols.lastName >= 0 && cols.firstName >=0) {
+            var lastName = data.rows[i][cols.lastName];
 //console.log('last name: ' + lastName);
             if (lastName) {
-              var firstName = shared.data.rows[i][col_firstName];
+              var firstName = rows[i][cols.firstName];
               if (firstName) {
 //console.log('first name: ' + firstName);
                 var api_data = {'api': 'contact_exist', 'last_name': lastName, 'first_name': firstName};
@@ -237,34 +268,34 @@ console.log(locations);
                 });
                 if (jsonResult) {
 //console.log("contact API result: " + jsonResult);
-                  shared.data.validation[i][col_lastName] = JSON.parse(jsonResult);
+                  data.validation[i][cols.lastName] = JSON.parse(jsonResult);
                 }
               }
               else {
-                shared.data.validation[i][col_firstName] = {valid: 'danger', comment: "First Name is empty"};
+                data.validation[i][cols.firstName] = {valid: 'danger', comment: "First Name is empty"};
               }
             }
             else {
-              shared.data.validation[i][col_lastName] = {valid: 'danger', comment: "Last Name is empty"};
+              data.validation[i][cols.lastName] = {valid: 'danger', comment: "Last Name is empty"};
             }
           }
 
           // final check
           var valid = 'success';
           var comments = [];
-          for (var j in shared.data.validation[i]) {
-            valid = ('danger' == shared.data.validation[i][j].valid) ? 'danger' : valid;
-            if (shared.data.validation[i][j].comment) {
-              comments.push(shared.data.validation[i][j].comment);
+          for (var j in data.validation[i]) {
+            valid = ('danger' == data.validation[i][j].valid) ? 'danger' : valid;
+            if (data.validation[i][j].comment) {
+              comments.push(data.validation[i][j].comment);
             }
           }
-          shared.data.rows[i][col_valid] = valid;
-          shared.data.rows[i][col_comments] = comments.join('; ');
+          rows[i][cols.valid] = valid;
+          rows[i][cols.comments] = comments.join('; ');
 
           // show in ht?
-          shared.ht.setDataAtCell(i, col_valid, valid);
+          shared.ht.setDataAtCell(i, cols.valid, valid);
           // shared.ht.setDataAtCell(i, col_comments, shared.data.rows[i][col_comments]);
-          window.setTimeout(shared.ht.render, 10);
+          window.setTimeout(shared.ht.render(), 10);
 
         }
 
@@ -278,8 +309,31 @@ console.log(locations);
 
         // check step
         if ('init'==step) {
+
+          // @TODO hardcoded but should be moved
+          shared.hrlator = {
+            siteUrl: "https://philippines.humanitarianresponse.info",
+            contactUri: "/operational-presence/xml?search_api_views_fulltext="
+          }
+
+          // get headers
           shared.data.colHeaders = shared.data.rows[0];
-          shared.data.validation = [];
+
+          // get data columns
+          shared.data.cols = {
+            firstName: shared.data.colHeaders.indexOf('First name'),
+            lastName: shared.data.colHeaders.indexOf('Last name'),
+            organization: shared.data.colHeaders.indexOf('Organization'),
+            cluster: shared.data.colHeaders.indexOf('Clusters'),
+            email: shared.data.colHeaders.indexOf('Email'),
+            phone: shared.data.colHeaders.indexOf('Telephones'),
+            location: shared.data.colHeaders.indexOf('Location'),
+            valid: shared.data.colHeaders.indexOf('valid'),
+            comments: shared.data.colHeaders.indexOf('comments')
+          }
+
+          // set validation function
+          shared.validateRow = validateRow;
         }
 
         // get data from html5csv
@@ -324,6 +378,7 @@ function sleep(milliseconds) {
   }
 }
 
+
 $(document).ready(function () {
 
   var t;
@@ -357,12 +412,17 @@ $(document).ready(function () {
 //    call( function(){ alert("post handsontable") }).
     call( function() {
       var shared = this;
-      shared.data.rows[1][14] = "danger";
+
+      testd(10);
+
+
+//      shared.data.rows[1][14] = "danger";
       var start = new Date().getSeconds();
       console.log('now: ' + start);
       sleep(3000);
       start = new Date().getSeconds();
       console.log("and now" + start);
+
     }).
 */
     call( function() {
