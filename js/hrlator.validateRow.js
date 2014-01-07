@@ -24,9 +24,19 @@ console.log(shared.data.rows[shared.rowToValidate]);
     // check email
     // http://stackoverflow.com/questions/46155/validate-email-address-in-javascript
     if (cols.email >= 0 && rows[rowToValidate][cols.email]) {
-      var re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/i;
-      if (!re.exec(rows[rowToValidate][cols.email])) {
+      // check for multiple emails (and raise an error in case)
+      var countAt = rows[rowToValidate][cols.email].split("@").length - 1;
+      if (countAt == 0) {
         data.validation[rowToValidate][cols.email] = { valid: 'danger', comment: 'Email address is invalid'};
+      }
+      else if (countAt > 1) {
+        data.validation[rowToValidate][cols.email] = { valid: 'danger', comment: 'Only one email address is allowed'};
+      }
+      else {
+        var re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/i;
+        if (!re.exec(rows[rowToValidate][cols.email])) {
+          data.validation[rowToValidate][cols.email] = { valid: 'danger', comment: 'Email address is invalid'};
+        }
       }
     }
 
@@ -165,12 +175,12 @@ console.log(shared.data.rows[shared.rowToValidate]);
             phone.valid = 'danger';
           }
           else {
-            phones.checked.push(phoneUtil.format(phoneParsed, PNF.E164));
+            phones.checked.push(phoneUtil.format(phoneParsed, PNF.INTERNATIONAL));
           }
 
         }
       });
-      rows[rowToValidate][cols.phone] = phones.checked.join(', ');
+      rows[rowToValidate][cols.phone] = phones.checked.join('; ');
       data.validation[rowToValidate][cols.phone] = {valid: phones.valid, comment: phones.comments.join('; ')};
     }
 
