@@ -14,21 +14,25 @@
             <div class="col-sm-12">
               <div id="hottable"></div>
               <div id="table"></div>
-              <button class="hrlator-button" id="hrlator-download-csv">Download CSV</button>
             </div>
           </div>
-
+        <div class="form-group">
+            <div class="col-lg-offset-3 col-sm-8">
+                <button id="hrlator-download-csv" class="hrlator-button btn btn-default">Download CSV</button>
 <!--
-<pre>{{ organizations }}</pre>
-<pre>{{ clusters }}</pre>
+                <button type="submit" class="btn btn-default">Submit</button>
+                <button id="contacts-upload" class="btn btn-default">Upload</button>
 -->
+            </div>
+        </div>
 
 <script>
   var hr_organizations = {{ organizations | raw }};
   var hr_clusters = {{ clusters | raw }};
 </script>
 
-        <!--<div class="form-group">
+ <!--
+        <div class="form-group">
             <label for="country" class="col-sm-3 control-label">Default Country</label>
 
             <div class="col-sm-3">
@@ -54,12 +58,13 @@
                         tag</a> (defaults to en)</span>
             </div>
 
-        </div>-->
+        </div>
         <div class="form-group">
             <div class="col-lg-offset-3 col-sm-8">
                 <button type="submit" class="btn btn-default">Submit</button>
                 <button id="contacts-upload" class="btn btn-default">Upload</button>
             </div>
         </div>
+-->
     </form>
 {% endblock %}

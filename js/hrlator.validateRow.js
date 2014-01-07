@@ -1,12 +1,6 @@
 /**
  * HRLator contacts row validation
  */
-function fancyLoop(i) {
-  
-
-}
-
-
 function validateContactsRow() {
   var shared = this;
   var headers = shared.data.colHeaders;
@@ -19,10 +13,10 @@ function validateContactsRow() {
   var phoneUtil = i18n.phonenumbers.PhoneNumberUtil.getInstance();
   var PNF = i18n.phonenumbers.PhoneNumberFormat;
 
+  if (rowToValidate < rows.length) {
+
 console.log('row: ' + shared.rowToValidate);
 console.log(shared.data.rows[shared.rowToValidate]);
-
-  if (rowToValidate < rows.length) {
 
     // clear validation
     data.validation[rowToValidate] = [];
@@ -214,7 +208,6 @@ console.log(shared.data.rows[shared.rowToValidate]);
       }
     }
 
-
     // Ok, let's check the row
     var valid = 'success';
     var comments = [];
@@ -229,18 +222,20 @@ console.log(shared.data.rows[shared.rowToValidate]);
 
     // OK let's do the next line
     shared.ht.setDataAtCell(rowToValidate-1, cols.valid, valid);
-    shared.ht.render();
     shared.rowToValidate++;
-    $(".htCore tbody tr:nth-child(" + shared.rowToValidate +")").toggleClass( "blink");
 
     // http://robinwinslow.co.uk/2012/03/13/javascript-closures-passing-an-object-context-to-a-callback-function/
     // Call the callback function after 1 second
     window.setTimeout((function(caller) { return function() { caller.validateContactsRow(); } })(shared), 100);
-//    $(".htCore tbody tr:nth-child(" + (shared.rowToValidate-1) +")").toggleClass( "blink");
+
+    shared.ht.render();
+    $(".htCore tbody tr:nth-child(" + shared.rowToValidate +")").toggleClass( "blink");
+
   }
   else {
     $(".htCore tbody tr:nth-child(" + shared.rowToValidate +")").toggleClass( "blink");
-    return 'zut';
+    //shared.ht.render();
+    return shared.nextTask();
   }
 }
 

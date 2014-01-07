@@ -53,7 +53,8 @@ var extension = {
         $(".htCore tbody tr:nth-child(" + shared.rowToValidate +")").toggleClass( "blink");
         shared.validateContactsRow();
 
-        return shared.nextTask();
+        // delegate return to validate function
+        // return shared.nextTask();
 
     },
 
@@ -184,8 +185,22 @@ $(document).ready(function () {
       var d = new Date();
       console.log( "Run time: " + (d.getTime() - t));
     }).
+
     // edit data
     handsontable('edit').
+
+    // enable download
+    call( function() {
+      var shared = this;
+      $('#hrlator-download-csv').unbind().on('click', function() {
+        var ht_data = shared.ht.getData().slice(0);
+        ht_data.unshift(shared.data.colHeaders);
+
+        CSV.begin(ht_data).download("hrlator.csv").go();
+
+        return false;
+      });
+    }).
     go();
 
 /*
@@ -196,4 +211,8 @@ $(document).ready(function () {
     }
   );
 */
+  // Disable download button
+  $('#hrlator-download-csv').on('click', function(){ alert('Wait for validation to complete'); return false;});
+
+
 });
