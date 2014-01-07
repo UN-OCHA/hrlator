@@ -192,7 +192,8 @@ $(document).ready(function () {
     // enable download
     call( function() {
       var shared = this;
-      $('#hrlator-download-csv').unbind().on('click', function() {
+      $('#hrlator-download-csv').unbind().on('click', function(e) {
+        e.preventDefault();
         var ht_data = shared.ht.getData().slice(0);
         ht_data.unshift(shared.data.colHeaders);
 
