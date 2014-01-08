@@ -53,9 +53,6 @@ var extension = {
         $(".htCore tbody tr:nth-child(" + shared.rowToValidate +")").toggleClass( "blink");
         shared.validateContactsRow();
 
-        // delegate return to validate function
-        // return shared.nextTask();
-
     },
 
     // render data in handsontable
@@ -157,30 +154,13 @@ $(document).ready(function () {
         return '';
       },
       false).
-//    call( function(){ alert("pre handsontable") }).
 
     // display data
     handsontable('init').
 
     // async validation
     validate().
-/*
-//    call( function(){ alert("post handsontable") }).
-    call( function() {
-      var shared = this;
 
-      testd(10);
-
-
-//      shared.data.rows[1][14] = "danger";
-      var start = new Date().getSeconds();
-      console.log('now: ' + start);
-      sleep(3000);
-      start = new Date().getSeconds();
-      console.log("and now" + start);
-
-    }).
-*/
     call( function() {
       var d = new Date();
       console.log( "Run time: " + (d.getTime() - t));
@@ -204,14 +184,6 @@ $(document).ready(function () {
     }).
     go();
 
-/*
-  $('#contacts-upload').on('click',
-    function() {
-      CSV.begin('#csvfile').table("table").go();
-      return false;
-    }
-  );
-*/
   // Disable download button
   $('#hrlator-download-csv').on('click', function(){ alert('Wait for validation to complete'); return false;});
 

@@ -5,3 +5,6 @@ vendor
 
 # data/ needs to be Apache writable!
 data/*
+
+# tmp files
+*.swp
