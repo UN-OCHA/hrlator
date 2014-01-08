@@ -45,11 +45,47 @@ console.log(shared.data.rows[shared.rowToValidate]);
     // 2 organization_exists
     // 3 find_organization_by_acronym
     if (cols.organization >=0 && rows[rowToValidate][cols.organization]) {
-      var organization = data.rows[rowToValidate][cols.organization].trim();
-      var api_json = hrlator_api({'api': 'contact_organization', 'organization': organization});
-      if (jsonResult) {
-        data.validation[rowToValidate][cols.organization] = JSON.parse(jsonResult);
+      var organization = {
+         data: data.rows[rowToValidate][cols.organization].trim(),
+         checked: '',
+         valid: 'success',
+         comment: ''
       }
+
+      // 1 consult dictionary
+      $.each(hr_dictionary, function(i, element) {
+        if ('organizations' == element.Type && organization.data === element.Initial) {
+           organization.checked = element.Replacement;
+           organization.comment = 'Organization found in dictionary (' + organization.data + ')';
+           finding = element;
+           return false;
+        }
+      });
+      if (!organization.checked) {
+        $.each(hr_organizations, function(i, element) {
+
+          // 2 organization_exists
+          if (organization.data === element.Name) {
+            organization.checked = element.Name;
+            return false;
+          }
+
+          // 3 find_organization_by_acronym
+          else if (organization.data === element.Acronym) {
+            organization.checked = element.Name;
+            organization.comment = 'Organization found by acronym (' + organization.data + ')';
+            return false;
+          }
+        });
+      }
+      if (!organization.checked) {
+        organization.checked = organization.data;
+        organization.comment = 'Organization not found';
+        organization.valid = 'danger';
+      }
+
+      rows[rowToValidate][cols.organization] = organization.checked;
+      data.validation[rowToValidate][cols.organization] = {valid: organization.valid, comment: organization.comment};
     }
 
     // validate cluster
