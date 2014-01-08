@@ -93,10 +93,10 @@ console.log(shared.data.rows[shared.rowToValidate]);
     // 2 find_cluster
     if (cols.cluster >= 0 && rows[rowToValidate][cols.cluster]) {
       var clusters = {
-        'data':  rows[rowToValidate][cols.cluster].replace(/[,]/g,';').split(';'),
-        'checked' : [],
-        'valid': 'success',
-        'comments': []
+        data:  rows[rowToValidate][cols.cluster].replace(/[,]/g,';').split(';'),
+        checked: [],
+        valid: 'success',
+        comments: []
       }
       $.each(clusters.data, function(j, cluster) {
         cluster = cluster.trim();
@@ -171,10 +171,10 @@ console.log(shared.data.rows[shared.rowToValidate]);
     // 1 find_location_by_name
     if (cols.location >= 0 && rows[rowToValidate][cols.location]) {
       locations = {
-        'data':  rows[rowToValidate][cols.location].replace(/[,]/g,';').split(';'),
-        'checked' : [],
-        'valid': 'success',
-        'comments': []
+        data:  rows[rowToValidate][cols.location].replace(/[,]/g,';').split(';'),
+        checked: [],
+        valid: 'success',
+        comments: []
       };
       $.each(locations.data, function(j, location) {
         location = location.trim();
@@ -193,12 +193,12 @@ console.log(shared.data.rows[shared.rowToValidate]);
       // cleanup numbers and split
       // phones = phones.replace(/[,\/]/g,';').replace(/-/g,' ').replace(/[^0-9+(); ]/, '');
       phones = {
-        'data': rows[rowToValidate][cols.phone].
+        data: rows[rowToValidate][cols.phone].
           replace(/[,\/]/g,';').replace(/-/g,' ').replace(/[^0-9+(); ]/, '').
           split(";"),
-        'checked' : [],
-        'valid': 'success',
-        'comments': []
+        checked: [],
+        valid: 'success',
+        comments: []
       }
       $.each(phones.data, function(j, phone) {
         phone = phone.trim();
@@ -208,7 +208,7 @@ console.log(shared.data.rows[shared.rowToValidate]);
           if (!phoneUtil.isValidNumber(phoneParsed)) {
             phones.comments.push("Phone number " + phone + " is invalid");
             phones.checked.push(phone);
-            phone.valid = 'danger';
+            phones.valid = 'danger';
           }
           else {
             phones.checked.push(phoneUtil.format(phoneParsed, PNF.INTERNATIONAL));
@@ -280,7 +280,6 @@ console.log(shared.data.rows[shared.rowToValidate]);
   }
   else {
     $(".htCore tbody tr:nth-child(" + shared.rowToValidate +")").toggleClass( "blink");
-    //shared.ht.render();
     return shared.nextTask();
   }
 }
