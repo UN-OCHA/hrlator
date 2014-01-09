@@ -38,6 +38,26 @@ console.log(shared.data.rows[shared.rowToValidate]);
 }
 */
 
+function validateContacts() {
+  var shared = this;
+  var data = shared.data;
+  var rows = data.rows;
+//  var cols = data.cols;
+  var rowToValidate = shared.rowToValidate;
+
+  if (rowToValidate < rows.length) {
+    row = rows[rowToValidate];
+    hrlator.validateContactsRow(row);
+    shared.ht.render();
+    shared.rowToValidate++;
+    $(".htCore tbody tr:nth-child(" + shared.rowToValidate +")").toggleClass( "blink");
+    window.setTimeout((function(caller) { return function() { caller.validateContacts(); } })(shared), 100);
+  }
+  else {
+    return shared.nextTask();
+  }
+}
+
 var extension = {
 
     // validate data
@@ -51,7 +71,7 @@ var extension = {
         // add blink effect
         // http://stackoverflow.com/questions/11578800/how-can-i-create-a-looping-fade-in-out-image-effect-using-css-3-transitions
         $(".htCore tbody tr:nth-child(" + shared.rowToValidate +")").toggleClass( "blink");
-        shared.validateContactsRow();
+        shared.validateContacts();
 
     },
 
@@ -86,8 +106,10 @@ var extension = {
             comments: shared.data.colHeaders.indexOf('comments')
           }
 
+          hrlator.data = shared.data;
+
           // set validation function
-          shared.validateContactsRow = validateContactsRow;
+          shared.validateContacts = validateContacts;
         }
 
         // get data from html5csv
@@ -135,6 +157,8 @@ function sleep(milliseconds) {
 $(document).ready(function () {
 
   var t;
+
+  hrlator.init();
 
   CSV.begin('#csvfile').
 
