@@ -101,14 +101,24 @@ var extension = {
     // 1) name/full name vs. first/last name
     if (shared.data.cols.fullName >= 0) {
 console.log('Full name column: ' + shared.data.cols.fullName);
-      insertColumn(shared.data.cols.fullName+1, 'First name');
-      insertColumn(shared.data.cols.fullName+2, 'Last name');
-      shared.data.cols = getDataCols();
+      if (shared.data.cols.firstName < 0) {
+        insertColumn(shared.data.cols.fullName+1, 'First name');
+        shared.data.cols = getDataCols();
+      }
+      if (shared.data.cols.lastName < 0) {
+        insertColumn(shared.data.cols.firstName+1, 'Last name');
+        shared.data.cols = getDataCols();
+      }
     }
     else if (shared.data.cols.name >= 0) {
-      insertColumn(shared.data.cols.name+1, 'First name');
-      insertColumn(shared.data.cols.name+2, 'Last name');
-      shared.data.cols = getDataCols();
+      if (shared.data.cols.firstName < 0) {
+        insertColumn(shared.data.cols.name+1, 'First name');
+        shared.data.cols = getDataCols();
+      }
+      if (shared.data.cols.lastName < 0) {
+        insertColumn(shared.data.cols.firstName+1, 'Last name');
+        shared.data.cols = getDataCols();
+      }
     }
 
     // 2) valid
