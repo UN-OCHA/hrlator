@@ -219,6 +219,23 @@ console.log(row);
 
     // validate first last name
     // 1 determine First name and last name from full name
+    if (cols.fullName >= 0 || cols.name >= 0) {
+      // check if already edited!
+      if ((row[cols.lastName].length + row[cols.firstName].length) == 0) {
+        var fullName = (cols.fullName >= 0) ? row[cols.fullName] : row[cols.name];
+        var names = fullName.trim().split(' ');
+        if (names.length != 2) {
+          validation[cols.fullName] = {valid: 'danger', comment: 'Could not determine first name and last name from ' + names};
+        }
+        else {
+          row[cols.firstName] = names[0];
+          row[cols.lastName] = names[1];
+          validation[cols.fullName] = {
+            valid: 'success',
+            comment: 'Separated ' + fullName + ' into First name: ' + names[0] + ' and Last name: ' + names[1]};
+        }
+      }
+    }
 
     // contact exists in DB
     // 1 contact exists

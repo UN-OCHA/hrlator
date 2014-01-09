@@ -60,87 +60,132 @@ function validateContacts() {
 
 var extension = {
 
-    // validate data
-    'validate': function() {
-        var shared = this; // pick up shared object from this, will be set internally by func.apply
+  // init
+  'initContacts': function() {
+    var shared = this; // pick up shared object from this, will be set internally by func.apply
 
-        // hic sunt leones
-        shared.data.validation = [];
-        shared.rowToValidate = 1;
-
-        // add blink effect
-        // http://stackoverflow.com/questions/11578800/how-can-i-create-a-looping-fade-in-out-image-effect-using-css-3-transitions
-        $(".htCore tbody tr:nth-child(" + shared.rowToValidate +")").toggleClass( "blink");
-        shared.validateContacts();
-
-    },
-
-    // render data in handsontable
-    'handsontable':  function(step) {
-
-        var shared = this; // pick up shared object from this, will be set internally by func.apply
-
-        // check step
-        if ('init'==step) {
-
-          // @TODO hardcoded but should be moved
-          shared.hrlator = {
-            siteUrl: "https://philippines.humanitarianresponse.info",
-            contactUri: "/operational-presence/xml?search_api_views_fulltext=",
-            countryCode: "PH"
-          }
-
-          // get headers
-          shared.data.colHeaders = shared.data.rows[0];
-
-          // get data columns
-          shared.data.cols = {
-            firstName: shared.data.colHeaders.indexOf('First name'),
-            lastName: shared.data.colHeaders.indexOf('Last name'),
-            organization: shared.data.colHeaders.indexOf('Organization'),
-            cluster: shared.data.colHeaders.indexOf('Clusters'),
-            email: shared.data.colHeaders.indexOf('Email'),
-            phone: shared.data.colHeaders.indexOf('Telephones'),
-            location: shared.data.colHeaders.indexOf('Location'),
-            valid: shared.data.colHeaders.indexOf('valid'),
-            comments: shared.data.colHeaders.indexOf('comments')
-          }
-
-          hrlator.data = shared.data;
-
-          // set validation function
-          shared.validateContacts = validateContacts;
-        }
-
-        // get data from html5csv
-        // use a copy so we can safely remove the first line
-        var data = shared.data.rows.slice(0);
-        data.shift();
-
-        var rowRenderer = new hrlatorRenderer();
-        var colHeaders = shared.data.colHeaders;
-        var colDanger = shared.data.cols.valid;
-
-        $('div#hottable').handsontable({
-          data: data,
-          cells: function (row, col, prop) {
-            var cellProperties = {};
-            cellProperties.renderer = rowRenderer.getRenderFunction(colDanger);
-            return cellProperties;
-          },
-          minSpareRows: 1,
-          height: 600,
-          colHeaders: colHeaders,
-          rowHeaders: true,
-          contextMenu: true,
-          persistantState: true,
-          manualColumnResize: true,
-        });
-        shared.ht = $('div#hottable').handsontable('getInstance');
-
-// console.log('zonkers:' + step);
-        return shared.nextTask();
+    function insertColumn(col, colName) {
+      shared.data.rows[0].splice(col, 0, colName);
+      for (i=1; i<shared.data.rows.length; i++) {
+        shared.data.rows[i].splice(col, 0, '');
+      }
     }
+
+    function removeColumn(col) {
+      shared.data.rows[0].splice(col, 1);
+      for (i=1; i<shared.data.rows.length; i++) {
+        shared.data.rows[i].splice(col, 1);
+      }
+    }
+
+    function getDataCols() {
+      return {
+        firstName:    shared.data.rows[0].indexOf('First name'),
+        lastName:     shared.data.rows[0].indexOf('Last name'),
+        fullName:     shared.data.rows[0].indexOf('Full name'),
+        name:         shared.data.rows[0].indexOf('Name'),
+        organization: shared.data.rows[0].indexOf('Organization'),
+        cluster:      shared.data.rows[0].indexOf('Clusters'),
+        email:        shared.data.rows[0].indexOf('Email'),
+        phone:        shared.data.rows[0].indexOf('Telephones'),
+        location:     shared.data.rows[0].indexOf('Location'),
+        valid:        shared.data.rows[0].indexOf('valid'),
+        comments:     shared.data.rows[0].indexOf('comments')
+      }
+    }
+
+    // get data columns
+    shared.data.cols = getDataCols();
+
+    // check columns
+    // 1) name/full name vs. first/last name
+    if (shared.data.cols.fullName >= 0) {
+console.log('Full name column: ' + shared.data.cols.fullName);
+      insertColumn(shared.data.cols.fullName+1, 'First name');
+      insertColumn(shared.data.cols.fullName+2, 'Last name');
+      shared.data.cols = getDataCols();
+    }
+    else if (shared.data.cols.name >= 0) {
+      insertColumn(shared.data.cols.name+1, 'First name');
+      insertColumn(shared.data.cols.name+2, 'Last name');
+      shared.data.cols = getDataCols();
+    }
+
+    // 2) valid
+    if (shared.data.cols.valid >= 0) {
+      removeColumn(shared.data.cols.valid);
+    }
+    insertColumn(shared.data.rows[0].length, 'valid');
+    shared.data.cols = getDataCols();
+
+    // 3) comments
+    if (shared.data.cols.comments >= 0) {
+      removeColumn(shared.data.cols.comments);
+    }
+    insertColumn(shared.data.rows[0].length, 'comments');
+    shared.data.cols = getDataCols();
+
+    // get headers
+    shared.data.colHeaders = shared.data.rows[0];
+
+    // push data in hrlator
+    hrlator.data = shared.data;
+
+    // set validation function
+    shared.validateContacts = validateContacts;
+
+    return shared.nextTask();
+  },
+
+  // validate data
+  'validateContacts': function() {
+
+    var shared = this; // pick up shared object from this, will be set internally by func.apply
+
+    // hic sunt leones
+    shared.rowToValidate = 1;
+
+    // add blink effect
+    // http://stackoverflow.com/questions/11578800/how-can-i-create-a-looping-fade-in-out-image-effect-using-css-3-transitions
+    $(".htCore tbody tr:nth-child(" + shared.rowToValidate +")").toggleClass( "blink");
+
+    shared.validateContacts();
+
+  },
+
+  // render data in handsontable
+  'handsontable':  function(step) {
+
+    var shared = this; // pick up shared object from this, will be set internally by func.apply
+
+    // get data from html5csv
+    // use a copy so we can safely remove the first line
+    var data = shared.data.rows.slice(0);
+    data.shift();
+
+    var rowRenderer = new hrlatorRenderer();
+    var colHeaders = shared.data.colHeaders;
+    var colDanger = shared.data.cols.valid;
+
+    $('div#hottable').handsontable({
+      data: data,
+      cells: function (row, col, prop) {
+        var cellProperties = {};
+        cellProperties.renderer = rowRenderer.getRenderFunction(colDanger);
+        return cellProperties;
+      },
+      minSpareRows: 1,
+      height: 600,
+      colHeaders: colHeaders,
+      rowHeaders: true,
+      contextMenu: true,
+      persistantState: true,
+      manualColumnResize: true,
+    });
+    shared.ht = $('div#hottable').handsontable('getInstance');
+
+    return shared.nextTask();
+  }
 };
 
 CSV.extend(extension); // attach to list of known middleware
@@ -167,23 +212,14 @@ $(document).ready(function () {
       t = d.getTime();
     }).
 
-    // append columns
-    appendCol('valid',
-      function(i, row, shared) {
-        return 'succes';
-      },
-      false).
-    appendCol('comments',
-      function(i, row, shared) {
-        return '';
-      },
-      false).
+    // init data & check columns
+    initContacts().
 
     // display data
     handsontable('init').
 
-    // async validation
-    validate().
+    // data validation
+    validateContacts().
 
     call( function() {
       var d = new Date();
@@ -210,6 +246,5 @@ $(document).ready(function () {
 
   // Disable download button
   $('#hrlator-download-csv').on('click', function(){ alert('Wait for validation to complete'); return false;});
-
 
 });
