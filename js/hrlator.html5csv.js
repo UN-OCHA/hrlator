@@ -3,10 +3,6 @@
  * - validate
  * - handson //table
  */
-function replace_separator(string) {
-  string = string.replace(/[,\/]/g,';');
-}
-
 function hrlator_api(api_data) {
   $.ajax({
     data: api_data,
@@ -18,26 +14,6 @@ function hrlator_api(api_data) {
   return jsonResult;
 }
 
-/**
- * HRLator contacts row validation
- *
-function validateRow() {
-  var shared = this;
-console.log('row: ' + shared.rowToValidate);
-console.log(shared.data.rows[shared.rowToValidate]);
-
-  shared.rowToValidate++;
-  if (shared.rowToValidate < shared.data.rows.length) {
-    // http://robinwinslow.co.uk/2012/03/13/javascript-closures-passing-an-object-context-to-a-callback-function/ 
-    // Call the callback function after 1 second
-    window.setTimeout((function(caller) { return function() { caller.validateRow(); } })(shared), 50);
-  }
-  else {
-    return 'zut';
-  }
-}
-*/
-
 function validateContacts() {
   var shared = this;
   var data = shared.data;
@@ -47,10 +23,12 @@ function validateContacts() {
 
   if (rowToValidate < rows.length) {
     row = rows[rowToValidate];
-    hrlator.validateContactsRow(row);
-    shared.ht.render();
+    if (row.join('').length > 0) {
+      row[hrlator.contacts.cols.valid] = 'validating';
+      shared.ht.render();
+      hrlator.validateContactsRow(row);
+    }
     shared.rowToValidate++;
-    $(".htCore tbody tr:nth-child(" + shared.rowToValidate +")").toggleClass( "blink");
     window.setTimeout((function(caller) { return function() { caller.validateContacts(); } })(shared), 100);
   }
   else {
@@ -100,7 +78,6 @@ var extension = {
     // check columns
     // 1) name/full name vs. first/last name
     if (shared.data.cols.fullName >= 0) {
-console.log('Full name column: ' + shared.data.cols.fullName);
       if (shared.data.cols.firstName < 0) {
         insertColumn(shared.data.cols.fullName+1, 'First name');
         shared.data.cols = getDataCols();
@@ -139,7 +116,13 @@ console.log('Full name column: ' + shared.data.cols.fullName);
     shared.data.colHeaders = shared.data.rows[0];
 
     // push data in hrlator
-    hrlator.data = shared.data;
+    var data = shared.data.rows.slice(0);
+    data.shift();
+    hrlator.contacts = {
+      rows: data,
+      cols: shared.data.cols,
+      headers: shared.data.rows[0]
+    }
 
     // set validation function
     shared.validateContacts = validateContacts;
@@ -149,18 +132,10 @@ console.log('Full name column: ' + shared.data.cols.fullName);
 
   // validate data
   'validateContacts': function() {
-
     var shared = this; // pick up shared object from this, will be set internally by func.apply
-
     // hic sunt leones
     shared.rowToValidate = 1;
-
-    // add blink effect
-    // http://stackoverflow.com/questions/11578800/how-can-i-create-a-looping-fade-in-out-image-effect-using-css-3-transitions
-    $(".htCore tbody tr:nth-child(" + shared.rowToValidate +")").toggleClass( "blink");
-
     shared.validateContacts();
-
   },
 
   // render data in handsontable
@@ -173,12 +148,12 @@ console.log('Full name column: ' + shared.data.cols.fullName);
     var data = shared.data.rows.slice(0);
     data.shift();
 
-    var rowRenderer = new hrlatorRenderer();
+    var rowRenderer = new hrlator.htContactsRenderer();
     var colHeaders = shared.data.colHeaders;
     var colDanger = shared.data.cols.valid;
 
     $('div#hottable').handsontable({
-      data: data,
+      data: hrlator.contacts.rows,
       cells: function (row, col, prop) {
         var cellProperties = {};
         cellProperties.renderer = rowRenderer.getRenderFunction(colDanger);
@@ -191,8 +166,10 @@ console.log('Full name column: ' + shared.data.cols.fullName);
       contextMenu: true,
       persistantState: true,
       manualColumnResize: true,
+      afterSelectionEnd: hrlator.afterSelectionEndContacts,
+      afterChange: hrlator.afterChangeContacts,
     });
-    shared.ht = $('div#hottable').handsontable('getInstance');
+    hrlator.ht = shared.ht = $('div#hottable').handsontable('getInstance');
 
     return shared.nextTask();
   }

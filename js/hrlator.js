@@ -5,6 +5,24 @@ var hrlator = (function () {
 
   // handsontable
   var ht;
+  var _ht_rowLastEdited = null;
+  var _ht_validated = false;
+
+  var htContactsRenderer = function() {
+    var highlightedRow = null;
+
+    return {
+      getRenderFunction: function(dangerCol) {
+        return function(instance, td, row, col, prop, value, cellProperties) {
+          Handsontable.TextRenderer.apply(this, arguments);
+          tdcheck = instance.getDataAtCell(row, dangerCol);
+          // add class to parent
+          $(td).parent().removeClass().addClass("hrlator-" + tdcheck);
+          return td;
+        }
+      }
+    }
+  };
 
   // internal variables harcoded
   var _siteUrl = 'https://philippines.humanitarianresponse.info';
@@ -41,10 +59,40 @@ var hrlator = (function () {
       self.clusters = _clusters = hr_clusters;
   };
 
-    // HRLator contacts row validation
+  // contact row validation after editing
+  var _validateContactsAfterEdit = function () {
+    row = self.contacts.rows[_ht_rowLastEdited];
+    validateContactsRow(row);
+    hrlator.ht.render();
+  }
+
+  var afterSelectionEndContacts = function (r, c, r2, c2) {
+    if (_ht_rowLastEdited && !_ht_validated && r != _ht_rowLastEdited) {
+      self.contacts.rows[_ht_rowLastEdited][self.contacts.cols.valid] = 'validating';
+      self.ht.render();
+      window.setTimeout(_validateContactsAfterEdit(), 100);
+    }
+  }
+
+  var afterChangeContacts = function(change, source) {
+    if ('edit'==source) {
+      _ht_rowLastEdited = change[0][0];
+      self.contacts.rows[_ht_rowLastEdited][self.contacts.cols.valid] = 'edited';
+      self.ht.render();
+      _ht_validated = false;
+    }
+  };
+
+  // HRLator contacts row validation
   var validateContactsRow = function(row) {
-    var rows = self.data.rows;
-    var cols = self.data.cols;
+
+    // check empty row
+    if (row.join('').length ===0) {
+      row[cols.comments] = 'empty';
+      return;
+    }
+
+    var cols = self.contacts.cols;
 console.log(row);
 
     // clear validation
@@ -225,7 +273,7 @@ console.log(row);
         var fullName = (cols.fullName >= 0) ? row[cols.fullName] : row[cols.name];
         var names = fullName.trim().split(' ');
         if (names.length != 2) {
-          validation[cols.fullName] = {valid: 'danger', comment: 'Could not determine first name and last name from ' + names};
+          validation[cols.fullName] = {valid: 'danger', comment: 'Could not determine first name and last name from ' + fullName};
         }
         else {
           row[cols.firstName] = names[0];
@@ -241,11 +289,9 @@ console.log(row);
     // 1 contact exists
     if (cols.lastName >= 0 && cols.firstName >= 0) {
       var lastName = row[cols.lastName];
-//console.log('last name: ' + lastName);
       if (lastName) {
         var firstName = row[cols.firstName];
         if (firstName) {
-//console.log('first name: ' + firstName);
           var api_data = {'api': 'contact_exist', 'last_name': lastName, 'first_name': firstName};
           $.ajax({
             data: api_data,
@@ -255,7 +301,6 @@ console.log(row);
             async: false
           });
           if (jsonResult) {
-//console.log("contact API result: " + jsonResult);
             validation[cols.lastName] = JSON.parse(jsonResult);
           }
         }
@@ -280,6 +325,8 @@ console.log(row);
     row[cols.valid] = valid;
     row[cols.comments] = comments.join('; ');
 
+    _ht_validated = true;
+
     return valid;
 
   }
@@ -289,8 +336,12 @@ console.log(row);
     // expose functions
     init: init,
     validateContactsRow: validateContactsRow,
+    afterChangeContacts: afterChangeContacts,
+    afterSelectionEndContacts: afterSelectionEndContacts,
+    htContactsRenderer: htContactsRenderer,
 
     // expose data
+    ht: ht,
     data: [],
     siteUrl: _siteUrl,
     contactUri: _contactUri,
