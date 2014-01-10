@@ -25,7 +25,10 @@
   color: #c09853;
 }
 
-/* blink */
+/**
+ * blink
+ * // http://stackoverflow.com/questions/11578800/how-can-i-create-a-looping-fade-in-out-image-effect-using-css-3-transitions
+ */
 @-webkit-keyframes blinker {
   from { opacity: 1.0; }
   to { opacity: 0.0; }
@@ -46,6 +49,7 @@
   to { opacity: 0.0; }
 }
 
+#hottable.handsontable tr.hrlator-validating td,
 tbody tr.blink {
   -webkit-animation-name: blinker;
   -webkit-animation-iteration-count: infinite;
