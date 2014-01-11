@@ -206,7 +206,7 @@ error_log("template: ". $template['template']);
     $rows = $dictionary->findAll();
     $parameters['rows'] = $rows;
   }
-  elseif ($template['template'] == 'home') {
+  elseif ($template['template'] == 'home' || $template['template'] == 'activities') {
     // data should be asynced!
     $data = new HRLatorContacts();
     $parameters['organizations'] = json_encode($data->load_data($data->site_url.'organizations.xml', array('Name', 'Acronym')));
