@@ -32,22 +32,27 @@
       </tbody>
     </table>
     <form class="form-horizontal" enctype="multipart/form-data" method="post" action="">
-        <div class="form-group">
-            <label for="csvfile" class="col-sm-3 control-label">CSV File</label>
 
-            <div class="col-sm-5">
-                <input type="file" class="form-control" id="csvActivities" name='csvActivities' required="required" accept="text/csv" />
-            </div>
+      <div class="form-group">
+        <label for="csvfile" class="col-sm-3 control-label">CSV File</label>
+        <div class="col-sm-5">
+          <input type="file" class="form-control" id="csvActivities" name='csvActivities' required="required" accept="text/csv" />
         </div>
+      </div>
 
-        <div class="form-group">
-            <div class="col-lg-offset-3 col-sm-8">
-                <button id="hrlator-download-csv" class="hrlator-button btn btn-default">Download CSV</button>
+      <div class="row">
+        <div class="col-sm-12">
+          <div id="hottable"></div>
+          <div id="table"></div>
+        </div>
+      </div><div class="form-group">
+
+      <div class="col-lg-offset-3 col-sm-8">
+        <button id="hrlator-download-csv" class="hrlator-button btn btn-default">Download CSV</button>
 <!--
-                <button type="submit" class="btn btn-default">Submit</button>
+        <button type="submit" class="btn btn-default">Submit</button>
 -->
-            </div>
-        </div>
+      </div>
     </form>
 
     <script>

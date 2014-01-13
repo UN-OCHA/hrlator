@@ -49,15 +49,175 @@ var hrlator = (function () {
     'EDU': 'E'
   };
 
+  // validate cluster
+  // 1 cluster_exists
+  // 2 find_cluster
+  function validateCluster(row, cols_cluster) {
+    var clusters = {
+      data:  row[cols_cluster].replace(/[,]/g,';').split(';'),
+      checked: [],
+      valid: 'success',
+      comments: []
+    }
+    $.each(clusters.data, function(j, cluster) {
+      cluster = cluster.trim();
+      $.each(hr_clusters, function(i, element) {
+        // check the list
+        if (element.Name === cluster) {
+          clusters.checked[j] = element.Name;
+          return false
+        }
+        // check the prefix
+        else if (element.Prefix === cluster) {
+          clusters.checked[j] = element.Name;
+          clusters.comments[j] = 'Cluster ' + cluster + ' (prefix) replaced by ' + element.Name;
+          return false;
+        }
+        // check prefix map
+        else if (element.Prefix === prefix_map[cluster]) {
+          clusters.checked[j] = element.Name;
+          clusters.comments[j] = 'Cluster ' + cluster + ' (mapped to ' + prefix_map[cluster] + ') replaced by ' + element.Name;
+          return false;
+        }
+        // check for similarities
+        else if (element.Name.indexOf(cluster)>=0) {
+          clusters.checked[j] = element.Name;
+          clusters.comments[j] = 'Cluster ' + cluster + ' replaced by ' + element.Name;
+          // keep looping because this could ba a false positive
+        }
+
+      });
+      if (!clusters.checked[j]) {
+         clusters.checked[j] = cluster;
+         clusters.valid = 'danger';
+         clusters.comments.push('Cluster ' + cluster + ' not found');
+      }
+    });
+    row[cols_cluster] = clusters.checked.join('; ');
+
+    return {valid: clusters.valid, comment: clusters.comments.join('; ')};
+
+  }
+
+
   // regexp for email
   // http://stackoverflow.com/questions/46155/validate-email-address-in-javascript
   var reEmail = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/i;
+
+  // validate organization
+  // 1 consult_dictionary
+  // 2 organization_exists
+  // 3 find_organization_by_acronym
+  function validateOrganization(row, cols_organization) {
+    var organization = {
+       data: row[cols_organization].trim(),
+       checked: '',
+       valid: 'success',
+       comment: ''
+    }
+
+    // 1 consult dictionary
+    $.each(hr_dictionary, function(i, element) {
+      if ('organizations' == element.Type && organization.data === element.Initial) {
+         organization.checked = element.Replacement;
+         organization.comment = 'Organization found in dictionary (' + organization.data + ')';
+         return false;
+      }
+    });
+    if (!organization.checked) {
+      $.each(hr_organizations, function(i, element) {
+
+        // 2 organization_exists
+        if (organization.data === element.Name) {
+          organization.checked = element.Name;
+          return false;
+        }
+
+        // 3 find_organization_by_acronym
+        else if (organization.data === element.Acronym) {
+          organization.checked = element.Name;
+          organization.comment = 'Organization found by acronym (' + organization.data + ')';
+          return false;
+        }
+      });
+    }
+    if (!organization.checked) {
+      organization.checked = organization.data;
+      organization.comment = 'Organization not found';
+      organization.valid = 'danger';
+    }
+
+    row[cols_organization] = organization.checked;
+
+    return {valid: organization.valid, comment: organization.comment};
+  }
 
   var init = function() {
       self.dictionary = _dictionary = hr_dictionary;
       self.organizations = _organizations = hr_organizations;
       self.clusters = _clusters = hr_clusters;
   };
+
+  // activities row validation after editing
+  var _validateActivitiesAfterEdit = function () {
+    row = self.contacts.rows[_ht_rowLastEdited];
+    validateActivitiesRow(row);
+    hrlator.ht.render();
+  }
+
+  var afterSelectionEndActivities = function (r, c, r2, c2) {
+    if (_ht_rowLastEdited && !_ht_validated && r != _ht_rowLastEdited) {
+      self.activities.rows[_ht_rowLastEdited][self.contacts.cols.valid] = 'validating';
+      self.ht.render();
+      window.setTimeout(_validateActivitiesAfterEdit(), 100);
+    }
+  }
+
+  var afterChangeActivities = function(change, source) {
+    if ('edit'==source) {
+      _ht_rowLastEdited = change[0][0];
+      self.activites.rows[_ht_rowLastEdited][self.contacts.cols.valid] = 'edited';
+      self.ht.render();
+      _ht_validated = false;
+    }
+  };
+
+  // HRLator Activities row validation
+  var validateActivitiesRow = function(row) {
+
+    // check empty row
+    if (row.join('').length ===0) {
+      row[cols.comments] = 'empty';
+      return;
+    }
+
+    var cols = self.contacts.cols;
+console.log(row);
+
+    // clear validation
+    validation = [];
+
+    // validate organization
+    if (cols.organization >=0 && row[cols.organization]) {
+      validation[cols.organization] = validateOrganization(row, cols.organization);
+    }
+
+    // Ok, let's check the row
+    var valid = 'success';
+    var comments = [];
+    for (var j in validation) {
+      valid = ('danger' == validation[j].valid) ? 'danger' : valid;
+      if (validation[j].comment) {
+        comments.push(validation[j].comment);
+      }
+    }
+    row[cols.valid] = valid;
+    row[cols.comments] = comments.join('; ');
+
+    _ht_validated = true;
+
+    return valid;
+  }
 
   // contact row validation after editing
   var _validateContactsAfterEdit = function () {
@@ -115,101 +275,14 @@ console.log(row);
         validation[cols.email] = { valid: 'danger', comment: 'Email address is invalid'};
       }
     }
-
     // validate organization
-    // 1 consult_dictionary
-    // 2 organization_exists
-    // 3 find_organization_by_acronym
     if (cols.organization >=0 && row[cols.organization]) {
-      var organization = {
-         data: row[cols.organization].trim(),
-         checked: '',
-         valid: 'success',
-         comment: ''
-      }
-
-      // 1 consult dictionary
-      $.each(hr_dictionary, function(i, element) {
-        if ('organizations' == element.Type && organization.data === element.Initial) {
-           organization.checked = element.Replacement;
-           organization.comment = 'Organization found in dictionary (' + organization.data + ')';
-           return false;
-        }
-      });
-      if (!organization.checked) {
-        $.each(hr_organizations, function(i, element) {
-
-          // 2 organization_exists
-          if (organization.data === element.Name) {
-            organization.checked = element.Name;
-            return false;
-          }
-
-          // 3 find_organization_by_acronym
-          else if (organization.data === element.Acronym) {
-            organization.checked = element.Name;
-            organization.comment = 'Organization found by acronym (' + organization.data + ')';
-            return false;
-          }
-        });
-      }
-      if (!organization.checked) {
-        organization.checked = organization.data;
-        organization.comment = 'Organization not found';
-        organization.valid = 'danger';
-      }
-
-      row[cols.organization] = organization.checked;
-      validation[cols.organization] = {valid: organization.valid, comment: organization.comment};
+      validation[cols.organization] = validateOrganization(row, cols.organization);
     }
 
     // validate cluster
-    // 1 cluster_exists
-    // 2 find_cluster
     if (cols.cluster >= 0 && row[cols.cluster]) {
-      var clusters = {
-        data:  row[cols.cluster].replace(/[,]/g,';').split(';'),
-        checked: [],
-        valid: 'success',
-        comments: []
-      }
-      $.each(clusters.data, function(j, cluster) {
-        cluster = cluster.trim();
-        $.each(hr_clusters, function(i, element) {
-          // check the list
-          if (element.Name === cluster) {
-            clusters.checked[j] = element.Name;
-            return false
-          }
-          // check the prefix
-          else if (element.Prefix === cluster) {
-            clusters.checked[j] = element.Name;
-            clusters.comments[j] = 'Cluster ' + cluster + ' (prefix) replaced by ' + element.Name;
-            return false;
-          }
-          // check prefix map
-          else if (element.Prefix === prefix_map[cluster]) {
-            clusters.checked[j] = element.Name;
-            clusters.comments[j] = 'Cluster ' + cluster + ' (mapped to ' + prefix_map[cluster] + ') replaced by ' + element.Name;
-            return false;
-          }
-          // check for similarities
-          else if (element.Name.indexOf(cluster)>=0) {
-            clusters.checked[j] = element.Name;
-            clusters.comments[j] = 'Cluster ' + cluster + ' replaced by ' + element.Name;
-            // keep looping because this could ba a false positive
-          }
-
-        });
-        if (!clusters.checked[j]) {
-           clusters.checked[j] = cluster;
-           clusters.valid = 'danger';
-           clusters.comments.push('Cluster ' + cluster + ' not found');
-        }
-      });
-      row[cols.cluster] = clusters.checked.join('; ');
-      validation[cols.cluster] = {valid: clusters.valid, comment: clusters.comments.join('; ')};
-
+      validation[cols.cluster] = validateCluster(row, cols.cluster);
     }
 
     // validate location
@@ -339,6 +412,11 @@ console.log(row);
     afterChangeContacts: afterChangeContacts,
     afterSelectionEndContacts: afterSelectionEndContacts,
     htContactsRenderer: htContactsRenderer,
+
+    validateActivitiesRow: validateActivitiesRow,
+    afterChangeActivities: afterChangeActivities,
+    afterSelectionEndActivities: afterSelectionEndActivities,
+    htActivitieRenderer: htContactsRenderer,
 
     // expose data
     ht: ht,
