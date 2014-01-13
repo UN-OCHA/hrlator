@@ -36,25 +36,25 @@ function validateContacts() {
   }
 }
 
+function insertColumn(rows, col, colName) {
+  rows[0].splice(col, 0, colName);
+  for (i=1; i<rows.length; i++) {
+    rows[i].splice(col, 0, '');
+  }
+}
+
+function removeColumn(rows, col) {
+  rows[0].splice(col, 1);
+  for (i=1; i<rows.length; i++) {
+    rows[i].splice(col, 1);
+  }
+}
+
 var extension = {
 
   // init
   'initContacts': function() {
     var shared = this; // pick up shared object from this, will be set internally by func.apply
-
-    function insertColumn(col, colName) {
-      shared.data.rows[0].splice(col, 0, colName);
-      for (i=1; i<shared.data.rows.length; i++) {
-        shared.data.rows[i].splice(col, 0, '');
-      }
-    }
-
-    function removeColumn(col) {
-      shared.data.rows[0].splice(col, 1);
-      for (i=1; i<shared.data.rows.length; i++) {
-        shared.data.rows[i].splice(col, 1);
-      }
-    }
 
     function getDataCols() {
       return {
@@ -79,37 +79,37 @@ var extension = {
     // 1) name/full name vs. first/last name
     if (shared.data.cols.fullName >= 0) {
       if (shared.data.cols.firstName < 0) {
-        insertColumn(shared.data.cols.fullName+1, 'First name');
+        insertColumn(shared.data.rows, shared.data.cols.fullName+1, 'First name');
         shared.data.cols = getDataCols();
       }
       if (shared.data.cols.lastName < 0) {
-        insertColumn(shared.data.cols.firstName+1, 'Last name');
+        insertColumn(shared.data.rows, shared.data.cols.firstName+1, 'Last name');
         shared.data.cols = getDataCols();
       }
     }
     else if (shared.data.cols.name >= 0) {
       if (shared.data.cols.firstName < 0) {
-        insertColumn(shared.data.cols.name+1, 'First name');
+        insertColumn(shared.data.rows, shared.data.cols.name+1, 'First name');
         shared.data.cols = getDataCols();
       }
       if (shared.data.cols.lastName < 0) {
-        insertColumn(shared.data.cols.firstName+1, 'Last name');
+        insertColumn(shared.data.rows, shared.data.cols.firstName+1, 'Last name');
         shared.data.cols = getDataCols();
       }
     }
 
     // 2) valid
     if (shared.data.cols.valid >= 0) {
-      removeColumn(shared.data.cols.valid);
+      removeColumn(shared.data.rows, shared.data.cols.valid);
     }
-    insertColumn(shared.data.rows[0].length, 'valid');
+    insertColumn(shared.data.rows, shared.data.rows[0].length, 'valid');
     shared.data.cols = getDataCols();
 
     // 3) comments
     if (shared.data.cols.comments >= 0) {
-      removeColumn(shared.data.cols.comments);
+      removeColumn(shared.data.rows, shared.data.cols.comments);
     }
-    insertColumn(shared.data.rows[0].length, 'comments');
+    insertColumn(shared.data.rows, shared.data.rows[0].length, 'comments');
     shared.data.cols = getDataCols();
 
     // get headers
@@ -214,7 +214,7 @@ $(document).ready(function () {
     initContacts().
 
     // display data
-    handsontable('init').
+    handsontable('contacts').
 
     // data validation
     validateContacts().
@@ -225,7 +225,7 @@ $(document).ready(function () {
     }).
 
     // edit data
-    handsontable('edit').
+    handsontable('contacts').
 
     // enable download
     call( function() {
