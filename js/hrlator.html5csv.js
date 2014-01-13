@@ -29,14 +29,14 @@ function validateContacts() {
       hrlator.validateContactsRow(row);
     }
     shared.rowToValidate++;
-    window.setTimeout((function(caller) { return function() { caller.validate(); } })(shared), 100);
+    window.setTimeout((function(caller) { return function() { caller.validate(); } })(shared), 50);
   }
   else {
     return shared.nextTask();
   }
 }
 
-function validateActivites() {
+function validateActivities() {
   var shared = this;
   var data = shared.data;
   var rows = data.rows;
@@ -51,7 +51,7 @@ function validateActivites() {
       hrlator.validateActivitiesRow(row);
     }
     shared.rowToValidate++;
-    window.setTimeout((function(caller) { return function() { caller.validateActivities(); } })(shared), 100);
+    window.setTimeout((function(caller) { return function() { caller.validate(); } })(shared), 50);
   }
   else {
     return shared.nextTask();
