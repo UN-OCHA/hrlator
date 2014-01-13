@@ -191,7 +191,7 @@ var hrlator = (function () {
       return;
     }
 
-    var cols = self.contacts.cols;
+    var cols = self.activities.cols;
 console.log(row);
 
     // clear validation
