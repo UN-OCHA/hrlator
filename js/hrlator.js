@@ -109,6 +109,7 @@ var hrlator = (function () {
   // 2 organization_exists
   // 3 find_organization_by_acronym
   function validateOrganization(row, cols_organization) {
+
     var organization = {
        data: row[cols_organization].trim(),
        checked: '',
@@ -205,6 +206,32 @@ console.log(row);
     // validate cluster
     if (cols.Clusters >= 0 && row[cols.Clusters]) {
       validation[cols.Clusters] = validateCluster(row, cols.Clusters);
+    }
+
+    // Primary Benieficiary
+    if (cols.PrimBen >= 0 && row[cols.PrimBen]) {
+
+      var PrimBen = {
+        data: row[cols.PrimBen].trim(),
+        checked: '',
+        valid: 'success',
+        comment: ''
+      }
+      // default
+      PrimBen.checked = PrimBen.data;
+
+      // 1 consult dictionary
+      $.each(hr_dictionary, function(i, element) {
+        if ('population_types' == element.Type && PrimBen.data === element.Initial) {
+           PrimBen.checked = element.Replacement;
+           PrimBen.comment = 'Primary Beneficiary found in dictionary (' + PrimBen.data + ')';
+           return false;
+        }
+      });
+
+      //validation[cols.PrimBen] = {valid: 'success', comment: 'checked'};
+      validation[cols.PrimBen] = {valid: PrimBen.valid, comment: PrimBen.comment};
+
     }
 
     // Ok, let's check the row
