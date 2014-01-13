@@ -139,37 +139,44 @@ var extension = {
   },
 
   // render data in handsontable
-  'handsontable':  function(step) {
+  'handsontable':  function(template) {
 
     var shared = this; // pick up shared object from this, will be set internally by func.apply
 
-    // get data from html5csv
-    // use a copy so we can safely remove the first line
-    var data = shared.data.rows.slice(0);
-    data.shift();
+    if ('activities' == template) {
 
-    var rowRenderer = new hrlator.htContactsRenderer();
-    var colHeaders = shared.data.colHeaders;
-    var colDanger = shared.data.cols.valid;
+    }
+    else {
 
-    $('div#hottable').handsontable({
-      data: hrlator.contacts.rows,
-      cells: function (row, col, prop) {
-        var cellProperties = {};
-        cellProperties.renderer = rowRenderer.getRenderFunction(colDanger);
-        return cellProperties;
-      },
-      minSpareRows: 1,
-      height: 600,
-      colHeaders: colHeaders,
-      rowHeaders: true,
-      contextMenu: true,
-      persistantState: true,
-      manualColumnResize: true,
-      afterSelectionEnd: hrlator.afterSelectionEndContacts,
-      afterChange: hrlator.afterChangeContacts,
-    });
-    hrlator.ht = shared.ht = $('div#hottable').handsontable('getInstance');
+      // get data from html5csv
+      // use a copy so we can safely remove the first line
+      var data = shared.data.rows.slice(0);
+      data.shift();
+
+      var rowRenderer = new hrlator.htContactsRenderer();
+      var colHeaders = shared.data.colHeaders;
+      var colDanger = shared.data.cols.valid;
+
+      $('div#hottable').handsontable({
+        data: hrlator.contacts.rows,
+        cells: function (row, col, prop) {
+          var cellProperties = {};
+          cellProperties.renderer = rowRenderer.getRenderFunction(colDanger);
+          return cellProperties;
+        },
+        minSpareRows: 1,
+        height: 600,
+        colHeaders: colHeaders,
+        rowHeaders: true,
+        contextMenu: true,
+        persistantState: true,
+        manualColumnResize: true,
+        afterSelectionEnd: hrlator.afterSelectionEndContacts,
+        afterChange: hrlator.afterChangeContacts,
+      });
+      hrlator.ht = shared.ht = $('div#hottable').handsontable('getInstance');
+
+    }
 
     return shared.nextTask();
   }
@@ -192,7 +199,11 @@ $(document).ready(function () {
 
   hrlator.init();
 
-  CSV.begin('#csvfile').
+  // Disable download button
+  $('#hrlator-download-csv').on('click', function(){ alert('Wait for validation to complete'); return false;});
+
+  // contacts
+  var csvContacts = CSV.begin('#csvContacts').
 
     call( function() {
       var d = new Date();
@@ -231,7 +242,21 @@ $(document).ready(function () {
     }).
     go();
 
-  // Disable download button
-  $('#hrlator-download-csv').on('click', function(){ alert('Wait for validation to complete'); return false;});
+  $('#csvContacts').on('click', csvContacts);
+
+  // activities
+  var csvActivities = CSV.begin('#csvActivities').
+
+    call( function() {
+      var d = new Date();
+      t = d.getTime();
+    }).
+    call( function() {
+      var d = new Date();
+      console.log( "Run time: " + (d.getTime() - t));
+    }).
+    go();
+
+  $('#csvActivities').on('clic', csvActivities);
 
 });
