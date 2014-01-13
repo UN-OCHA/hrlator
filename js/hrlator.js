@@ -37,6 +37,9 @@ var hrlator = (function () {
   var _organizations;
   var _clusters;
 
+  // default states
+  var StatusDefaults = ['planned', 'ongoing', 'completed'];
+
   // cluster prefix map
   var prefix_map = {
     'CCCM': 'CM',
@@ -120,7 +123,7 @@ var hrlator = (function () {
     // 1 consult dictionary
     $.each(hr_dictionary, function(i, element) {
       if ('organizations' == element.Type && organization.data === element.Initial) {
-         organization.checked = element.Replacement;
+         organization.checked = element.Replacement.toLowerCase();
          organization.comment = 'Organization found in dictionary (' + organization.data + ')';
          return false;
       }
@@ -208,7 +211,7 @@ console.log(row);
       validation[cols.Clusters] = validateCluster(row, cols.Clusters);
     }
 
-    // Primary Benieficiary
+    // Primary Beneficiary
     if (cols.PrimBen >= 0 && row[cols.PrimBen]) {
 
       var PrimBen = {
@@ -232,6 +235,35 @@ console.log(row);
       //validation[cols.PrimBen] = {valid: 'success', comment: 'checked'};
       validation[cols.PrimBen] = {valid: PrimBen.valid, comment: PrimBen.comment};
 
+    }
+
+    // Status
+    if (cols.Status >= 0 && row[cols.Status]) {
+      var Status = {
+        data: row[cols.Status].trim().toLowerCase(),
+        checked: '',
+        valid: 'success',
+        comment: ''
+      }
+
+      if (StatusDefaults.indexOf(Status.data) >= 0) {
+        Status.checked = Status.data;
+      }
+      else {
+        $.each(hr_dictionary, function(i, element) {
+          if ('activity_status' == element.Type && Status.data === element.Initial.toLowerCase()) {
+            Status.checked = element.Replacement;
+            return false
+          }
+        });
+        if (!Status.checked) {
+          Status.valid = 'danger';
+          Status.checked = Status.data;
+          Status.comment = 'Status not recognized';
+        }
+      }
+      row[cols.Status] = Status.checked;
+      validation[cols.Status] = {valid: Status.valid, comment: Status.comment};
     }
 
     // Ok, let's check the row
