@@ -198,8 +198,13 @@ console.log(row);
     validation = [];
 
     // validate organization
-    if (cols.organization >=0 && row[cols.organization]) {
-      validation[cols.organization] = validateOrganization(row, cols.organization);
+    if (cols.Organizations >=0 && row[cols.Organizations]) {
+      validation[cols.Organizations] = validateOrganization(row, cols.Organizations);
+    }
+
+    // validate cluster
+    if (cols.Clusters >= 0 && row[cols.Clusters]) {
+      validation[cols.Clusters] = validateCluster(row, cols.Clusters);
     }
 
     // Ok, let's check the row
