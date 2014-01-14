@@ -156,6 +156,40 @@ var hrlator = (function () {
     return {valid: organization.valid, comment: organization.comment};
   }
 
+  function validateDate(row, cols_date, colName) {
+
+    var date = {
+       data: row[cols_date].trim().replace(/\W/g,'/'),
+       checked: '',
+       valid: 'success',
+       comment: '' 
+    }
+
+    var countSep = date.data.split('/').length - 1;
+    var dataParsed = Date.parse(date.data);
+
+    if (dataParsed) {
+      if (countSep == 2) {
+        date.checked = dataParsed.toString("yyyy/MM/dd");
+      }
+      else {
+        date.valid = 'alert';
+        date.checked = date.data;
+        date.comment = colName + ' is incomplete, although valid';
+      }
+    }
+    else {
+      date.valid = 'danger';
+      date.checked = date.data;
+      date.comment = colName + ' not recognized';
+    }
+    
+    row[cols_date] = date.checked;
+    return {valid: date.valid, comment: date.comment};
+
+  }
+
+  // INIT
   var init = function() {
       self.dictionary = _dictionary = hr_dictionary;
       self.organizations = _organizations = hr_organizations;
@@ -262,15 +296,26 @@ console.log(row);
           Status.comment = 'Status not recognized';
         }
       }
+
       row[cols.Status] = Status.checked;
       validation[cols.Status] = {valid: Status.valid, comment: Status.comment};
+    }
+
+    // Date
+    if (cols.DateStart >= 0 && row[cols.DateStart]) {
+      validation[cols.DateStart] = validateDate(row, cols.DateStart, 'Start date');
+    }
+    if (cols.DateEnd >= 0 && row[cols.DateEnd]) {
+      validation[cols.DateEnd] = validateDate(row, cols.DateEnd, 'End date');
     }
 
     // Ok, let's check the row
     var valid = 'success';
     var comments = [];
     for (var j in validation) {
-      valid = ('danger' == validation[j].valid) ? 'danger' : valid;
+      if (valid != 'danger') {
+        valid = (validation[j].valid != 'success') ? validation[j].valid : valid;
+      }
       if (validation[j].comment) {
         comments.push(validation[j].comment);
       }
