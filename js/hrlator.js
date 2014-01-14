@@ -260,10 +260,10 @@ console.log(row);
     }
 
     // Primary Beneficiary
-    if (cols.PrimBen >= 0 && row[cols.PrimBen]) {
+    if (cols.PrimBen >= 0 && row[cols.PrimBen].toString().trim()) {
 
       var PrimBen = {
-        data: row[cols.PrimBen].trim(),
+        data: row[cols.PrimBen].toString().trim(),
         checked: '',
         valid: 'success',
         comment: ''
