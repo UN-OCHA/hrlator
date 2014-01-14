@@ -162,20 +162,34 @@ var hrlator = (function () {
        data: row[cols_date].trim().replace(/\W/g,'/'),
        checked: '',
        valid: 'success',
-       comment: '' 
+       comment: ''
     }
 
     var countSep = date.data.split('/').length - 1;
     var dataParsed = Date.parse(date.data);
 
     if (dataParsed) {
+      date.valid = 'alert';
+      // date is OK
       if (countSep == 2) {
         date.checked = dataParsed.toString("yyyy/MM/dd");
+        date.valid = 'success';
       }
+      // date in the form '15/nov' or 'dec 2014'
+      else if (countSep == 1) {
+        if (!dataParsed.config.day) {
+          date.checked = date.data;
+          date.comment = colName + ' is incomplete';
+        }
+        else {
+          date.checked = dataParsed.toString("yyyy/MM/dd");
+          date.comment = colName + ' valid date parsed from "' + date.data + '"';
+        }
+      }
+      // date in the form 'december'
       else {
-        date.valid = 'alert';
         date.checked = date.data;
-        date.comment = colName + ' is incomplete, although valid';
+        date.comment = colName + ' is incomplete';
       }
     }
     else {
@@ -183,7 +197,7 @@ var hrlator = (function () {
       date.checked = date.data;
       date.comment = colName + ' not recognized';
     }
-    
+
     row[cols_date] = date.checked;
     return {valid: date.valid, comment: date.comment};
 
@@ -302,10 +316,10 @@ console.log(row);
     }
 
     // Date
-    if (cols.DateStart >= 0 && row[cols.DateStart]) {
+    if (cols.DateStart >= 0 && row[cols.DateStart].trim()) {
       validation[cols.DateStart] = validateDate(row, cols.DateStart, 'Start date');
     }
-    if (cols.DateEnd >= 0 && row[cols.DateEnd]) {
+    if (cols.DateEnd >= 0 && row[cols.DateEnd].trim()) {
       validation[cols.DateEnd] = validateDate(row, cols.DateEnd, 'End date');
     }
 

@@ -150,7 +150,8 @@ Date.validateYear = function(n) {
     return Date._validate(n, 1, 9999, "seconds");
 };
 Date.prototype.set = function(config) {
-    var x = config;
+    this.config = config._src;
+    var x = Object.create(config);
     if (!x.millisecond && x.millisecond !== 0) {
         x.millisecond = -1;
     }
@@ -866,6 +867,7 @@ Date.prototype.getOrdinal = function() {
             if (this.now) {
                 return new Date();
             }
+            this._src = JSON.parse( JSON.stringify(this));
             var today = Date.today();
             var method = null;
             var expression = !!(this.days != null || this.orient || this.operator);
