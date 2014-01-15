@@ -368,7 +368,7 @@ $(document).ready(function () {
         var ht_data = shared.ht.getData().slice(0);
         ht_data.unshift(shared.data.colHeaders);
 
-        CSV.begin(ht_data).download("hrlator.csv").go();
+        CSV.begin(ht_data).download("hrlator-contacts.csv").go();
 
         return false;
       });
@@ -396,6 +396,20 @@ $(document).ready(function () {
     call( function() {
       var d = new Date();
       console.log( "Run time: " + (d.getTime() - t));
+    }).
+
+    // enable download
+    call( function() {
+      var shared = this;
+      $('#hrlator-download-csv').unbind().on('click', function(e) {
+        e.preventDefault();
+        var ht_data = shared.ht.getData().slice(0);
+        ht_data.unshift(shared.data.colHeaders);
+
+        CSV.begin(ht_data).download("hrlator-activities.csv").go();
+
+        return false;
+      });
     }).
     go();
 
