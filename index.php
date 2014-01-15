@@ -205,6 +205,7 @@ error_log("template: ". $template['template']);
     $dictionary = new HRLatorDictionary();
     $rows = $dictionary->findAll();
     $parameters['rows'] = $rows;
+    $parameters['dictionary'] = json_encode($rows);
   }
   elseif ($template['template'] == 'home' || $template['template'] == 'contacts' || $template['template'] == 'activities') {
     // data should be asynced!
