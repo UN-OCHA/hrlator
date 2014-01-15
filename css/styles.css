@@ -5,6 +5,11 @@
   margin-bottom: 1em;
 }
 
+/* Dropdown settings */
+.navbar-nav div.dropdown-menu {
+  width: 250px;
+}
+
 /* Bootstrap colors */
 #hottable.handsontable tr.hrlator-success td {
   background-color: #dff0d8;

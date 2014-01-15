@@ -30,6 +30,11 @@ var hrlator = (function () {
   }
 
   // internal variables harcoded
+  var _servers = {
+    'PH': {'siteUrl': 'http://philippines.humanitarianresponse.info'},
+    'SS': {'siteUrl': 'http://southsudan.humanitarianresponse.info'}
+  };
+
   var _siteUrl = 'https://philippines.humanitarianresponse.info';
   var _contactUri = '/operational-presence/xml?search_api_views_fulltext';
   var _countryCode = 'PH';
@@ -552,6 +557,7 @@ console.log(row);
     ht: ht,
     data: [],
     siteUrl: _siteUrl,
+    servers: _servers,
     contactUri: _contactUri,
     countryCode: _countryCode,
     dictionary: [],
@@ -561,5 +567,28 @@ console.log(row);
   return self;
 
 })();
+
+$(document).ready(function () {
+
+  if (jQuery.cookie('hrlator-server')) {
+    $('#settings-server select').val(jQuery.cookie('hrlator-server'));
+  }
+
+  $('#settings-server select').change(function() {
+    var cc = $(this).val();
+    if (hrlator.servers[cc]) {
+      hrlator.countryCode = cc;
+      hrlator.siteUrl = hrlator.servers[cc];
+      $.cookie('hrlator-server', hrlator.countryCode);
+    }
+    console.log(this);
+//hlator
+
+    alert($(this).val());
+  });
+//  var _siteUrl = 'https://philippines.humanitarianresponse.info';
+//  var _contactUri = '/operational-presence/xml?search_api_views_fulltext';
+//  var _countryCode = 'PH';
+});
 
 

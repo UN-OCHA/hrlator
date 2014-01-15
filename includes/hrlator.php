@@ -31,8 +31,25 @@ abstract class HRLator {
   public $organizations = array();
   public $clusters = array();
   public $site_url = "https://philippines.humanitarianresponse.info/";
-  
+  protected $country = 'PH';
+  protected $servers = array(
+    'PH' => array('site_url' => 'http://philippines.humanitarianresponse.info'),
+    'SS' => array('site_url' => 'http://southsudan.humanitarianresponse.info')
+  );
+
   public function __construct() {
+
+    if (isset($_COOKIE['hrlator-server'])) {
+      $country = $_COOKIE['hrlator-server'];
+error_log("cookie " . $_COOKIE['hrlator-server']);
+    }
+    else {
+      reset($this->servers);
+      $country = key($this->servers);
+      $_COOKIE['hrlator-server'] = $country;
+    }
+    $this->set_country($country);
+
     $this->dictionary = new HRLatorDictionary();
   }
   
@@ -40,7 +57,21 @@ abstract class HRLator {
     return $this->dictionary->find($type, $initial);
   }
 
+  public function set_country($country) {
+error_log("function set_country($country)");
+    if ($country && isset($this->servers[$country])) {
+      $this->site_url = $this->servers[$country]['site_url'] . '/';
+      setcookie('hrlator-server', $country, time() + (86400* 7));
+      $this->country = $country;
+    }
+    else {
+      $country = $this->country;
+    }
+    return $this->servers[$country];
+  }
+
   public function load_data($file, $fields) {
+error_log("load_data: $file");
     $xml = simplexml_load_file($file);
     $final_data = array();
     foreach ($xml->taxonomy_term_data as $data) {
@@ -181,7 +212,7 @@ abstract class HRLator {
     foreach ($phones as &$tphone) {
       $tphone = trim($tphone);
       try {
-          $number = $phoneUtil->parse($tphone, "PH");
+          $number = $phoneUtil->parse($tphone, $this->country);
           $isValid = $phoneUtil->isValidNumber($number);
           if ($isValid) {
             $tphone = $phoneUtil->format($number, \libphonenumber\PhoneNumberFormat::E164);

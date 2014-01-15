@@ -52,7 +52,20 @@ $twig->addFunction('get_class', new Twig_Function_Function('get_class'));
 if (isset($_GET['api'])) {
   switch ($_GET['api']) {
 
-    case 'load':
+   case 'country':
+      if (isset($_GET['set'])) {
+        $country = $_GET['set'];
+      }
+      else {
+        $country = "";
+      }
+      $hrlator = new HRLatorContacts();
+      $out['url'] = $hrlator->set_country($country);
+      //$out['url'] = ($country = $_GET['set']) ? $hrlator->set_country($country) : $hrlator->set_country();
+      $out['country'] = $country;
+      break;
+
+   case 'load':
       // available uri: organizations, clusters
       $fields = array(
         'organizations' =>  array('Name', 'Acronym'),
