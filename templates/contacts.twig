@@ -1,16 +1,42 @@
 {% extends '_page.twig' %}
 {% block title %}HRLator{% endblock %}
 {% block content %}
-    <h1>HRLator Contacts</h1>
+    <h1>HRLator Home</h1>
     <form class="form-horizontal" enctype="multipart/form-data" method="post" action="">
-        <div class="form-group">
-            <label for="csvfile" class="col-sm-3 control-label">CSV File</label>
 
-            <div class="col-sm-5">
-                <input type="file" class="form-control" id="csvfile" name='csvfile' required="required" accept="text/csv" />
+        <div class="form-group" id="hrlator-control">
+          <label for="csvfile" class="col-sm-3 control-label">CSV File</label>
+          <div class="col-sm-5">
+            <input type="file" class="form-control" id="csvContacts" name='csvContacts' required="required" accept="text/csv" />
+            <div id="hrlator-status" class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%">
+              <span class="srz-only"></span>
+            </div>
+          </div>
+        </div>
+
+          <div class="row">
+            <div class="col-sm-12">
+              <div id="hottable"></div>
+            </div>
+          </div>
+        <div class="form-group">
+            <div class="col-lg-offset-3 col-sm-8">
+                <button id="hrlator-download-csv" class="hrlator-button btn btn-default">Download CSV</button>
+<!--
+                <button type="submit" class="btn btn-default">Submit</button>
+                <button id="contacts-upload" class="btn btn-default">Upload</button>
+-->
             </div>
         </div>
-        <!--<div class="form-group">
+
+<script>
+  var hr_organizations = {{ organizations | raw }};
+  var hr_clusters = {{ clusters | raw }};
+  var hr_dictionary = {{ dictionary | raw }};
+</script>
+
+ <!--
+        <div class="form-group">
             <label for="country" class="col-sm-3 control-label">Default Country</label>
 
             <div class="col-sm-3">
@@ -36,11 +62,13 @@
                         tag</a> (defaults to en)</span>
             </div>
 
-        </div>-->
+        </div>
         <div class="form-group">
             <div class="col-lg-offset-3 col-sm-8">
                 <button type="submit" class="btn btn-default">Submit</button>
+                <button id="contacts-upload" class="btn btn-default">Upload</button>
             </div>
         </div>
+-->
     </form>
 {% endblock %}
