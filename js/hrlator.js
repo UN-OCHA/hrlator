@@ -24,6 +24,11 @@ var hrlator = (function () {
     }
   };
 
+  var showStatus = function(txtStatus, width) {
+    $('#hrlator-status span').text(txtStatus);
+    $('#hrlator-status').width(width + '%').attr('aria-valuenow', width);
+  }
+
   // internal variables harcoded
   var _siteUrl = 'https://philippines.humanitarianresponse.info';
   var _contactUri = '/operational-presence/xml?search_api_views_fulltext';
@@ -531,6 +536,8 @@ console.log(row);
   var self = {
     // expose functions
     init: init,
+    status: showStatus,
+
     validateContactsRow: validateContactsRow,
     afterChangeContacts: afterChangeContacts,
     afterSelectionEndContacts: afterSelectionEndContacts,

@@ -29,9 +29,12 @@ function validateContacts() {
       hrlator.validateContactsRow(row);
     }
     shared.rowToValidate++;
-    window.setTimeout((function(caller) { return function() { caller.validate(); } })(shared), 50);
+    hrlator.status('Validating ' + shared.rowToValidate + '/' + rows.length, Math.round(shared.rowToValidate * 100 /rows.length));
+    window.setTimeout((function(caller) { return function() { caller.validate(); } })(shared), 100);
   }
   else {
+    hrlator.status('', 0);
+    shared.ht.render();
     return shared.nextTask();
   }
 }
@@ -51,9 +54,12 @@ function validateActivities() {
       hrlator.validateActivitiesRow(row);
     }
     shared.rowToValidate++;
+    hrlator.status('Validating ' + shared.rowToValidate + '/' + rows.length, (shared.rowToValidate * 100 /rows.length));
     window.setTimeout((function(caller) { return function() { caller.validate(); } })(shared), 50);
   }
   else {
+    hrlator.status('', 0);
+    shared.ht.render();
     return shared.nextTask();
   }
 }
@@ -93,6 +99,17 @@ var extension = {
         comments:     shared.data.rows[0].indexOf('comments')
       }
     }
+
+    // cleanup first row
+    var row = shared.data.rows[0];
+    var i, l;
+    for(i=0; i < row.length; i++) {
+      row[i] = row[i].trim();
+    }
+
+    // remove empty rows
+    shared.data.rows = shared.data.rows.filter( function(row, i) {
+      return (row.join("").trim()) ? row : null; } );
 
     // get data columns
     shared.data.cols = getDataCols();
@@ -176,9 +193,14 @@ var extension = {
 
     // cleanup first row
     var row = shared.data.rows[0];
+    var i, l;
     for(i=0; i < row.length; i++) {
       row[i] = row[i].trim();
     }
+
+    // remove empty rows
+    shared.data.rows = shared.data.rows.filter( function(row, i) {
+      return (row.join("").trim()) ? row : null; } );
 
     // get data columns
     shared.data.cols = getDataCols();
@@ -215,6 +237,8 @@ var extension = {
       headers: shared.data.rows[0]
     }
 
+    hrlator.status('', 0);
+
     // set validation function
     shared.validate = validateActivities;
 
@@ -224,6 +248,7 @@ var extension = {
   // validate data
   'validateContacts': function() {
     var shared = this; // pick up shared object from this, will be set internally by func.apply
+    hrlator.status('Validating', 0);
     // hic sunt leones
     shared.rowToValidate = 1;
     shared.validate();
@@ -232,6 +257,7 @@ var extension = {
   // validate data
   'validateActivities': function() {
     var shared = this; // pick up shared object from this, will be set internally by func.apply
+    hrlator.status('Validating', 0);
     // hic sunt leones
     shared.rowToValidate = 1;
     shared.validate();
@@ -281,7 +307,9 @@ var extension = {
       afterSelectionEnd: afterSelectionEnd,
       afterChange: afterChange,
     });
+
     hrlator.ht = shared.ht = $('div#hottable').handsontable('getInstance');
+    hrlator.status('', 0);
 
     return shared.nextTask();
   }
@@ -330,7 +358,7 @@ $(document).ready(function () {
     }).
 
     // edit data
-    handsontable('contacts').
+//    handsontable('contacts').
 
     // enable download
     call( function() {
