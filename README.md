@@ -21,5 +21,5 @@ libphonenumber - http://code.google.com/p/libphonenumber
 html5csv - https://github.com/DrPaulBrewer/html5csv
 datajs - http://www.datejs.com
   debug version from http://code.google.com/p/datejs/
-
+  [98cd4af] patched in return values
 
