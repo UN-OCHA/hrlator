@@ -439,7 +439,7 @@ console.log(row);
       // cleanup numbers and split
       // phones = phones.replace(/[,\/]/g,';').replace(/-/g,' ').replace(/[^0-9+(); ]/, '');
       phones = {
-        data: row[cols.phone].
+        data: row[cols.phone].toString().
           replace(/[,\/]/g,';').replace(/-/g,' ').replace(/[^0-9+(); ]/, '').
           split(";"),
         checked: [],
