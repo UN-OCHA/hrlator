@@ -240,30 +240,6 @@ var hrlator = (function () {
     }
   };
 
-  // activities row validation after editing
-  var _validateActivitiesAfterEdit = function () {
-    row = self.data.rows[_ht_rowLastEdited];
-    validateActivitiesRow(row);
-    hrlator.ht.render();
-  }
-
-  var afterSelectionEndActivities = function (r, c, r2, c2) {
-    if (_ht_rowLastEdited && !_ht_validated && r != _ht_rowLastEdited) {
-      self.data.rows[_ht_rowLastEdited][self.data.cols.valid] = 'validating';
-      self.ht.render();
-      window.setTimeout(_validateActivitiesAfterEdit(), 100);
-    }
-  }
-
-  var afterChangeActivities = function(change, source) {
-    if ('edit'==source) {
-      _ht_rowLastEdited = change[0][0];
-      self.data.rows[_ht_rowLastEdited][self.data.cols.valid] = 'edited';
-      self.ht.render();
-      _ht_validated = false;
-    }
-  };
-
   // HRLator Activities row validation
   var validateActivitiesRow = function(row) {
 
@@ -371,30 +347,6 @@ var hrlator = (function () {
 
     return valid;
   }
-
-  // contact row validation after editing
-  var _validateContactsAfterEdit = function () {
-    row = self.data.rows[_ht_rowLastEdited];
-    validateContactsRow(row);
-    hrlator.ht.render();
-  }
-
-  var afterSelectionEndContacts = function (r, c, r2, c2) {
-    if (_ht_rowLastEdited && !_ht_validated && r != _ht_rowLastEdited) {
-      self.data.rows[_ht_rowLastEdited][self.data.cols.valid] = 'validating';
-      self.ht.render();
-      window.setTimeout(_validateContactsAfterEdit(), 100);
-    }
-  }
-
-  var afterChangeContacts = function(change, source) {
-    if ('edit'==source) {
-      _ht_rowLastEdited = change[0][0];
-      self.data.rows[_ht_rowLastEdited][self.data.cols.valid] = 'edited';
-      self.ht.render();
-      _ht_validated = false;
-    }
-  };
 
   // HRLator contacts row validation
   var validateContactsRow = function(row) {
@@ -563,19 +515,17 @@ var hrlator = (function () {
     init: init,
     status: showStatus,
 
+    // Contacts
     validateContactsRow: validateContactsRow,
-    afterChangeContacts: afterChangeContacts,
-    afterSelectionEndContacts: afterSelectionEndContacts,
     htContactsRenderer: htContactsRenderer,
 
+    // Activities
     validateActivitiesRow: validateActivitiesRow,
-    afterChangeActivities: afterChangeActivities,
-    afterSelectionEndActivities: afterSelectionEndActivities,
+    htActivitieRenderer: htContactsRenderer,
 
+    // handsontable live validation
     afterChange: afterChange,
     afterSelectionEnd: afterSelectionEnd,
-
-    htActivitieRenderer: htContactsRenderer,
 
     // expose data
     ht: ht,
