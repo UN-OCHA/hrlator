@@ -12,10 +12,10 @@ var hrlator = (function () {
     var highlightedRow = null;
 
     return {
-      getRenderFunction: function(dangerCol) {
+      getRenderFunction: function() {
         return function(instance, td, row, col, prop, value, cellProperties) {
           Handsontable.TextRenderer.apply(this, arguments);
-          tdcheck = instance.getDataAtCell(row, dangerCol);
+          tdcheck = instance.getDataAtCell(row, self.data.cols.valid);
           // add class to parent
           $(td).parent().removeClass().addClass("hrlator-" + tdcheck);
           return td;
@@ -216,16 +216,40 @@ var hrlator = (function () {
       self.clusters = _clusters = hr_clusters;
   };
 
+  // Handsontable row validation (after user leave the edited row)
+  var _validateAfterEdit = function () {
+    row = self.data.rows[_ht_rowLastEdited];
+    self.data.validateRow(row);
+    self.ht.render();
+  }
+
+  var afterSelectionEnd = function (r, c, r2, c2) {
+    if (_ht_rowLastEdited && !_ht_validated && r != _ht_rowLastEdited) {
+      self.data.rows[_ht_rowLastEdited][self.data.cols.valid] = 'validating';
+      self.ht.render();
+      window.setTimeout(_validateAfterEdit(), 100);
+    }
+  }
+
+  var afterChange = function(change, source) {
+    if ('edit'==source) {
+      _ht_rowLastEdited = change[0][0];
+      self.data.rows[_ht_rowLastEdited][self.data.cols.valid] = 'edited';
+      self.ht.render();
+      _ht_validated = false;
+    }
+  };
+
   // activities row validation after editing
   var _validateActivitiesAfterEdit = function () {
-    row = self.activities.rows[_ht_rowLastEdited];
+    row = self.data.rows[_ht_rowLastEdited];
     validateActivitiesRow(row);
     hrlator.ht.render();
   }
 
   var afterSelectionEndActivities = function (r, c, r2, c2) {
     if (_ht_rowLastEdited && !_ht_validated && r != _ht_rowLastEdited) {
-      self.activities.rows[_ht_rowLastEdited][self.activities.cols.valid] = 'validating';
+      self.data.rows[_ht_rowLastEdited][self.data.cols.valid] = 'validating';
       self.ht.render();
       window.setTimeout(_validateActivitiesAfterEdit(), 100);
     }
@@ -234,7 +258,7 @@ var hrlator = (function () {
   var afterChangeActivities = function(change, source) {
     if ('edit'==source) {
       _ht_rowLastEdited = change[0][0];
-      self.activities.rows[_ht_rowLastEdited][self.activities.cols.valid] = 'edited';
+      self.data.rows[_ht_rowLastEdited][self.data.cols.valid] = 'edited';
       self.ht.render();
       _ht_validated = false;
     }
@@ -243,14 +267,14 @@ var hrlator = (function () {
   // HRLator Activities row validation
   var validateActivitiesRow = function(row) {
 
+    var cols = self.data.cols;
+//console.log(row);
+
     // check empty row
     if (row.join('').length ===0) {
       row[cols.comments] = 'empty';
       return;
     }
-
-    var cols = self.activities.cols;
-console.log(row);
 
     // clear validation
     validation = [];
@@ -350,14 +374,14 @@ console.log(row);
 
   // contact row validation after editing
   var _validateContactsAfterEdit = function () {
-    row = self.contacts.rows[_ht_rowLastEdited];
+    row = self.data.rows[_ht_rowLastEdited];
     validateContactsRow(row);
     hrlator.ht.render();
   }
 
   var afterSelectionEndContacts = function (r, c, r2, c2) {
     if (_ht_rowLastEdited && !_ht_validated && r != _ht_rowLastEdited) {
-      self.contacts.rows[_ht_rowLastEdited][self.contacts.cols.valid] = 'validating';
+      self.data.rows[_ht_rowLastEdited][self.data.cols.valid] = 'validating';
       self.ht.render();
       window.setTimeout(_validateContactsAfterEdit(), 100);
     }
@@ -366,7 +390,7 @@ console.log(row);
   var afterChangeContacts = function(change, source) {
     if ('edit'==source) {
       _ht_rowLastEdited = change[0][0];
-      self.contacts.rows[_ht_rowLastEdited][self.contacts.cols.valid] = 'edited';
+      self.data.rows[_ht_rowLastEdited][self.data.cols.valid] = 'edited';
       self.ht.render();
       _ht_validated = false;
     }
@@ -375,14 +399,14 @@ console.log(row);
   // HRLator contacts row validation
   var validateContactsRow = function(row) {
 
+    var cols = self.data.cols;
+//console.log(row);
+
     // check empty row
     if (row.join('').length ===0) {
       row[cols.comments] = 'empty';
       return;
     }
-
-    var cols = self.contacts.cols;
-console.log(row);
 
     // clear validation
     validation = [];
@@ -547,6 +571,10 @@ console.log(row);
     validateActivitiesRow: validateActivitiesRow,
     afterChangeActivities: afterChangeActivities,
     afterSelectionEndActivities: afterSelectionEndActivities,
+
+    afterChange: afterChange,
+    afterSelectionEnd: afterSelectionEnd,
+
     htActivitieRenderer: htContactsRenderer,
 
     // expose data
