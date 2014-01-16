@@ -275,8 +275,8 @@ var extension = {
       var colHeaders = shared.data.colHeaders;
       var colDanger = shared.data.cols.valid;
 
-      var afterSelectionEnd = function () {}; //hrlator.afterSelectionEndContacts;
-      var afterChange = function () {}; //hrlator.afterChangeContacts;
+      var afterSelectionEnd = hrlator.afterSelectionEndActivities;
+      var afterChange = hrlator.afterChangeActivities;
 
     }
     else {

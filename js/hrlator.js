@@ -24,6 +24,7 @@ var hrlator = (function () {
     }
   };
 
+  // status function
   var showStatus = function(txtStatus, width) {
     $('#hrlator-status span').text(txtStatus);
     $('#hrlator-status').width(width + '%').attr('aria-valuenow', width);
@@ -217,14 +218,14 @@ var hrlator = (function () {
 
   // activities row validation after editing
   var _validateActivitiesAfterEdit = function () {
-    row = self.contacts.rows[_ht_rowLastEdited];
+    row = self.activities.rows[_ht_rowLastEdited];
     validateActivitiesRow(row);
     hrlator.ht.render();
   }
 
   var afterSelectionEndActivities = function (r, c, r2, c2) {
     if (_ht_rowLastEdited && !_ht_validated && r != _ht_rowLastEdited) {
-      self.activities.rows[_ht_rowLastEdited][self.contacts.cols.valid] = 'validating';
+      self.activities.rows[_ht_rowLastEdited][self.activities.cols.valid] = 'validating';
       self.ht.render();
       window.setTimeout(_validateActivitiesAfterEdit(), 100);
     }
@@ -233,7 +234,7 @@ var hrlator = (function () {
   var afterChangeActivities = function(change, source) {
     if ('edit'==source) {
       _ht_rowLastEdited = change[0][0];
-      self.activites.rows[_ht_rowLastEdited][self.contacts.cols.valid] = 'edited';
+      self.activities.rows[_ht_rowLastEdited][self.activities.cols.valid] = 'edited';
       self.ht.render();
       _ht_validated = false;
     }
