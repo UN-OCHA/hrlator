@@ -211,9 +211,18 @@ var hrlator = (function () {
 
   // INIT
   var init = function() {
-      self.dictionary = _dictionary = hr_dictionary;
-      self.organizations = _organizations = hr_organizations;
-      self.clusters = _clusters = hr_clusters;
+    self.dictionary = _dictionary = hr_dictionary;
+    self.organizations = _organizations = hr_organizations;
+    self.clusters = _clusters = hr_clusters;
+
+    // get dictionary from server
+    $.ajax({
+    //  url: 'http://hrlator.humanitarianresponse.info/index.php',
+      data: {'api': 'dictionary'},
+      success: function(result) {
+        self.dictionary = _dictionary;
+      },
+    });
   };
 
   // Handsontable row validation (after user leave the edited row)
