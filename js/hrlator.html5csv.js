@@ -24,9 +24,9 @@ function validateContacts() {
   if (rowToValidate < rows.length) {
     row = rows[rowToValidate];
     if (row.join('').length > 0) {
-      row[hrlator.contacts.cols.valid] = 'validating';
+      row[hrlator.data.cols.valid] = 'validating';
       shared.ht.render();
-      hrlator.validateContactsRow(row);
+      hrlator.data.validateRow(row);
     }
     shared.rowToValidate++;
     hrlator.status('Validating ' + shared.rowToValidate + '/' + rows.length, Math.round(shared.rowToValidate * 100 /rows.length));
@@ -49,9 +49,9 @@ function validateActivities() {
   if (rowToValidate < rows.length) {
     row = rows[rowToValidate];
     if (row.join('').length > 0) {
-      row[hrlator.activities.cols.valid] = 'validating';
+      row[hrlator.data.cols.valid] = 'validating';
       shared.ht.render();
-      hrlator.validateActivitiesRow(row);
+      hrlator.data.validateRow(row);
     }
     shared.rowToValidate++;
     hrlator.status('Validating ' + shared.rowToValidate + '/' + rows.length, (shared.rowToValidate * 100 /rows.length));
@@ -157,10 +157,12 @@ var extension = {
     // push data in hrlator
     var data = shared.data.rows.slice(0);
     data.shift();
-    hrlator.contacts = {
+    hrlator.data = {
+      type: 'contacs',
       rows: data,
       cols: shared.data.cols,
-      headers: shared.data.rows[0]
+      headers: shared.data.rows[0],
+      validateRow: hrlator.validateContactsRow
     }
 
     // set validation function
@@ -231,10 +233,12 @@ var extension = {
     // push data in hrlator
     var data = shared.data.rows.slice(0);
     data.shift();
-    hrlator.activities = {
+    hrlator.data = {
+      type: 'activities',
       rows: data,
       cols: shared.data.cols,
-      headers: shared.data.rows[0]
+      headers: shared.data.rows[0],
+      validateRow: hrlator.validateActivitiesRow
     }
 
     hrlator.status('', 0);
@@ -268,33 +272,20 @@ var extension = {
 
     var shared = this; // pick up shared object from this, will be set internally by func.apply
 
+    var data = hrlator.data.rows;
+    var rowRenderer = new hrlator.htContactsRenderer();
+    var colHeaders = shared.data.colHeaders;
+
     if ('activities' == template) {
-      var data = hrlator.activities.rows;
-
-      var rowRenderer = new hrlator.htContactsRenderer();
-      var colHeaders = shared.data.colHeaders;
-      var colDanger = shared.data.cols.valid;
-
-      var afterSelectionEnd = hrlator.afterSelectionEndActivities;
-      var afterChange = hrlator.afterChangeActivities;
-
     }
     else {
-      var data = hrlator.contacts.rows;
-
-      var rowRenderer = new hrlator.htContactsRenderer();
-      var colHeaders = shared.data.colHeaders;
-      var colDanger = shared.data.cols.valid;
-
-      var afterSelectionEnd = hrlator.afterSelectionEndContacts;
-      var afterChange = hrlator.afterChangeContacts;
     }
 
     $('div#hottable').handsontable({
       data: data,
       cells: function (row, col, prop) {
         var cellProperties = {};
-        cellProperties.renderer = rowRenderer.getRenderFunction(colDanger);
+        cellProperties.renderer = rowRenderer.getRenderFunction();
         return cellProperties;
       },
       minSpareRows: 1,
@@ -304,8 +295,8 @@ var extension = {
       contextMenu: true,
       persistantState: true,
       manualColumnResize: true,
-      afterSelectionEnd: afterSelectionEnd,
-      afterChange: afterChange,
+      afterSelectionEnd: hrlator.afterSelectionEnd, //afterSelectionEnd,
+      afterChange: hrlator.afterChange
     });
 
     hrlator.ht = shared.ht = $('div#hottable').handsontable('getInstance');
