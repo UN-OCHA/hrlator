@@ -15,11 +15,12 @@ SQLite3 needs a writable file, chown or chmod the directory so that
 either the database file and the parent directory are writeable by Apache
 
 # JS Libraries
-Handsontable - http://handsontable.com/demo/ajax.html
-libphonenumber - http://code.google.com/p/libphonenumber
+* Handsontable - http://handsontable.com/demo/ajax.html
+* libphonenumber - http://code.google.com/p/libphonenumber
   Compiled http://stackoverflow.com/questions/18678031/how-to-host-the-google-libphonenumber-locally
-html5csv - https://github.com/DrPaulBrewer/html5csv
-datajs - http://www.datejs.com
+* html5csv - https://github.com/DrPaulBrewer/html5csv
+* datajs - http://www.datejs.com
   debug version from http://code.google.com/p/datejs/
   [98cd4af] patched in return values
 
+* jquery cookies - https://github.com/carhartl/jquery-cookie
