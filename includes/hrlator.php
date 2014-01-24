@@ -40,7 +40,6 @@ abstract class HRLator {
   public function __construct() {
 
     if (isset($_COOKIE['hrlator-server']) && array_key_exists($_COOKIE['hrlator-server'], $this->servers)) {
-error_log("cookie " . $_COOKIE['hrlator-server']);
       $country = $_COOKIE['hrlator-server'];
     }
     else {
@@ -48,7 +47,6 @@ error_log("cookie " . $_COOKIE['hrlator-server']);
       $country = key($this->servers);
       $_COOKIE['hrlator-server'] = $country;
     }
-error_log("country: $country");
     $this->set_country($country);
 
     $this->dictionary = new HRLatorDictionary();

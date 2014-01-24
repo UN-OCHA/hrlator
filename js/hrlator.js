@@ -24,16 +24,10 @@ var hrlator = (function () {
     }
   };
 
-  // status function
-  var showStatus = function(txtStatus, width) {
-    $('#hrlator-status span').text(txtStatus);
-    $('#hrlator-status').width(width + '%').attr('aria-valuenow', width);
-  }
-
   // internal variables harcoded
   var _servers = {
     'PH': {'siteUrl': 'http://philippines.humanitarianresponse.info'},
-    'SS': {'siteUrl': 'http://southsudan.humanitarianresponse.info'}
+//    'SS': {'siteUrl': 'http://southsudan.humanitarianresponse.info'}
   };
 
   var _siteUrl = 'https://philippines.humanitarianresponse.info';
@@ -62,6 +56,38 @@ var hrlator = (function () {
     'Food': 'FS',
     'EDU': 'E'
   };
+
+  // INIT hrlator object
+  // - set the country
+  // - load data
+  var init = function() {
+
+    // double check cookie (already done in server side indeed)
+    var country = jQuery.cookie('hrlator-server');
+    if (!_servers.country) {
+      for(var country_key in _servers) break;
+      country = country_key;
+    }
+
+    self.dictionary = _dictionary = hr_dictionary;
+    self.organizations = _organizations = hr_organizations;
+    self.clusters = _clusters = hr_clusters;
+
+    // get dictionary from server
+    $.ajax({
+    //  url: 'http://hrlator.humanitarianresponse.info/index.php',
+      data: {'api': 'dictionary'},
+      success: function(result) {
+        self.dictionary = _dictionary;
+      },
+    });
+  };
+
+  // status function
+  var showStatus = function(txtStatus, width) {
+    $('#hrlator-status span').text(txtStatus);
+    $('#hrlator-status').width(width + '%').attr('aria-valuenow', width);
+  }
 
   // validate cluster
   // 1 cluster_exists
@@ -213,22 +239,6 @@ var hrlator = (function () {
     return {valid: date.valid, comment: date.comment};
 
   }
-
-  // INIT
-  var init = function() {
-    self.dictionary = _dictionary = hr_dictionary;
-    self.organizations = _organizations = hr_organizations;
-    self.clusters = _clusters = hr_clusters;
-
-    // get dictionary from server
-    $.ajax({
-    //  url: 'http://hrlator.humanitarianresponse.info/index.php',
-      data: {'api': 'dictionary'},
-      success: function(result) {
-        self.dictionary = _dictionary;
-      },
-    });
-  };
 
   // Handsontable row validation (after user leave the edited row)
   var _validateAfterEdit = function () {
@@ -569,10 +579,7 @@ $(document).ready(function () {
       hrlator.siteUrl = hrlator.servers[cc];
       $.cookie('hrlator-server', hrlator.countryCode);
     }
-    console.log(this);
-//hlator
 
-    alert($(this).val());
   });
 //  var _siteUrl = 'https://philippines.humanitarianresponse.info';
 //  var _contactUri = '/operational-presence/xml?search_api_views_fulltext';
