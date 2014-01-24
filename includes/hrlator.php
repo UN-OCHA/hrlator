@@ -26,7 +26,7 @@ function csv_to_array($filename='', $delimiter=',')
 }
 
 abstract class HRLator {
-  
+
   protected $dictionary = NULL;
   public $organizations = array();
   public $clusters = array();
@@ -34,25 +34,26 @@ abstract class HRLator {
   protected $country = 'PH';
   protected $servers = array(
     'PH' => array('site_url' => 'http://philippines.humanitarianresponse.info'),
-    'SS' => array('site_url' => 'http://southsudan.humanitarianresponse.info')
+//    'SS' => array('site_url' => 'http://southsudan.humanitarianresponse.info')
   );
 
   public function __construct() {
 
-    if (isset($_COOKIE['hrlator-server'])) {
-      $country = $_COOKIE['hrlator-server'];
+    if (isset($_COOKIE['hrlator-server']) && array_key_exists($_COOKIE['hrlator-server'], $this->servers)) {
 error_log("cookie " . $_COOKIE['hrlator-server']);
+      $country = $_COOKIE['hrlator-server'];
     }
     else {
       reset($this->servers);
       $country = key($this->servers);
       $_COOKIE['hrlator-server'] = $country;
     }
+error_log("country: $country");
     $this->set_country($country);
 
     $this->dictionary = new HRLatorDictionary();
   }
-  
+
   public function consult_dictionary($type, $initial) {
     return $this->dictionary->find($type, $initial);
   }
