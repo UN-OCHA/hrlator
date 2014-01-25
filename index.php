@@ -222,11 +222,11 @@ error_log("template: ". $template['template']);
   }
   elseif ($template['template'] == 'home' || $template['template'] == 'contacts' || $template['template'] == 'activities') {
     // data should be asynced!
-    $data = new HRLatorContacts();
-    $parameters['organizations'] = json_encode($data->load_data($data->site_url.'organizations.xml', array('Name', 'Acronym')));
-    $parameters['clusters'] = json_encode($data->load_data($data->site_url.'clusters.xml', array('Name', 'Prefix')));
-    $dictionary = new HRLatorDictionary();
-    $parameters['dictionary'] = json_encode($dictionary->findAll());
+//    $data = new HRLatorContacts();
+//    $parameters['organizations'] = json_encode($data->load_data($data->site_url.'organizations.xml', array('Name', 'Acronym')));
+//    $parameters['clusters'] = json_encode($data->load_data($data->site_url.'clusters.xml', array('Name', 'Prefix')));
+//    $dictionary = new HRLatorDictionary();
+//    $parameters['dictionary'] = json_encode($dictionary->findAll());
   }
 
   echo $twig->render($template['template'].'.twig', $parameters);

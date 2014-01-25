@@ -26,12 +26,12 @@ var hrlator = (function () {
 
   // internal variables harcoded
   var _servers = {
-    'PH': {'siteUrl': 'http://philippines.humanitarianresponse.info'},
-//    'SS': {'siteUrl': 'http://southsudan.humanitarianresponse.info'}
+    'PH': {serverUrlBase: 'https://philippines.humanitarianresponse.info', countryCode: 'PH'},
+//    'SS': {'serverUrlBase': 'southsudan.humanitarianresponse.info'}
   };
 
-  var _siteUrl = 'https://philippines.humanitarianresponse.info';
-  var _contactUri = '/operational-presence/xml?search_api_views_fulltext';
+  var _serverUrlBase = 'philippines.humanitarianresponse.info';
+  var _contactPath = '/operational-presence/xml?search_api_views_fulltext';
   var _countryCode = 'PH';
 
   var phoneUtil = i18n.phonenumbers.PhoneNumberUtil.getInstance();
@@ -63,24 +63,58 @@ var hrlator = (function () {
   var init = function() {
 
     // double check cookie (already done in server side indeed)
-    var country = jQuery.cookie('hrlator-server');
-    if (!_servers.country) {
-      for(var country_key in _servers) break;
-      country = country_key;
+    var server = jQuery.cookie('hrlator-server');
+    if (!_servers.server) {
+      for(var _server in _servers) break;
+      server = _server;
     }
+    _serverUrlBase = _servers[server].serverUrlBase;
+    _countryCode = _servers[server].countryCode;
 
-    self.dictionary = _dictionary = hr_dictionary;
-    self.organizations = _organizations = hr_organizations;
-    self.clusters = _clusters = hr_clusters;
+    // self.dictionary = _dictionary = hr_dictionary;
+    // self.organizations = _organizations = hr_organizations;
+    // self.clusters = _clusters = hr_clusters;
 
-    // get dictionary from server
+    // TODO use premise/defer
+    // get dictionary from hrlator
     $.ajax({
     //  url: 'http://hrlator.humanitarianresponse.info/index.php',
       data: {'api': 'dictionary'},
       success: function(result) {
-        self.dictionary = _dictionary;
+        self.dictionary = result;
       },
     });
+
+    // get cluster from server
+    $.ajax({
+      url: _serverUrlBase + '/clusters.xml',
+      error: function() {
+        alert('hrlator init ERROR loading from ' + _serverUrlBase + '/clusters.xml');
+      },
+      success: function(result) {
+        // parse result with jQuery and extract relevant field
+        var _clusters = $('taxonomy_term_data', result).map(function () {
+          return {Name: $(this).find('Name').text(), Prefix: $(this).find('Prefix').text()};
+        }).get();
+        self.clusters = _clusters;
+      },
+    });
+
+    // get organizations from server
+    $.ajax({
+      url: _serverUrlBase + '/organizations.xml',
+      error: function() {
+        alert('hrlator init ERROR loading from ' + _serverUrlBase + '/organizations.xml');
+      },
+      success: function(result) {
+        // parse result with jQuery and extract relevant field
+        var _organizations = $('taxonomy_term_data', result).map(function () {
+          return {Name: $(this).find('Name').text(), Prefix: $(this).find('Acronym').text()};
+        }).get();
+        self.organizations = _organizations;
+      },
+    });
+
   };
 
   // status function
@@ -554,9 +588,9 @@ var hrlator = (function () {
     // expose data
     ht: ht,
     data: [],
-    siteUrl: _siteUrl,
+    serverUrlBase: _serverUrlBase,
     servers: _servers,
-    contactUri: _contactUri,
+    contactPath: _contactPath,
     countryCode: _countryCode,
     dictionary: [],
     organizations: [],
@@ -575,15 +609,12 @@ $(document).ready(function () {
   $('#settings-server select').change(function() {
     var cc = $(this).val();
     if (hrlator.servers[cc]) {
-      hrlator.countryCode = cc;
-      hrlator.siteUrl = hrlator.servers[cc];
-      $.cookie('hrlator-server', hrlator.countryCode);
+      hrlator.countryCode = hrlator.servers[cc].countryCode;
+      hrlator.serverUrlBase = hrlator.servers[cc].serverUrlBase;
+      $.cookie('hrlator-server', hrlator.cc);
     }
 
   });
-//  var _siteUrl = 'https://philippines.humanitarianresponse.info';
-//  var _contactUri = '/operational-presence/xml?search_api_views_fulltext';
-//  var _countryCode = 'PH';
-});
 
+});
 
