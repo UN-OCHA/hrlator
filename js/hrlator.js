@@ -574,7 +574,7 @@ var hrlator = (function () {
   var self = {
     // expose functions
     init: init,
-    status: showStatus,
+    showStatus: showStatus,
 
     // Contacts
     validateContactsRow: validateContactsRow,

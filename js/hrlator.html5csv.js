@@ -29,11 +29,11 @@ function validateContacts() {
       hrlator.data.validateRow(row);
     }
     shared.rowToValidate++;
-    hrlator.status('Validating ' + shared.rowToValidate + '/' + rows.length, Math.round(shared.rowToValidate * 100 /rows.length));
+    hrlator.showStatus('Validating ' + shared.rowToValidate + '/' + rows.length, Math.round(shared.rowToValidate * 100 /rows.length));
     window.setTimeout((function(caller) { return function() { caller.validate(); } })(shared), 100);
   }
   else {
-    hrlator.status('', 0);
+    hrlator.showStatus('', 0);
     shared.ht.render();
     return shared.nextTask();
   }
@@ -54,11 +54,11 @@ function validateActivities() {
       hrlator.data.validateRow(row);
     }
     shared.rowToValidate++;
-    hrlator.status('Validating ' + shared.rowToValidate + '/' + rows.length, (shared.rowToValidate * 100 /rows.length));
+    hrlator.showStatus('Validating ' + shared.rowToValidate + '/' + rows.length, (shared.rowToValidate * 100 /rows.length));
     window.setTimeout((function(caller) { return function() { caller.validate(); } })(shared), 50);
   }
   else {
-    hrlator.status('', 0);
+    hrlator.showStatus('', 0);
     shared.ht.render();
     return shared.nextTask();
   }
@@ -241,7 +241,7 @@ var extension = {
       validateRow: hrlator.validateActivitiesRow
     }
 
-    hrlator.status('', 0);
+    hrlator.showStatus('', 0);
 
     // set validation function
     shared.validate = validateActivities;
@@ -252,7 +252,7 @@ var extension = {
   // validate data
   'validateContacts': function() {
     var shared = this; // pick up shared object from this, will be set internally by func.apply
-    hrlator.status('Validating', 0);
+    hrlator.showStatus('Validating', 0);
     // hic sunt leones
     shared.rowToValidate = 1;
     shared.validate();
@@ -261,7 +261,7 @@ var extension = {
   // validate data
   'validateActivities': function() {
     var shared = this; // pick up shared object from this, will be set internally by func.apply
-    hrlator.status('Validating', 0);
+    hrlator.showStatus('Validating', 0);
     // hic sunt leones
     shared.rowToValidate = 1;
     shared.validate();
@@ -300,7 +300,7 @@ var extension = {
     });
 
     hrlator.ht = shared.ht = $('div#hottable').handsontable('getInstance');
-    hrlator.status('', 0);
+    hrlator.showStatus('', 0);
 
     return shared.nextTask();
   }
