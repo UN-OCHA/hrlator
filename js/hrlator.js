@@ -71,7 +71,7 @@ var hrlator = (function () {
     _serverUrlBase = _servers[server].serverUrlBase;
     _countryCode = _servers[server].countryCode;
 
-    // self.dictionary = _dictionary = hr_dictionary;
+    // self.dictionary = _dictionary = self.dictionary;
     // self.organizations = _organizations = hr_organizations;
     // self.clusters = _clusters = hr_clusters;
 
@@ -81,7 +81,7 @@ var hrlator = (function () {
     //  url: 'http://hrlator.humanitarianresponse.info/index.php',
       data: {'api': 'dictionary'},
       success: function(result) {
-        self.dictionary = result;
+        self.dictionary = JSON.parse(result);
       },
     });
 
@@ -135,23 +135,24 @@ var hrlator = (function () {
     }
     $.each(clusters.data, function(j, cluster) {
       cluster = cluster.trim();
-      $.each(hr_clusters, function(i, element) {
+      var i = 0;
+      while (element = self.clusters[i]) {
         // check the list
         if (element.Name === cluster) {
           clusters.checked[j] = element.Name;
-          return false
+          break;
         }
         // check the prefix
         else if (element.Prefix === cluster) {
           clusters.checked[j] = element.Name;
           clusters.comments[j] = 'Cluster ' + cluster + ' (prefix) replaced by ' + element.Name;
-          return false;
+          break;
         }
         // check prefix map
         else if (element.Prefix === prefix_map[cluster]) {
           clusters.checked[j] = element.Name;
           clusters.comments[j] = 'Cluster ' + cluster + ' (mapped to ' + prefix_map[cluster] + ') replaced by ' + element.Name;
-          return false;
+          break;
         }
         // check for similarities
         else if (element.Name.indexOf(cluster)>=0) {
@@ -159,8 +160,8 @@ var hrlator = (function () {
           clusters.comments[j] = 'Cluster ' + cluster + ' replaced by ' + element.Name;
           // keep looping because this could ba a false positive
         }
-
-      });
+        i++;
+      }
       if (!clusters.checked[j]) {
          clusters.checked[j] = cluster;
          clusters.valid = 'danger';
@@ -192,29 +193,31 @@ var hrlator = (function () {
     }
 
     // 1 consult dictionary
-    $.each(hr_dictionary, function(i, element) {
+    var i = 0;
+    while (element = self.dictionary[i]) {
       if ('organizations' == element.Type && organization.data === element.Initial) {
-         organization.checked = element.Replacement.toLowerCase();
-         organization.comment = 'Organization found in dictionary (' + organization.data + ')';
-         return false;
+        organization.checked = element.Replacement.toLowerCase();
+        organization.comment = 'Organization found in dictionary (' + organization.data + ')';
+        break;
       }
-    });
+      i++;
+    }
     if (!organization.checked) {
-      $.each(hr_organizations, function(i, element) {
-
+      i = 0;
+      while (element = self.organizations[i]) {
         // 2 organization_exists
         if (organization.data === element.Name) {
           organization.checked = element.Name;
-          return false;
+          break;
         }
-
         // 3 find_organization_by_acronym
         else if (organization.data === element.Acronym) {
           organization.checked = element.Name;
           organization.comment = 'Organization found by acronym (' + organization.data + ')';
-          return false;
+          break;
         }
-      });
+        i++;
+      }
     }
     if (!organization.checked) {
       organization.checked = organization.data;
@@ -336,7 +339,7 @@ var hrlator = (function () {
       PrimBen.checked = PrimBen.data;
 
       // 1 consult dictionary
-      $.each(hr_dictionary, function(i, element) {
+      $.each(self.dictionary, function(i, element) {
         if ('population_types' == element.Type && PrimBen.data === element.Initial) {
            PrimBen.checked = element.Replacement;
            PrimBen.comment = 'Primary Beneficiary found in dictionary (' + PrimBen.data + ')';
@@ -362,7 +365,7 @@ var hrlator = (function () {
         Status.checked = Status.data;
       }
       else {
-        $.each(hr_dictionary, function(i, element) {
+        $.each(self.dictionary, function(i, element) {
           if ('activity_status' == element.Type && Status.data === element.Initial.toLowerCase()) {
             Status.checked = element.Replacement;
             return false
