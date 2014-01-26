@@ -354,6 +354,14 @@ $(document).ready(function () {
     hrlator.ht = $('div#hottable').handsontable('getInstance');
     hrlator.showStatus('', 0);
 
+    $("#contacts-upload").attr( "disabled", true );
+    $("#contacts-new").attr( "disabled", true );
+    $("#contacts-download").attr( "disabled", false ).
+      on('click', function(e) {
+        var data = hrlator.data.rows.slice(0);
+        data.unshift(hrlator.data.headers);
+        CSV.begin(data).download("hrlator-contacts.csv").go();
+      });
   });
 
   // upload contacts
