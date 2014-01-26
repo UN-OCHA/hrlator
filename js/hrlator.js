@@ -5,7 +5,7 @@ var hrlator = (function () {
 
   // handsontable
   var ht;
-  var _ht_rowLastEdited = null;
+  var _ht_rowLastEdited = -1;
   var _ht_validated = false;
 
   var htContactsRenderer = function() {
@@ -42,6 +42,28 @@ var hrlator = (function () {
   var _organizations;
   var _clusters;
 
+  // contacts headers
+  var _contactHeaders = [
+    {column: 'cluster',      out: true,  header: 'Clusters'},
+    {column: 'salutation',   out: true,  header: 'Salutation'},
+    {column: 'firstName',    out: true,  header: 'First name'},
+    {column: 'lastName',     out: true,  header: 'Last name'},
+    {column: 'fullName',     out: false, header: 'Full name'},
+    {column: 'name',         out: false, header: 'Name'},
+    {column: 'email',        out: true,  header: 'Email'},
+    {column: 'phone',        out: true,  header: 'Telephones'},
+    {column: 'organization', out: true,  header: 'Organization'},
+    {column: 'orgType',      out: true,  header: 'Organization Type'},
+    {column: 'jobTitle',     out: true,  header: 'Job Title'},
+    {column: 'location',     out: true,  header: 'Location'},
+    {column: 'coordHub',     out: true,  header: 'Coordination Hub'},
+    {column: 'fundings',     out: true,  header: 'Fundings'},
+    {column: 'themes',       out: true,  header: 'Theme(s)'},
+    {column: 'emergencies',  out: true,  header: 'Emergencies'},
+    {column: 'valid',        out: true,  header: 'valid'},
+    {column: 'comments',     out: true,  header: 'comments'}
+  ];
+
   // default states
   var StatusDefaults = ['planned', 'ongoing', 'completed'];
 
@@ -70,10 +92,6 @@ var hrlator = (function () {
     }
     _serverUrlBase = _servers[server].serverUrlBase;
     _countryCode = _servers[server].countryCode;
-
-    // self.dictionary = _dictionary = self.dictionary;
-    // self.organizations = _organizations = hr_organizations;
-    // self.clusters = _clusters = hr_clusters;
 
     // TODO use premise/defer
     // get dictionary from hrlator
@@ -115,7 +133,26 @@ var hrlator = (function () {
       },
     });
 
-  };
+  }
+
+  // new data
+  var newData = function(txtType) {
+    if ('contacts' == txtType) {
+      self.data.type = 'contacs';
+      self.data.validateRow = hrlator.validateContactsRow;
+      self.contactHeaders.
+        filter(function(item) { return item.out }).
+        forEach(function(item, i) {
+          self.data.headers[i] = item.header;
+          self.data.cols[item.column] = i;
+          self.data.rows[0][i] = "";
+        });
+      return txtType;
+    }
+    else {
+      return "";
+    }
+  }
 
   // status function
   var showStatus = function(txtStatus, width) {
@@ -285,7 +322,7 @@ var hrlator = (function () {
   }
 
   var afterSelectionEnd = function (r, c, r2, c2) {
-    if (_ht_rowLastEdited && !_ht_validated && r != _ht_rowLastEdited) {
+    if ((_ht_rowLastEdited >= 0) && !_ht_validated && r != _ht_rowLastEdited) {
       self.data.rows[_ht_rowLastEdited][self.data.cols.valid] = 'validating';
       self.ht.render();
       window.setTimeout(_validateAfterEdit(), 100);
@@ -575,6 +612,7 @@ var hrlator = (function () {
     // expose functions
     init: init,
     showStatus: showStatus,
+    newData: newData,
 
     // Contacts
     validateContactsRow: validateContactsRow,
@@ -588,9 +626,16 @@ var hrlator = (function () {
     afterChange: afterChange,
     afterSelectionEnd: afterSelectionEnd,
 
-    // expose data
+    // expose and init data
     ht: ht,
-    data: [],
+    data: {
+      rows: [ [] ],
+      headers: [],
+      cols: {},
+      validateRow: ''
+    },
+
+    contactHeaders: _contactHeaders,
     serverUrlBase: _serverUrlBase,
     servers: _servers,
     contactPath: _contactPath,

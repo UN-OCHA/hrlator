@@ -28,8 +28,8 @@ function validateContacts() {
       shared.ht.render();
       hrlator.data.validateRow(row);
     }
-    shared.rowToValidate++;
     hrlator.showStatus('Validating ' + shared.rowToValidate + '/' + rows.length, Math.round(shared.rowToValidate * 100 /rows.length));
+    shared.rowToValidate++;
     window.setTimeout((function(caller) { return function() { caller.validate(); } })(shared), 100);
   }
   else {
@@ -53,8 +53,8 @@ function validateActivities() {
       shared.ht.render();
       hrlator.data.validateRow(row);
     }
-    shared.rowToValidate++;
     hrlator.showStatus('Validating ' + shared.rowToValidate + '/' + rows.length, (shared.rowToValidate * 100 /rows.length));
+    shared.rowToValidate++;
     window.setTimeout((function(caller) { return function() { caller.validate(); } })(shared), 50);
   }
   else {
@@ -324,9 +324,39 @@ $(document).ready(function () {
   hrlator.init();
 
   // Disable download button
-  $('#hrlator-download-csv').on('click', function(){ alert('Wait for validation to complete'); return false;});
+//  $('#hrlator-download-csv').on('click', function(){ alert('Wait for validation to complete'); return false;});
 
-  // contacts
+  // create contacts
+  $("#contacts-new").on('click', function(e) {
+
+    // setup data
+    hrlator.newData('contacts');
+    var rowRenderer = new hrlator.htContactsRenderer();
+
+    $('div#hottable').handsontable({
+      data: hrlator.data.rows,
+      cells: function (row, col, prop) {
+        var cellProperties = {};
+        cellProperties.renderer = rowRenderer.getRenderFunction();
+        return cellProperties;
+      },
+      minSpareRows: 1,
+      height: 600,
+      colHeaders: hrlator.data.headers,
+      rowHeaders: true,
+      contextMenu: true,
+      persistantState: true,
+      manualColumnResize: true,
+      afterSelectionEnd: hrlator.afterSelectionEnd, //afterSelectionEnd,
+      afterChange: hrlator.afterChange
+    });
+
+    hrlator.ht = $('div#hottable').handsontable('getInstance');
+    hrlator.showStatus('', 0);
+
+  });
+
+  // upload contacts
   var csvContacts = CSV.begin('#csvContacts').
 
     call( function() {
@@ -353,16 +383,14 @@ $(document).ready(function () {
 
     // enable download
     call( function() {
-      var shared = this;
-      $('#hrlator-download-csv').unbind().on('click', function(e) {
-        e.preventDefault();
-        var ht_data = shared.ht.getData().slice(0);
-        ht_data.unshift(shared.data.colHeaders);
-
-        CSV.begin(ht_data).download("hrlator-contacts.csv").go();
-
-        return false;
-      });
+      $("#contacts-upload").attr( "disabled", true );
+      $("#contacts-new").attr( "disabled", true );
+      $("#contacts-download").attr( "disabled", false ).
+        on('click', function(e) {
+          var data = hrlator.data.rows.slice(0);
+          data.unshift(hrlator.data.headers);
+          CSV.begin(data).download("hrlator-contacts.csv").go();
+        });
     }).
     go();
 
