@@ -221,6 +221,7 @@ error_log("template: ". $template['template']);
     $parameters['dictionary'] = json_encode($rows);
   }
   elseif ($template['template'] == 'home' || $template['template'] == 'contacts' || $template['template'] == 'activities') {
+    $parameters['hrType'] = $template['template'];
     // data should be asynced!
 //    $data = new HRLatorContacts();
 //    $parameters['organizations'] = json_encode($data->load_data($data->site_url.'organizations.xml', array('Name', 'Acronym')));

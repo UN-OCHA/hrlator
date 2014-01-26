@@ -93,6 +93,8 @@ var hrlator = (function () {
     _serverUrlBase = _servers[server].serverUrlBase;
     _countryCode = _servers[server].countryCode;
 
+    self.data.type = hrType;
+
     // TODO use premise/defer
     // get dictionary from hrlator
     $.ajax({

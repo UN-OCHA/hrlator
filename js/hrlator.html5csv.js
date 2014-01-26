@@ -326,6 +326,7 @@ $(document).ready(function () {
   // Disable download button
 //  $('#hrlator-download-csv').on('click', function(){ alert('Wait for validation to complete'); return false;});
 
+  if (
   // create contacts
   $("#contacts-new").on('click', function(e) {
 
