@@ -97,7 +97,7 @@ var hrlator = (function () {
 
     // TODO use premise/defer
     // get dictionary from hrlator
-    $.ajax({
+    var jqxhrDictionary = $.ajax({
     //  url: 'http://hrlator.humanitarianresponse.info/index.php',
       data: {'api': 'dictionary'},
       success: function(result) {
@@ -106,7 +106,7 @@ var hrlator = (function () {
     });
 
     // get cluster from server
-    $.ajax({
+    var jqxhrClusters = $.ajax({
       url: _serverUrlBase + '/clusters.xml',
       error: function() {
         alert('hrlator init ERROR loading from ' + _serverUrlBase + '/clusters.xml');
@@ -121,7 +121,7 @@ var hrlator = (function () {
     });
 
     // get organizations from server
-    $.ajax({
+    var jqxhrOrganizations = $.ajax({
       url: _serverUrlBase + '/organizations.xml',
       error: function() {
         alert('hrlator init ERROR loading from ' + _serverUrlBase + '/organizations.xml');
@@ -135,12 +135,27 @@ var hrlator = (function () {
       },
     });
 
+    $.when(jqxhrDictionary, jqxhrClusters, jqxhrOrganizations).done(function (jqxhrDictionary, jqxhrClusters, jqxhrOrganizations) {
+      self.autoComplete.organization = self.organizations.
+        map(function (element) { return element.Name } ).
+        concat( self.dictionary.
+          filter( function(element) { return (element.Type=='organizations'); }).
+          map(function (element) { return element.Initial }));
+
+      self.autoComplete.cluster = self.clusters.
+        map(function (element) { return element.Name } ).
+        concat( self.clusters.
+          map(function (element) { return element.Prefix }));
+
+    });
+
   }
 
   // new data
   var newData = function(txtType) {
     if ('contacts' == txtType) {
       self.data.type = 'contacs';
+      self.data.columns = [];
       self.data.validateRow = hrlator.validateContactsRow;
       self.contactHeaders.
         filter(function(item) { return item.out }).
@@ -148,6 +163,12 @@ var hrlator = (function () {
           self.data.headers[i] = item.header;
           self.data.cols[item.column] = i;
           self.data.rows[0][i] = "";
+          if (self.autoComplete[item.column]) {
+            self.data.columns[i] = {type: 'autocomplete', source: self.autoComplete[item.column],  strict: false};
+          }
+          else {
+            self.data.columns[i] = {type: 'text'};
+          }
         });
       return txtType;
     }
@@ -644,7 +665,11 @@ var hrlator = (function () {
     countryCode: _countryCode,
     dictionary: [],
     organizations: [],
-    clusters: []
+    clusters: [],
+    autoComplete: {
+      cluster: [],
+      organization: []
+    }
   }
   return self;
 

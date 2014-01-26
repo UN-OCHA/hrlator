@@ -335,6 +335,7 @@ $(document).ready(function () {
 
     $('div#hottable').handsontable({
       data: hrlator.data.rows,
+      columns: hrlator.data.columns,
       cells: function (row, col, prop) {
         var cellProperties = {};
         cellProperties.renderer = rowRenderer.getRenderFunction();
