@@ -317,128 +317,131 @@ function sleep(milliseconds) {
   }
 }
 
+function dataNew(type) {
+
+  // setup data
+  hrlator.newData(type);
+  var rowRenderer = new hrlator.htContactsRenderer();
+
+  $('div#hottable').handsontable({
+    data: hrlator.data.rows,
+    columns: hrlator.data.columns,
+    cells: function (row, col, prop) {
+      var cellProperties = {};
+      cellProperties.renderer = rowRenderer.getRenderFunction();
+      return cellProperties;
+    },
+    minSpareRows: 1,
+    height: 600,
+    colHeaders: hrlator.data.headers,
+    rowHeaders: true,
+    contextMenu: true,
+    persistantState: true,
+    manualColumnResize: true,
+    afterSelectionEnd: hrlator.afterSelectionEnd, //afterSelectionEnd,
+    afterChange: hrlator.afterChange
+  });
+
+  hrlator.ht = $('div#hottable').handsontable('getInstance');
+  hrlator.showStatus('', 0);
+
+  $('#' + type + '-upload').attr( 'disabled', true );
+  $('#' + type + ' -new').attr( 'disabled', true );
+  $('#' + type + '-download').attr( 'disabled', false ).
+    on('click', function(e) {
+      var data = hrlator.data.rows.slice(0);
+      data.unshift(hrlator.data.headers);
+      CSV.begin(data).download('hrlator-' + type + '.csv').go();
+    });
+}
+
+function enableDownload() {
+  var hrType = hrlator.data.type;
+
+  $('#' + hrType + '-upload').attr( 'disabled', true );
+  $('#' + hrType + '-new').attr( 'disabled', true );
+  $('#' + hrType + '-download').attr( 'disabled', false ).
+    on('click', function(e) {
+      var data = hrlator.data.rows.slice(0);
+      data.unshift(hrlator.data.headers);
+      CSV.begin(data).download('hrlator-' + hrType + '.csv').go();
+    });
+}
+
 $(document).ready(function () {
 
   var t;
 
-
   var hrReady = hrlator.init();
   hrReady.done(function () {
 
+    var hrType = hrlator.data.type;
+
     $('.nav.navbar-nav li').removeClass('active');
-    $('.nav.navbar-nav li.' + hrlator.data.type).addClass('active');
+    $('.nav.navbar-nav li.' + hrType).addClass('active');
 
-    // create contacts
-    $("#contacts-new").on('click', function(e) {
-
-      // setup data
-      hrlator.newData('contacts');
-      var rowRenderer = new hrlator.htContactsRenderer();
-
-      $('div#hottable').handsontable({
-        data: hrlator.data.rows,
-        columns: hrlator.data.columns,
-        cells: function (row, col, prop) {
-          var cellProperties = {};
-          cellProperties.renderer = rowRenderer.getRenderFunction();
-          return cellProperties;
-        },
-        minSpareRows: 1,
-        height: 600,
-        colHeaders: hrlator.data.headers,
-        rowHeaders: true,
-        contextMenu: true,
-        persistantState: true,
-        manualColumnResize: true,
-        afterSelectionEnd: hrlator.afterSelectionEnd, //afterSelectionEnd,
-        afterChange: hrlator.afterChange
-      });
-
-      hrlator.ht = $('div#hottable').handsontable('getInstance');
-      hrlator.showStatus('', 0);
-
-      $("#contacts-upload").attr( "disabled", true );
-      $("#contacts-new").attr( "disabled", true );
-      $("#contacts-download").attr( "disabled", false ).
-        on('click', function(e) {
-          var data = hrlator.data.rows.slice(0);
-          data.unshift(hrlator.data.headers);
-          CSV.begin(data).download("hrlator-contacts.csv").go();
-        });
+    // create data
+    $('#' + hrType + '-new').on('click', function(e) {
+       dataNew(hrType);
     });
 
-    // upload contacts
-    var csvContacts = CSV.begin('#csvContacts').
-      call( function() {
-        var d = new Date();
-        t = d.getTime();
-      }).
-      // init data & check columns
-      initContacts().
-      // display data
-      handsontable('contacts').
-      // data validation
-      validateContacts().
-      call( function() {
-        var d = new Date();
-        console.log( "Run time: " + (d.getTime() - t));
-      }).
-      // enable download
-      call( function() {
-        $("#contacts-upload").attr( "disabled", true );
-        $("#contacts-new").attr( "disabled", true );
-        $("#contacts-download").attr( "disabled", false ).
-          on('click', function(e) {
-            var data = hrlator.data.rows.slice(0);
-            data.unshift(hrlator.data.headers);
-            CSV.begin(data).download("hrlator-contacts.csv").go();
-          });
-      }).
-      go();
-    $('#csvContacts').on('click', csvContacts);
+    // upload data
+    if ('contacts' == hrType) { //contacts
+      var csvData = CSV.begin('#csv-data').
+        call( function() {
+          var d = new Date();
+          t = d.getTime();
+        }).
+        // init data & check columns
+        initContacts().
+        // display data
+        handsontable('contacts').
+        // data validation
+        validateContacts().
+        call( function() {
+          var d = new Date();
+          console.log( "Run time: " + (d.getTime() - t));
+        }).
+        // enable download
+        call( function() {
+          $("#contacts-upload").attr( "disabled", true );
+          $("#contacts-new").attr( "disabled", true );
+          $("#contacts-download").attr( "disabled", false ).
+            on('click', function(e) {
+              var data = hrlator.data.rows.slice(0);
+              data.unshift(hrlator.data.headers);
+              CSV.begin(data).download("hrlator-contacts.csv").go();
+            });
+        }).
+        go();
+    }
+    else if ('activities'  == hrType) { // activities
+      var csvData = CSV.begin('#csv-data').
+        call( function() {
+          var d = new Date();
+          t = d.getTime();
+        }).
+        // init data & check columns
+        initActivities().
+        // display data
+        handsontable('activities').
+        // data validation
+        validateActivities().
+        call( function() {
+          var d = new Date();
+          console.log( "Run time: " + (d.getTime() - t));
+        }).
+        // enable download
+        call( enableDownload() ).
+        go();
+    }
 
-    $("#contacts-upload").attr( "disabled", false );
-    $("#contacts-new").attr( "disabled", false );
+    $('#csv-data').on('click', csvData);
+
+    $('#' + hrType + '-upload').attr( "disabled", false );
+    $('#' + hrType + '-new').attr( "disabled", false );
     $("h1 i").removeClass('glyphicon-refresh-animate').hide();
 
   });
-
-  // activities
-  var csvActivities = CSV.begin('#csvActivities').
-
-    // init data & check columns
-    initActivities().
-
-    // display data
-    handsontable('activities').
-
-    // data validation
-    validateActivities().
-
-    call( function() {
-      var d = new Date();
-      t = d.getTime();
-    }).
-    call( function() {
-      var d = new Date();
-      console.log( "Run time: " + (d.getTime() - t));
-    }).
-
-    // enable download
-    call( function() {
-      var shared = this;
-      $('#hrlator-download-csv').unbind().on('click', function(e) {
-        e.preventDefault();
-        var ht_data = shared.ht.getData().slice(0);
-        ht_data.unshift(shared.data.colHeaders);
-
-        CSV.begin(ht_data).download("hrlator-activities.csv").go();
-
-        return false;
-      });
-    }).
-    go();
-
-  $('#csvActivities').on('clic', csvActivities);
 
 });
