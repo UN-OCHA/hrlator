@@ -71,7 +71,7 @@ var hrlator = (function () {
     _serverUrlBase = _servers[server].serverUrlBase;
     _countryCode = _servers[server].countryCode;
 
-    self.data.type = hrType;
+    self.data.type = (typeof hrType != 'undefined') ? hrType : '';
 
     // get dictionary from hrlator
     var jqxhrDictionary = $.ajax({

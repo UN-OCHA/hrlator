@@ -5,6 +5,7 @@
 
     <h2>HRLator Dictionary</h2>
     <div class="row">
+    <script>hrType = '{{ hrType }}';</script>
     <form class="form-horizontal" method="post" action="">
         <div class="form-group">
             <label for="type" class="col-sm-3 control-label">Type</label>
@@ -53,8 +54,10 @@
                   {% for row in rows %}
                   <tr class="{{ row.Type|e('css') }}">
                       <td>{{ row.Type }}</td>
-                      <td>{{ row.Initial }}</td>
-                      <td>{{ row.Replacement }}</td>
+                      <td>
+                        <a href="#"  data-type="text" data-pk="1" data-title="Enter initial" class="editable editable-click dic-initial" style="display: inline;">{{ row.Initial}}</a>
+                      </td>
+                      <td>{{ row.Replacement }} </td>
                       <th><form class="form-horizontal" name="delete" method="post" action="">
                           <input type="hidden" name="type" value="{{ row.Type }}">
                           <input type="hidden" name="initial" value="{{ row.Initial }}">
@@ -67,9 +70,11 @@
             </table>
         </div>
     </div>
+<!--
     <script>
       var hr_organizations = null;
       var hr_clusters = null;
       var hr_dictionary = {{ dictionary | raw }};
     </script>
+-->
 {% endblock %}
