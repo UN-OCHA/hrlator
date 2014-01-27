@@ -22,5 +22,6 @@ either the database file and the parent directory are writeable by Apache
 * datajs - http://www.datejs.com
   debug version from http://code.google.com/p/datejs/
   [98cd4af] patched in return values
-
+* prefixfree - http://leaverou.github.io/prefixfree
+  add data-noprefix for remote css
 * jquery cookies - https://github.com/carhartl/jquery-cookie
