@@ -261,7 +261,7 @@ var hrlator = (function () {
     var i = 0;
     while (element = self.dictionary[i]) {
       if ('organizations' == element.Type && organization.data === element.Initial) {
-        organization.checked = element.Replacement.toLowerCase();
+        organization.checked = element.Replacement;
         organization.comment = 'Organization found in dictionary (' + organization.data + ')';
         break;
       }
