@@ -38,47 +38,7 @@ var hrlator = (function () {
   var PNF = i18n.phonenumbers.PhoneNumberFormat;
 
   var _data;
-  var _dictionary;
-  var _organizations;
-  var _clusters;
-
-  // contacts headers
-  var _headers = {
-    contacts: [
-      {column: 'cluster',      out: true,  header: 'Clusters'},
-      {column: 'salutation',   out: true,  header: 'Salutation'},
-      {column: 'firstName',    out: true,  header: 'First name'},
-      {column: 'lastName',     out: true,  header: 'Last name'},
-      {column: 'fullName',     out: false, header: 'Full name'},
-      {column: 'name',         out: false, header: 'Name'},
-      {column: 'email',        out: true,  header: 'Email'},
-      {column: 'phone',        out: true,  header: 'Telephones'},
-      {column: 'organization', out: true,  header: 'Organization'},
-      {column: 'orgType',      out: true,  header: 'Organization Type'},
-      {column: 'jobTitle',     out: true,  header: 'Job Title'},
-      {column: 'location',     out: true,  header: 'Location'},
-      {column: 'coordHub',     out: true,  header: 'Coordination Hub'},
-      {column: 'fundings',     out: true,  header: 'Fundings'},
-      {column: 'themes',       out: true,  header: 'Theme(s)'},
-      {column: 'emergencies',  out: true,  header: 'Emergencies'},
-      {column: 'valid',        out: true,  header: 'valid'},
-      {column: 'comments',     out: true,  header: 'comments'}
-    ],
-    activities: [
-      {column: 'Organizations', out: true,  header: 'Organizations'},
-      {column: 'OrgAcronym',    out: true,  header: 'Organizations Acronym'},
-      {column: 'Clusters',      out: true,  header: 'Clusters'},
-      {column: 'Locations',     out: true,  header: 'Locations'},
-      {column: 'Title',         out: true,  header: 'Title'},
-      {column: 'PrimBen',       out: true,  header: 'Primary Beneficiary'},
-      {column: 'PrimBenNum',    out: true,  header: 'Number of primary beneficiaries'},
-      {column: 'Status',        out: true,  header: 'Status'},
-      {column: 'DateStart',     out: true,  header: 'Start Date'},
-      {column: 'DateEnd',       out: true,  header: 'End Date'},
-      {column: 'valid',         out: true,  header: 'valid'},
-      {column: 'comments',      out: true,  header: 'comments'}
-    ]
-  }
+  var _dictionary, _organizations, _clusters;
 
   // default states
   var StatusDefaults = ['planned', 'ongoing', 'completed'];
@@ -174,11 +134,12 @@ var hrlator = (function () {
 
   // new data
   var newData = function(txtType) {
-    if (_headers[txtType]) {
+    if (_schema[txtType]) {
+      var schema = _schema[txtType];
       self.data.type = txtType;
       self.data.columns = [];
-      self.data.validateRow = hrlator.validateContactsRow;
-      _headers[txtType].
+      self.data.validateRow = schema.validateRow;
+      schema.columns.
         filter(function(item) { return item.out }).
         forEach(function(item, i) {
           self.data.headers[i] = item.header;
@@ -651,6 +612,48 @@ var hrlator = (function () {
 
   }
 
+  // contacts headers
+  var _schema = {
+    contacts: { validateRow: validateContactsRow,
+      columns: [
+        {column: 'cluster',      out: true,  header: 'Clusters'},
+        {column: 'salutation',   out: true,  header: 'Salutation'},
+        {column: 'firstName',    out: true,  header: 'First name'},
+        {column: 'lastName',     out: true,  header: 'Last name'},
+        {column: 'fullName',     out: false, header: 'Full name'},
+        {column: 'name',         out: false, header: 'Name'},
+        {column: 'email',        out: true,  header: 'Email'},
+        {column: 'phone',        out: true,  header: 'Telephones'},
+        {column: 'organization', out: true,  header: 'Organization'},
+        {column: 'orgType',      out: true,  header: 'Organization Type'},
+        {column: 'jobTitle',     out: true,  header: 'Job Title'},
+        {column: 'location',     out: true,  header: 'Location'},
+        {column: 'coordHub',     out: true,  header: 'Coordination Hub'},
+        {column: 'fundings',     out: true,  header: 'Fundings'},
+        {column: 'themes',       out: true,  header: 'Theme(s)'},
+        {column: 'emergencies',  out: true,  header: 'Emergencies'},
+        {column: 'valid',        out: true,  header: 'valid'},
+        {column: 'comments',     out: true,  header: 'comments'}
+      ],
+    },
+    activities: { validateRow: validateActivitiesRow,
+      columns: [
+        {column: 'Organizations', out: true,  header: 'Organizations'},
+        {column: 'OrgAcronym',    out: true,  header: 'Organizations Acronym'},
+        {column: 'Clusters',      out: true,  header: 'Clusters'},
+        {column: 'Locations',     out: true,  header: 'Locations'},
+        {column: 'Title',         out: true,  header: 'Title'},
+        {column: 'PrimBen',       out: true,  header: 'Primary Beneficiary'},
+        {column: 'PrimBenNum',    out: true,  header: 'Number of primary beneficiaries'},
+        {column: 'Status',        out: true,  header: 'Status'},
+        {column: 'DateStart',     out: true,  header: 'Start Date'},
+        {column: 'DateEnd',       out: true,  header: 'End Date'},
+        {column: 'valid',         out: true,  header: 'valid'},
+        {column: 'comments',      out: true,  header: 'comments'}
+      ]
+    }
+  };
+
   // public
   var self = {
     // expose functions
@@ -679,7 +682,7 @@ var hrlator = (function () {
       validateRow: ''
     },
 
-    headers: _headers,
+    schema: _schema,
     serverUrlBase: _serverUrlBase,
     servers: _servers,
     contactPath: _contactPath,
