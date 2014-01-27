@@ -321,8 +321,12 @@ $(document).ready(function () {
 
   var t;
 
+
   var hrReady = hrlator.init();
   hrReady.done(function () {
+
+    $('.nav.navbar-nav li').removeClass('active');
+    $('.nav.navbar-nav li.' + hrlator.data.type).addClass('active');
 
     // create contacts
     $("#contacts-new").on('click', function(e) {
