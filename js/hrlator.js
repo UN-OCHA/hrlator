@@ -43,26 +43,42 @@ var hrlator = (function () {
   var _clusters;
 
   // contacts headers
-  var _contactHeaders = [
-    {column: 'cluster',      out: true,  header: 'Clusters'},
-    {column: 'salutation',   out: true,  header: 'Salutation'},
-    {column: 'firstName',    out: true,  header: 'First name'},
-    {column: 'lastName',     out: true,  header: 'Last name'},
-    {column: 'fullName',     out: false, header: 'Full name'},
-    {column: 'name',         out: false, header: 'Name'},
-    {column: 'email',        out: true,  header: 'Email'},
-    {column: 'phone',        out: true,  header: 'Telephones'},
-    {column: 'organization', out: true,  header: 'Organization'},
-    {column: 'orgType',      out: true,  header: 'Organization Type'},
-    {column: 'jobTitle',     out: true,  header: 'Job Title'},
-    {column: 'location',     out: true,  header: 'Location'},
-    {column: 'coordHub',     out: true,  header: 'Coordination Hub'},
-    {column: 'fundings',     out: true,  header: 'Fundings'},
-    {column: 'themes',       out: true,  header: 'Theme(s)'},
-    {column: 'emergencies',  out: true,  header: 'Emergencies'},
-    {column: 'valid',        out: true,  header: 'valid'},
-    {column: 'comments',     out: true,  header: 'comments'}
-  ];
+  var _headers = {
+    contacts: [
+      {column: 'cluster',      out: true,  header: 'Clusters'},
+      {column: 'salutation',   out: true,  header: 'Salutation'},
+      {column: 'firstName',    out: true,  header: 'First name'},
+      {column: 'lastName',     out: true,  header: 'Last name'},
+      {column: 'fullName',     out: false, header: 'Full name'},
+      {column: 'name',         out: false, header: 'Name'},
+      {column: 'email',        out: true,  header: 'Email'},
+      {column: 'phone',        out: true,  header: 'Telephones'},
+      {column: 'organization', out: true,  header: 'Organization'},
+      {column: 'orgType',      out: true,  header: 'Organization Type'},
+      {column: 'jobTitle',     out: true,  header: 'Job Title'},
+      {column: 'location',     out: true,  header: 'Location'},
+      {column: 'coordHub',     out: true,  header: 'Coordination Hub'},
+      {column: 'fundings',     out: true,  header: 'Fundings'},
+      {column: 'themes',       out: true,  header: 'Theme(s)'},
+      {column: 'emergencies',  out: true,  header: 'Emergencies'},
+      {column: 'valid',        out: true,  header: 'valid'},
+      {column: 'comments',     out: true,  header: 'comments'}
+    ],
+    activities: [
+      {column: 'Organizations', out: true,  header: 'Organizations'},
+      {column: 'OrgAcronym',    out: true,  header: 'Organizations Acronym'},
+      {column: 'Clusters',      out: true,  header: 'Clusters'},
+      {column: 'Locations',     out: true,  header: 'Locations'},
+      {column: 'Title',         out: true,  header: 'Title'},
+      {column: 'PrimBen',       out: true,  header: 'Primary Beneficiary'},
+      {column: 'PrimBenNum',    out: true,  header: 'Number of primary beneficiaries'},
+      {column: 'Status',        out: true,  header: 'Status'},
+      {column: 'DateStart',     out: true,  header: 'Start Date'},
+      {column: 'DateEnd',       out: true,  header: 'End Date'},
+      {column: 'valid',         out: true,  header: 'valid'},
+      {column: 'comments',      out: true,  header: 'comments'}
+    ]
+  }
 
   // default states
   var StatusDefaults = ['planned', 'ongoing', 'completed'];
@@ -158,11 +174,11 @@ var hrlator = (function () {
 
   // new data
   var newData = function(txtType) {
-    if ('contacts' == txtType) {
-      self.data.type = 'contacs';
+    if (_headers[txtType]) {
+      self.data.type = txtType;
       self.data.columns = [];
       self.data.validateRow = hrlator.validateContactsRow;
-      self.contactHeaders.
+      _headers[txtType].
         filter(function(item) { return item.out }).
         forEach(function(item, i) {
           self.data.headers[i] = item.header;
@@ -663,7 +679,7 @@ var hrlator = (function () {
       validateRow: ''
     },
 
-    contactHeaders: _contactHeaders,
+    headers: _headers,
     serverUrlBase: _serverUrlBase,
     servers: _servers,
     contactPath: _contactPath,

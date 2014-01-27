@@ -158,7 +158,7 @@ var extension = {
     var data = shared.data.rows.slice(0);
     data.shift();
     hrlator.data = {
-      type: 'contacs',
+      type: 'contacts',
       rows: data,
       cols: shared.data.cols,
       headers: shared.data.rows[0],
@@ -345,14 +345,17 @@ function dataNew(type) {
   hrlator.ht = $('div#hottable').handsontable('getInstance');
   hrlator.showStatus('', 0);
 
+  enableDownload();
+/*
   $('#' + type + '-upload').attr( 'disabled', true );
-  $('#' + type + ' -new').attr( 'disabled', true );
+  $('#' + type + '-new').attr( 'disabled', true );
   $('#' + type + '-download').attr( 'disabled', false ).
     on('click', function(e) {
       var data = hrlator.data.rows.slice(0);
       data.unshift(hrlator.data.headers);
       CSV.begin(data).download('hrlator-' + type + '.csv').go();
     });
+*/
 }
 
 function enableDownload() {
@@ -387,60 +390,67 @@ $(document).ready(function () {
 
     // upload data
     if ('contacts' == hrType) { //contacts
-      var csvData = CSV.begin('#csv-data').
-        call( function() {
-          var d = new Date();
-          t = d.getTime();
-        }).
-        // init data & check columns
-        initContacts().
-        // display data
-        handsontable('contacts').
-        // data validation
-        validateContacts().
-        call( function() {
-          var d = new Date();
-          console.log( "Run time: " + (d.getTime() - t));
-        }).
-        // enable download
-        call( function() {
-          $("#contacts-upload").attr( "disabled", true );
-          $("#contacts-new").attr( "disabled", true );
-          $("#contacts-download").attr( "disabled", false ).
-            on('click', function(e) {
-              var data = hrlator.data.rows.slice(0);
-              data.unshift(hrlator.data.headers);
-              CSV.begin(data).download("hrlator-contacts.csv").go();
-            });
-        }).
-        go();
+      $('#csv-data').on('click', function () {
+        CSV.
+          begin('#csv-data').
+          call( function() {
+            var d = new Date();
+            t = d.getTime();
+          }).
+          // init data & check columns
+          initContacts().
+          // display data
+          handsontable('contacts').
+          // data validation
+          validateContacts().
+          // enable download
+          call(enableDownload()).
+          call( function() {
+            var d = new Date();
+            console.log( "Run time: " + (d.getTime() - t));
+          }).
+          /*
+          function() {
+            $("#contacts-upload").attr( "disabled", true );
+            $("#contacts-new").attr( "disabled", true );
+            $("#contacts-download").attr( "disabled", false ).
+              on('click', function(e) {
+                var data = hrlator.data.rows.slice(0);
+                data.unshift(hrlator.data.headers);
+                CSV.begin(data).download("hrlator-contacts.csv").go();
+              });
+          }).
+          */
+          go();
+      });
     }
     else if ('activities'  == hrType) { // activities
-      var csvData = CSV.begin('#csv-data').
-        call( function() {
-          var d = new Date();
-          t = d.getTime();
-        }).
-        // init data & check columns
-        initActivities().
-        // display data
-        handsontable('activities').
-        // data validation
-        validateActivities().
-        call( function() {
-          var d = new Date();
-          console.log( "Run time: " + (d.getTime() - t));
-        }).
-        // enable download
-        call( enableDownload() ).
-        go();
-    }
+      $('#csv-data').on('click', function () {
+        CSV.
+          begin('#csv-data').
+          call( function() {
+            var d = new Date();
+            t = d.getTime();
+          }).
+          // init data & check columns
+          initActivities().
+          // display data
+          handsontable('activities').
+          // data validation
+          validateActivities().
+          // enable download
+          call( enableDownload() ).
+          call( function() {
+            var d = new Date();
+            console.log( "Run time: " + (d.getTime() - t));
+          }).
+          go();
+    });
+  }
 
-    $('#csv-data').on('click', csvData);
-
-    $('#' + hrType + '-upload').attr( "disabled", false );
-    $('#' + hrType + '-new').attr( "disabled", false );
-    $("h1 i").removeClass('glyphicon-refresh-animate').hide();
+  $('#' + hrType + '-upload').attr( "disabled", false );
+  $('#' + hrType + '-new').attr( "disabled", false );
+  $("h1 i").removeClass('glyphicon-refresh-animate').hide();
 
   });
 
