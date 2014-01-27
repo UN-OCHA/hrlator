@@ -84,6 +84,8 @@ var hrlator = (function () {
   // - load data
   var init = function() {
 
+    var deferred = $.Deferred();
+
     // double check cookie (already done in server side indeed)
     var server = jQuery.cookie('hrlator-server');
     if (!_servers.server) {
@@ -147,7 +149,10 @@ var hrlator = (function () {
         concat( self.clusters.
           map(function (element) { return element.Prefix }));
 
+      deferred.resolve();
     });
+
+    return deferred.promise();
 
   }
 

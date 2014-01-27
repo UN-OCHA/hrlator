@@ -31,6 +31,25 @@
 }
 
 /**
+ * Spinner on loading data
+ */
+h1 .glyphicon.glyphicon-refresh {
+  font-size: 0.5em;
+}
+
+.glyphicon-refresh-animate {
+  animation-name: rotateThis;
+  animation-duration: .5s;
+  animation-iteration-count: infinite;
+  animation-timing-function: linear;
+}
+
+@keyframes rotateThis {
+  from { transform: scale( 1 ) rotate( 0deg );   }
+  to   { transform: scale( 1 ) rotate( 360deg ); }
+}
+
+/**
  * Button style for uploads
  * http://www.abeautifulsite.net/blog/2013/08/whipping-file-inputs-into-shape-with-bootstrap-3
  */
@@ -57,52 +76,16 @@
  * blink
  * http://stackoverflow.com/questions/11578800/how-can-i-create-a-looping-fade-in-out-image-effect-using-css-3-transitions
  */
-@-webkit-keyframes blinker {
-  from { opacity: 1.0; }
-  to { opacity: 0.0; }
-}
-
-@-moz-keyframes blinker {
-  from { opacity: 1.0; }
-  to { opacity: 0.0; }
-}
-
-@-o-keyframes blinker {
-  from { opacity: 1.0; }
-  to { opacity: 0.0; }
-}
-
-@-ms-keyframes blinker {
+@keyframes blinker {
   from { opacity: 1.0; }
   to { opacity: 0.0; }
 }
 
 #hottable.handsontable tr.hrlator-validating td,
 tbody tr.blink {
-  -webkit-animation-name: blinker;
-  -webkit-animation-iteration-count: infinite;
-  -webkit-animation-timing-function: ease-in-out;
-  -webkit-animation-duration: 2s;
-
-  -moz-animation-name: blinker;
-  -moz-animation-iteration-count: infinite;
-  -moz-animation-timing-function: ease-in-out;
-  -moz-animation-duration: 2s;
-
-  -o-animation-name: blinker;
-  -o-animation-iteration-count: infinite;
-  -o-animation-timing-function: ease-in-out;
-  -o-animation-duration: 2s;
-
-  -ms-animation-name: blinker;
-  -ms-animation-iteration-count: infinite;
-  -ms-animation-timing-function: ease-in-out;
-  -ms-animation-duration: 2s;
-
   animation-name: blinker;
   animation-iteration-count: infinite;
   animation-timing-function: ease-in-out;
   animation-duration: 2s;
-
 }
 
