@@ -73,7 +73,6 @@ var hrlator = (function () {
 
     self.data.type = hrType;
 
-    // TODO use premise/defer
     // get dictionary from hrlator
     var jqxhrDictionary = $.ajax({
     //  url: 'http://hrlator.humanitarianresponse.info/index.php',
@@ -114,17 +113,18 @@ var hrlator = (function () {
     });
 
     $.when(jqxhrDictionary, jqxhrClusters, jqxhrOrganizations).done(function (jqxhrDictionary, jqxhrClusters, jqxhrOrganizations) {
+      // autocomplete organization
       self.autoComplete.organization = self.organizations.
         map(function (element) { return element.Name } ).
         concat( self.dictionary.
           filter( function(element) { return (element.Type=='organizations'); }).
           map(function (element) { return element.Initial }));
-
+      // autocomplete cluster
       self.autoComplete.cluster = self.clusters.
         map(function (element) { return element.Name } ).
         concat( self.clusters.
           map(function (element) { return element.Prefix }));
-
+      // resolve deferred so init.done() runs
       deferred.resolve();
     });
 
@@ -145,8 +145,8 @@ var hrlator = (function () {
           self.data.headers[i] = item.header;
           self.data.cols[item.column] = i;
           self.data.rows[0][i] = "";
-          if (self.autoComplete[item.column]) {
-            self.data.columns[i] = {type: 'autocomplete', source: self.autoComplete[item.column],  strict: false};
+          if (item.autoComplete) {
+            self.data.columns[i] = {type: 'autocomplete', source: self.autoComplete[item.autoComplete],  strict: false};
           }
           else {
             self.data.columns[i] = {type: 'text'};
@@ -616,7 +616,7 @@ var hrlator = (function () {
   var _schema = {
     contacts: { validateRow: validateContactsRow,
       columns: [
-        {column: 'cluster',      out: true,  header: 'Clusters'},
+        {column: 'cluster',      out: true,  header: 'Clusters', autoComplete: 'cluster'},
         {column: 'salutation',   out: true,  header: 'Salutation'},
         {column: 'firstName',    out: true,  header: 'First name'},
         {column: 'lastName',     out: true,  header: 'Last name'},
@@ -624,7 +624,7 @@ var hrlator = (function () {
         {column: 'name',         out: false, header: 'Name'},
         {column: 'email',        out: true,  header: 'Email'},
         {column: 'phone',        out: true,  header: 'Telephones'},
-        {column: 'organization', out: true,  header: 'Organization'},
+        {column: 'organization', out: true,  header: 'Organization', autoComplete: 'organization'},
         {column: 'orgType',      out: true,  header: 'Organization Type'},
         {column: 'jobTitle',     out: true,  header: 'Job Title'},
         {column: 'location',     out: true,  header: 'Location'},
@@ -638,9 +638,9 @@ var hrlator = (function () {
     },
     activities: { validateRow: validateActivitiesRow,
       columns: [
-        {column: 'Organizations', out: true,  header: 'Organizations'},
+        {column: 'Organizations', out: true,  header: 'Organizations', autoComplete: 'organization'},
         {column: 'OrgAcronym',    out: true,  header: 'Organizations Acronym'},
-        {column: 'Clusters',      out: true,  header: 'Clusters'},
+        {column: 'Clusters',      out: true,  header: 'Clusters', autoComplete: 'cluster'},
         {column: 'Locations',     out: true,  header: 'Locations'},
         {column: 'Title',         out: true,  header: 'Title'},
         {column: 'PrimBen',       out: true,  header: 'Primary Beneficiary'},
