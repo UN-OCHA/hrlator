@@ -376,6 +376,7 @@ $(document).ready(function () {
     // create data
     $('#' + hrType + '-new').on('click', function(e) {
        dataNew(hrType);
+       $('#data-sample').hide();
     });
 
     // upload data
@@ -400,6 +401,7 @@ $(document).ready(function () {
             console.log( "Run time: " + (d.getTime() - t));
           }).
           go();
+        $('#data-sample').hide();
       });
     }
     else if ('activities'  == hrType) { // activities
@@ -423,6 +425,7 @@ $(document).ready(function () {
             console.log( "Run time: " + (d.getTime() - t));
           }).
           go();
+        $('#data-sample').hide();
     });
   }
 
