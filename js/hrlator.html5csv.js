@@ -428,6 +428,29 @@ $(document).ready(function () {
         $('#data-sample').hide();
     });
   }
+  else if ('dictionary' == hrType) { // dictionary
+    $('.dic-initial').editable({
+      mode: 'inline',
+      url: 'index.php',
+      data: {api: ""},
+      ajaxOptions: {
+        type: 'put',
+        dataType: 'json'
+      },
+//      showbuttons: false,
+      success: function(response, newValue) {
+        console.log(newValue);
+        console.log(response);
+      }
+/*      ,
+      url: '/put',
+      pk: 1,
+      typeahead: {
+        local: ['Rome', 'Milan', 'Venice', 'Florence']
+      }
+*/
+    });
+  }
 
   $('#' + hrType + '-upload').attr( "disabled", false );
   $('#' + hrType + '-new').attr( "disabled", false );

@@ -48,8 +48,16 @@ $twig->addGlobal('version', $versionDetails);
 
 $twig->addFunction('get_class', new Twig_Function_Function('get_class'));
 
+if($_SERVER['REQUEST_METHOD'] == 'PUT') {
+    echo "this is a put request\n";
+    parse_str(file_get_contents("php://input"),$post_vars);
+    echo "<pre>" . print_r($post_vars, TRUE) . "</pre>";
+error_log('PUT: ' + print_r($post_vars, TRUE));
+   return;
+}
+
 // API call
-if (isset($_GET['api'])) {
+else if (isset($_GET['api'])) {
   switch ($_GET['api']) {
 
    case 'country':

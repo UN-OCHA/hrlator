@@ -55,7 +55,7 @@
                   <tr class="{{ row.Type|e('css') }}">
                       <td>{{ row.Type }}</td>
                       <td>
-                        <a href="#"  data-type="text" data-pk="1" data-title="Enter initial" class="editable editable-click dic-initial" style="display: inline;">{{ row.Initial}}</a>
+                        <a href="#"  data-type="text" data-pk="{{ loop.index0 }}" data-title="Enter initial" class="editable editable-click dic-initial" style="display: inline;">{{ row.Initial}}</a>
                       </td>
                       <td>{{ row.Replacement }} </td>
                       <th><form class="form-horizontal" name="delete" method="post" action="">
