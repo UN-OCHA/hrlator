@@ -24,11 +24,13 @@ function validateContacts() {
   var timer = setInterval(function() {
     shared.ht.render();
     hrlator.showStatus('Validated ' + rowsValidated + '/' + rows.length, Math.round(rowsValidated * 100 /rows.length));
-  }, 100);
+  }, 300);
 
+  $("h1 i").addClass('glyphicon-refresh-animate').show();
   rows.forEach(function(row, index) {
     if (index>0) {
       var rowValidated = hrlator.data.validateRow(row);
+      setTimeout(shared.ht.render, 100);
       // shared.ht.render();
       rowValidated.done( function() {
         // shared.ht.render();
@@ -44,6 +46,7 @@ function validateContacts() {
     clearInterval(timer);
     shared.ht.render();
     hrlator.showStatus('', 0);
+    $("h1 i").removeClass('glyphicon-refresh-animate').hide();
     return shared.nextTask();
   });
 

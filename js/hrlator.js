@@ -604,6 +604,10 @@ var hrlator = (function () {
         deferred.resolve(validation);
       }
     }
+    else {
+      validation[cols.lastName] = {valid: 'danger', comment: "Could not determine Last Name"};
+      deferred.resolve(validation);
+    }
 
     // Ok, let's check the row
     row[cols.valid] = 'validating';
