@@ -18,25 +18,35 @@ function validateContacts() {
   var shared = this;
   var data = shared.data;
   var rows = data.rows;
-//  var cols = data.cols;
-  var rowToValidate = shared.rowToValidate;
+  var rowsValidated = 1;
+  var deferred = $.Deferred();
 
-  if (rowToValidate < rows.length) {
-    row = rows[rowToValidate];
-    if (row.join('').length > 0) {
-      row[hrlator.data.cols.valid] = 'validating';
-      shared.ht.render();
-      hrlator.data.validateRow(row);
-    }
-    hrlator.showStatus('Validating ' + shared.rowToValidate + '/' + rows.length, Math.round(shared.rowToValidate * 100 /rows.length));
-    shared.rowToValidate++;
-    window.setTimeout((function(caller) { return function() { caller.validate(); } })(shared), 100);
-  }
-  else {
-    hrlator.showStatus('', 0);
+  var timer = setInterval(function() {
     shared.ht.render();
+    hrlator.showStatus('Validated ' + rowsValidated + '/' + rows.length, Math.round(rowsValidated * 100 /rows.length));
+  }, 100);
+
+  rows.forEach(function(row, index) {
+    if (index>0) {
+      var rowValidated = hrlator.data.validateRow(row);
+      // shared.ht.render();
+      rowValidated.done( function() {
+        // shared.ht.render();
+        rowsValidated++;
+        if (rowsValidated == rows.length) {
+          deferred.resolve();
+        }
+      });
+    }
+  });
+
+  deferred.done(function () {
+    clearInterval(timer);
+    shared.ht.render();
+    hrlator.showStatus('', 0);
     return shared.nextTask();
-  }
+  });
+
 }
 
 function validateActivities() {
@@ -92,7 +102,7 @@ var extension = {
         fullName:     header.indexOf('full name'),
         name:         header.indexOf('name'),
         organization: header.indexOf('organization'),
-        cluster:      header.indexOf('llusters'),
+        cluster:      header.indexOf('clusters'),
         email:        header.indexOf('email'),
         phone:        header.indexOf('telephones'),
         location:     header.indexOf('location'),

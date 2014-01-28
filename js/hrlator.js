@@ -334,17 +334,13 @@ var hrlator = (function () {
   }
 
   // Handsontable row validation (after user leave the edited row)
-  var _validateAfterEdit = function () {
-    row = self.data.rows[_ht_rowLastEdited];
-    self.data.validateRow(row);
-    self.ht.render();
-  }
-
   var afterSelectionEnd = function (r, c, r2, c2) {
     if ((_ht_rowLastEdited >= 0) && !_ht_validated && r != _ht_rowLastEdited) {
-      self.data.rows[_ht_rowLastEdited][self.data.cols.valid] = 'validating';
+      var row = self.data.rows[_ht_rowLastEdited];
+      row[self.data.cols.valid] = 'validating';
       self.ht.render();
-      window.setTimeout(_validateAfterEdit(), 100);
+      var rowValidated = self.data.validateRow(row);
+      rowValidated.done(self.ht.render);
     }
   }
 
@@ -468,13 +464,14 @@ var hrlator = (function () {
   // HRLator contacts row validation
   var validateContactsRow = function(row) {
 
+    var deferred = $.Deferred();
     var cols = self.data.cols;
-//console.log(row);
 
     // check empty row
     if (row.join('').length ===0) {
       row[cols.comments] = 'empty';
-      return;
+      deferred.resolve();
+      return deferred.promise;
     }
 
     // clear validation
@@ -592,37 +589,40 @@ var hrlator = (function () {
             data: api_data,
             success: function(result) {
               jsonResult = result;
-            },
-            async: false
+              validation[cols.lastName] = JSON.parse(jsonResult);
+              deferred.resolve(validation);
+            }
           });
-          if (jsonResult) {
-            validation[cols.lastName] = JSON.parse(jsonResult);
-          }
         }
         else {
           validation[cols.firstName] = {valid: 'danger', comment: "First Name is empty"};
+          deferred.resolve(validation);
         }
       }
       else {
         validation[cols.lastName] = {valid: 'danger', comment: "Last Name is empty"};
+        deferred.resolve(validation);
       }
     }
 
     // Ok, let's check the row
-    var valid = 'success';
-    var comments = [];
-    for (var j in validation) {
-      valid = ('danger' == validation[j].valid) ? 'danger' : valid;
-      if (validation[j].comment) {
-        comments.push(validation[j].comment);
+    row[cols.valid] = 'validating';
+    deferred.done(function () {
+      var valid = 'success';
+      var comments = [];
+      for (var j in validation) {
+        valid = ('danger' == validation[j].valid) ? 'danger' : valid;
+        if (validation[j].comment) {
+          comments.push(validation[j].comment);
+        }
       }
-    }
-    row[cols.valid] = valid;
-    row[cols.comments] = comments.join('; ');
+      row[cols.valid] = valid;
+      row[cols.comments] = comments.join('; ');
 
-    _ht_validated = true;
+      _ht_validated = true;
+    });
 
-    return valid;
+    return deferred.promise();
 
   }
 
