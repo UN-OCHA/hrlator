@@ -210,9 +210,23 @@ var hrlator = (function () {
          clusters.comments.push('Cluster ' + cluster + ' not found');
       }
     });
-    row[cols_cluster] = clusters.checked.join('; ');
 
-    return {valid: clusters.valid, comment: clusters.comments.join('; ')};
+    // remove duplicates
+    var clustersChecked = clusters.checked.
+      filter(function(value, index, self) {
+        return self.indexOf(value) === index;
+      })
+    row[cols_cluster] = clustersChecked.join('; ');
+    if (clustersChecked.length != clusters.checked.length) {
+      clusters.comments.push('Duplicated clusters removed');
+    }
+    var clusters_comments = clusters.comments.
+      filter(function(value, index, self) {
+        return self.indexOf(value) === index;
+      }).
+      join('; ');
+
+    return {valid: clusters.valid, comment: clusters_comments};
 
   }
 
