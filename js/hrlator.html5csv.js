@@ -85,18 +85,19 @@ var extension = {
     var shared = this; // pick up shared object from this, will be set internally by func.apply
 
     function getDataCols() {
+      var header = shared.data.rows[0].slice(0).map(function(element) { return element.toLowerCase();} );
       return {
-        firstName:    shared.data.rows[0].indexOf('First name'),
-        lastName:     shared.data.rows[0].indexOf('Last name'),
-        fullName:     shared.data.rows[0].indexOf('Full name'),
-        name:         shared.data.rows[0].indexOf('Name'),
-        organization: shared.data.rows[0].indexOf('Organization'),
-        cluster:      shared.data.rows[0].indexOf('Clusters'),
-        email:        shared.data.rows[0].indexOf('Email'),
-        phone:        shared.data.rows[0].indexOf('Telephones'),
-        location:     shared.data.rows[0].indexOf('Location'),
-        valid:        shared.data.rows[0].indexOf('valid'),
-        comments:     shared.data.rows[0].indexOf('comments')
+        firstName:    header.indexOf('first name'),
+        lastName:     header.indexOf('last name'),
+        fullName:     header.indexOf('full name'),
+        name:         header.indexOf('name'),
+        organization: header.indexOf('organization'),
+        cluster:      header.indexOf('llusters'),
+        email:        header.indexOf('email'),
+        phone:        header.indexOf('telephones'),
+        location:     header.indexOf('location'),
+        valid:        header.indexOf('valid'),
+        comments:     header.indexOf('comments')
       }
     }
 
@@ -176,20 +177,20 @@ var extension = {
     var shared = this; // pick up shared object from this, will be set internally by func.apply
 
     function getDataCols() {
-
+      var header = shared.data.rows[0].slice(0).map(function(element) { return element.toLowerCase();} );
       return {
-        Organizations: shared.data.rows[0].indexOf('Organizations'),
-        OrgAcronym:    shared.data.rows[0].indexOf('Organizations Acronym'),
-        Clusters:      shared.data.rows[0].indexOf('Clusters'),
-        Locations:     shared.data.rows[0].indexOf('Locations'),
-        Title:         shared.data.rows[0].indexOf('Title'),
-        PrimBen:       shared.data.rows[0].indexOf('Primary Beneficiary'),
-        PrimBenNum:    shared.data.rows[0].indexOf('Number of primary beneficiaries'),
-        Status:        shared.data.rows[0].indexOf('Status'),
-        DateStart:     shared.data.rows[0].indexOf('Start Date'),
-        DateEnd:       shared.data.rows[0].indexOf('End Date'),
-        valid:         shared.data.rows[0].indexOf('valid'),
-        comments:      shared.data.rows[0].indexOf('comments')
+        Organizations: header.indexOf('organizations'),
+        OrgAcronym:    header.indexOf('organizations acronym'),
+        Clusters:      header.indexOf('clusters'),
+        Locations:     header.indexOf('locations'),
+        Title:         header.indexOf('title'),
+        PrimBen:       header.indexOf('primary beneficiary'),
+        PrimBenNum:    header.indexOf('number of primary beneficiaries'),
+        Status:        header.indexOf('status'),
+        DateStart:     header.indexOf('start date'),
+        DateEnd:       header.indexOf('end date'),
+        valid:         header.indexOf('valid'),
+        comments:      header.indexOf('comments')
       }
     }
 
