@@ -95,6 +95,9 @@ var extension = {
 
   // initContacts
   'initContacts': function() {
+
+    $("h1 i").addClass('glyphicon-refresh-animate').show();
+
     var shared = this; // pick up shared object from this, will be set internally by func.apply
 
     function getDataCols() {
@@ -182,11 +185,16 @@ var extension = {
     // set validation function
     shared.validate = validateContacts;
 
+    $("h1 i").removeClass('glyphicon-refresh-animate').hide();
+
     return shared.nextTask();
   },
 
   // initActivities
   'initActivities': function() {
+
+    $("h1 i").addClass('glyphicon-refresh-animate').show();
+
     var shared = this; // pick up shared object from this, will be set internally by func.apply
 
     function getDataCols() {
@@ -260,7 +268,19 @@ var extension = {
     // set validation function
     shared.validate = validateActivities;
 
+    $("h1 i").removeClass('glyphicon-refresh-animate').hide();
     return shared.nextTask();
+  },
+
+  // validate data
+  'validateTable': function() {
+    $("h1 i").addClass('glyphicon-refresh-animate').show();
+    var shared = this; // pick up shared object from this, will be set internally by func.apply
+    hrlator.showStatus('Validating', 0);
+    // hic sunt leones
+    shared.rowToValidate = 1;
+    shared.validate();
+    $("h1 i").removeClass('glyphicon-refresh-animate').hide();
   },
 
   // validate data

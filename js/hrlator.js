@@ -27,12 +27,9 @@ var hrlator = (function () {
   // internal variables harcoded
   var _servers = {
     'PH': {serverUrlBase: 'https://philippines.humanitarianresponse.info', countryCode: 'PH'},
-//    'SS': {'serverUrlBase': 'southsudan.humanitarianresponse.info'}
+    'SS': {serverUrlBase: 'http://southsudan.humanitarianresponse.info',   countryCode: 'SS'}
   };
-
-  var _serverUrlBase = 'philippines.humanitarianresponse.info';
   var _contactPath = '/operational-presence/xml?search_api_views_fulltext';
-  var _countryCode = 'PH';
 
   var phoneUtil = i18n.phonenumbers.PhoneNumberUtil.getInstance();
   var PNF = i18n.phonenumbers.PhoneNumberFormat;
@@ -68,8 +65,8 @@ var hrlator = (function () {
       for(var _server in _servers) break;
       server = _server;
     }
-    _serverUrlBase = _servers[server].serverUrlBase;
-    _countryCode = _servers[server].countryCode;
+    self.serverUrlBase = _servers[server].serverUrlBase;
+    self.countryCode = _servers[server].countryCode;
 
     self.data.type = hrType;
 
@@ -84,7 +81,7 @@ var hrlator = (function () {
 
     // get cluster from server
     var jqxhrClusters = $.ajax({
-      url: _serverUrlBase + '/clusters.xml',
+      url: self.serverUrlBase + '/clusters.xml',
       error: function() {
         alert('hrlator init ERROR loading from ' + _serverUrlBase + '/clusters.xml');
       },
@@ -99,7 +96,7 @@ var hrlator = (function () {
 
     // get organizations from server
     var jqxhrOrganizations = $.ajax({
-      url: _serverUrlBase + '/organizations.xml',
+      url: self.serverUrlBase + '/organizations.xml',
       error: function() {
         alert('hrlator init ERROR loading from ' + _serverUrlBase + '/organizations.xml');
       },
@@ -562,15 +559,16 @@ var hrlator = (function () {
     if (cols.fullName >= 0 || cols.name >= 0) {
       // check if already edited!
       if ((row[cols.lastName].length + row[cols.firstName].length) == 0) {
+        var colName = (cols.fullName > 0) ? cols.fullName : cols.name;
         var fullName = (cols.fullName >= 0) ? row[cols.fullName] : row[cols.name];
         var names = fullName.trim().split(' ');
         if (names.length != 2) {
-          validation[cols.fullName] = {valid: 'danger', comment: 'Could not determine first name and last name from ' + fullName};
+          validation[colName] = {valid: 'danger', comment: 'Could not determine first name and last name from ' + fullName};
         }
         else {
           row[cols.firstName] = names[0];
           row[cols.lastName] = names[1];
-          validation[cols.fullName] = {
+          validation[colName] = {
             valid: 'success',
             comment: 'Separated ' + fullName + ' into First name: ' + names[0] + ' and Last name: ' + names[1]};
         }
@@ -580,32 +578,49 @@ var hrlator = (function () {
     // contact exists in DB
     // 1 contact exists
     if (cols.lastName >= 0 && cols.firstName >= 0) {
-      var lastName = row[cols.lastName];
+      var lastName = row[cols.lastName] = row[cols.lastName].trim();
       if (lastName) {
-        var firstName = row[cols.firstName];
+        var firstName = row[cols.firstName] = row[cols.firstName].trim();
         if (firstName) {
-          var api_data = {'api': 'contact_exist', 'last_name': lastName, 'first_name': firstName};
+          var _user_profiles;
           $.ajax({
-            data: api_data,
+            url: hrlator.serverUrlBase + '/operational-presence/xml',
+            data: {'search_api_views_fulltext': lastName},
             success: function(result) {
-              jsonResult = result;
-              validation[cols.lastName] = JSON.parse(jsonResult);
+              // parse result with jQuery and extract relevant field from XML
+              _user_profiles = $('search_api_index_user_profile', result).
+                filter(function(i, element) {
+                  return ($(element).find('lastName').text().toLowerCase() == lastName.toLowerCase()) &&
+                    ($(element).find('firstName').text().toLowerCase() == firstName.toLowerCase());
+                });
+              if (_user_profiles.length > 0) {
+                validation[cols.lastName] = {
+                  valid: 'danger',
+                  comment: 'Contact already exists in the database. See ' + hrlator.serverUrlBase + '/profile/' + $(_user_profiles).find('profileId').text()};
+              }
+              else {
+                validation[cols.lastName] = {valid: 'success'};
+              }
+              deferred.resolve(validation);
+            },
+            error: function(result) {
+              validation[cols.lastName] = {valid: 'alert', comment: 'Network error on contact validation with ' + hrlator.serverUrlBase};
               deferred.resolve(validation);
             }
           });
         }
         else {
-          validation[cols.firstName] = {valid: 'danger', comment: "First Name is empty"};
+          validation[cols.firstName] = {valid: 'danger', comment: 'First Name is empty'};
           deferred.resolve(validation);
         }
       }
       else {
-        validation[cols.lastName] = {valid: 'danger', comment: "Last Name is empty"};
+        validation[cols.lastName] = {valid: 'danger', comment: 'Last Name is empty'};
         deferred.resolve(validation);
       }
     }
     else {
-      validation[cols.lastName] = {valid: 'danger', comment: "Could not determine Last Name"};
+      validation[cols.lastName] = {valid: 'danger', comment: 'Could not determine Last Name column'};
       deferred.resolve(validation);
     }
 
@@ -701,10 +716,10 @@ var hrlator = (function () {
     },
 
     schema: _schema,
-    serverUrlBase: _serverUrlBase,
     servers: _servers,
     contactPath: _contactPath,
-    countryCode: _countryCode,
+    serverUrlBase: "",
+    countryCode: "",
     dictionary: [],
     organizations: [],
     clusters: [],
@@ -728,7 +743,7 @@ $(document).ready(function () {
     if (hrlator.servers[cc]) {
       hrlator.countryCode = hrlator.servers[cc].countryCode;
       hrlator.serverUrlBase = hrlator.servers[cc].serverUrlBase;
-      $.cookie('hrlator-server', hrlator.cc);
+      $.cookie('hrlator-server', cc);
     }
 
   });
