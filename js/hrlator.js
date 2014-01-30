@@ -597,8 +597,14 @@ var hrlator = (function () {
               // parse result with jQuery and extract relevant field from XML
               _user_profiles = $('search_api_index_user_profile', result).
                 filter(function(i, element) {
-                  return ($(element).find('lastName').text().toLowerCase() == lastName.toLowerCase()) &&
-                    ($(element).find('firstName').text().toLowerCase() == firstName.toLowerCase());
+                  return ($(element).find('firstName').text().toLowerCase() == firstName.toLowerCase());
+                }).
+                map( function(i, element) {
+                  var profile = {}
+                  $(element).children().each(function(i, element) {
+                    profile[$(element).prop("tagName")] = $(element).text();
+                  });
+                  return profile;
                 });
               if (_user_profiles.length > 0) {
                 validation[cols.lastName] = {
