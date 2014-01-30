@@ -31,6 +31,14 @@
 }
 
 /**
+ * Overflow panel
+ * http://stackoverflow.com/questions/14926577/why-is-table-content-extending-beyond-containing-bootstrap-span-and-overlapp
+ */
+.div-overflow-auto {
+  overflow: auto;
+}
+
+/**
  * Spinner on loading data
  * http://www.elijahmanor.com/animating-a-twitter-bootstrap-icon-with-css3
  */
