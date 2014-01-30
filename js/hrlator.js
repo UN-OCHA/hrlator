@@ -463,6 +463,7 @@ var hrlator = (function () {
 
     var deferred = $.Deferred();
     var cols = self.data.cols;
+    var promises = [];
 
     // check empty row
     if (row.join('').length ===0) {
@@ -514,9 +515,15 @@ var hrlator = (function () {
         location = location.trim();
         if (location.length) {
           var api_json = hrlator_api({'api': 'location_by_name', 'location': location});
-          if (jsonResult) {
-            validation[cols.location] = JSON.parse(jsonResult);
-          }
+          promises.push( $.ajax({
+            url: 'index.php',
+            data: {'api': 'location_by_name', 'location': location},
+            success: function(jsonResult) {
+              if (jsonResult) {
+                validation[cols.location] = JSON.parse(jsonResult);
+              }
+            }
+          }) );
         }
       });
     }
@@ -583,7 +590,7 @@ var hrlator = (function () {
         var firstName = row[cols.firstName] = row[cols.firstName].trim();
         if (firstName) {
           var _user_profiles;
-          $.ajax({
+          promises.push( $.ajax({
             url: hrlator.serverUrlBase + '/operational-presence/xml',
             data: {'search_api_views_fulltext': lastName},
             success: function(result) {
@@ -601,32 +608,29 @@ var hrlator = (function () {
               else {
                 validation[cols.lastName] = {valid: 'success'};
               }
-              deferred.resolve(validation);
             },
             error: function(result) {
               validation[cols.lastName] = {valid: 'alert', comment: 'Network error on contact validation with ' + hrlator.serverUrlBase};
-              deferred.resolve(validation);
             }
-          });
+          }) );
         }
         else {
           validation[cols.firstName] = {valid: 'danger', comment: 'First Name is empty'};
-          deferred.resolve(validation);
         }
       }
       else {
         validation[cols.lastName] = {valid: 'danger', comment: 'Last Name is empty'};
-        deferred.resolve(validation);
       }
     }
     else {
       validation[cols.lastName] = {valid: 'danger', comment: 'Could not determine Last Name column'};
-      deferred.resolve(validation);
     }
 
     // Ok, let's check the row
     row[cols.valid] = 'validating';
-    deferred.done(function () {
+
+    // http://stackoverflow.com/questions/5627284/pass-in-an-array-of-deferreds-to-when
+    $.when.apply($, promises).done(function () {
       var valid = 'success';
       var comments = [];
       for (var j in validation) {
@@ -639,6 +643,8 @@ var hrlator = (function () {
       row[cols.comments] = comments.join('; ');
 
       _ht_validated = true;
+
+      deferred.resolve();
     });
 
     return deferred.promise();

@@ -24,13 +24,16 @@ function validateContacts() {
   var timer = setInterval(function() {
     shared.ht.render();
     hrlator.showStatus('Validated ' + rowsValidated + '/' + rows.length, Math.round(rowsValidated * 100 /rows.length));
+console.log('Validated ' + rowsValidated);
   }, 300);
 
   $("h1 i").addClass('glyphicon-refresh-animate').show();
+/*
   rows.forEach(function(row, index) {
     if (index>0) {
       var rowValidated = hrlator.data.validateRow(row);
-      setTimeout(shared.ht.render, 100);
+console.log('Validating ' + index);
+ //     setTimeout(shared.ht.render, 100);
       // shared.ht.render();
       rowValidated.done( function() {
         // shared.ht.render();
@@ -41,6 +44,19 @@ function validateContacts() {
       });
     }
   });
+*/
+  (function validateRow(index) {
+    if (index >= rows.length) return;
+    var rowValidated = hrlator.data.validateRow(rows[index]);
+    rowValidated.done( function() {
+      rowsValidated++;
+      if (rowsValidated == rows.length) {
+        deferred.resolve();
+      }
+    });
+
+    if (index < rows.length) setTimeout(function() { validateRow(index+1) }, 100);
+  })(1);
 
   deferred.done(function () {
     clearInterval(timer);
@@ -285,6 +301,7 @@ var extension = {
 
   // validate data
   'validateContacts': function() {
+console.log('validateContacts: ' + template);
     var shared = this; // pick up shared object from this, will be set internally by func.apply
     hrlator.showStatus('Validating', 0);
     // hic sunt leones
@@ -303,6 +320,8 @@ var extension = {
 
   // render data in handsontable
   'handsontable':  function(template) {
+console.log('handsontable: ' + template);
+    $("h1 i").addClass('glyphicon-refresh-animate').show();
 
     var shared = this; // pick up shared object from this, will be set internally by func.apply
 
@@ -335,6 +354,8 @@ var extension = {
 
     hrlator.ht = shared.ht = $('div#hottable').handsontable('getInstance');
     hrlator.showStatus('', 0);
+
+    $("h1 i").removeClass('glyphicon-refresh-animate').hide();
 
     return shared.nextTask();
   }
@@ -427,7 +448,7 @@ $(document).ready(function () {
           // display data
           handsontable('contacts').
           // data validation
-          validateContacts().
+          validateTable().
           // enable download
           call(enableDownload()).
           call( function() {
