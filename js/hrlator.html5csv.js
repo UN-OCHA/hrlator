@@ -18,54 +18,28 @@ function validateContacts() {
   var shared = this;
   var data = shared.data;
   var rows = data.rows;
+  var validationRows = [];
   var rowsValidated = 1;
   var deferred = $.Deferred();
 
   var timer = setInterval(function() {
     shared.ht.render();
     hrlator.showStatus('Validated ' + rowsValidated + '/' + rows.length, Math.round(rowsValidated * 100 /rows.length));
-console.log('Validated ' + rowsValidated);
+//console.log('Validated ' + rowsValidated, hrlator.dataStats());
   }, 300);
 
   $("h1 i").addClass('glyphicon-refresh-animate').show();
-/*
-  rows.forEach(function(row, index) {
-    if (index>0) {
-      var rowValidated = hrlator.data.validateRow(row);
-console.log('Validating ' + index);
- //     setTimeout(shared.ht.render, 100);
-      // shared.ht.render();
-      rowValidated.done( function() {
-        // shared.ht.render();
-        rowsValidated++;
-        if (rowsValidated == rows.length) {
-          deferred.resolve();
-        }
-      });
-    }
-  });
-*/
-  (function validateRow(index) {
-    if (index >= rows.length) return;
-    var rowValidated = hrlator.data.validateRow(rows[index]);
-    rowValidated.done( function() {
-      rowsValidated++;
-      if (rowsValidated == rows.length) {
-        deferred.resolve();
-      }
-    });
 
-    if (index < rows.length) setTimeout(function() { validateRow(index+1) }, 100);
-  })(1);
+  for (var i=1; i < rows.length; i++) {
+    validationRows.push(hrlator.data.validateRow(rows[i]));
+  }
 
-  deferred.done(function () {
+  $.when.apply($, validationRows).done(function () {
     clearInterval(timer);
-    shared.ht.render();
-    hrlator.showStatus('', 0);
-    $("h1 i").removeClass('glyphicon-refresh-animate').hide();
-    return shared.nextTask();
+    deferred.resolve();
   });
 
+  return deferred.promise();
 }
 
 function validateActivities() {
@@ -93,10 +67,11 @@ function validateActivities() {
   }
 }
 
-function insertColumn(rows, col, colName) {
+function insertColumn(rows, col, colName, data) {
+  data = typeof data !== 'string' ? '' : data;
   rows[0].splice(col, 0, colName);
   for (i=1; i<rows.length; i++) {
-    rows[i].splice(col, 0, '');
+    rows[i].splice(col, 0, data);
   }
 }
 
@@ -174,7 +149,7 @@ var extension = {
     if (shared.data.cols.valid >= 0) {
       removeColumn(shared.data.rows, shared.data.cols.valid);
     }
-    insertColumn(shared.data.rows, shared.data.rows[0].length, 'valid');
+    insertColumn(shared.data.rows, shared.data.rows[0].length, 'valid', 'loaded');
     shared.data.cols = getDataCols();
 
     // 3) comments
@@ -295,8 +270,13 @@ var extension = {
     hrlator.showStatus('Validating', 0);
     // hic sunt leones
     shared.rowToValidate = 1;
-    shared.validate();
-    $("h1 i").removeClass('glyphicon-refresh-animate').hide();
+    $.when(shared.validate())
+      .always(function() {
+        shared.ht.render();
+        hrlator.showStatus('', 0);
+        $("h1 i").removeClass('glyphicon-refresh-animate').hide();
+        return shared.nextTask();
+      });
   },
 
   // validate data
@@ -320,7 +300,7 @@ console.log('validateContacts: ' + template);
 
   // render data in handsontable
   'handsontable':  function(template) {
-console.log('handsontable: ' + template);
+
     $("h1 i").addClass('glyphicon-refresh-animate').show();
 
     var shared = this; // pick up shared object from this, will be set internally by func.apply
@@ -421,73 +401,70 @@ $(document).ready(function () {
   var t;
 
   var hrReady = hrlator.init();
-  hrReady.done(function () {
+  hrReady
+    .done(function () {
 
-    var hrType = hrlator.data.type;
+      var hrType = hrlator.data.type;
 
-    $('.nav.navbar-nav li').removeClass('active');
-    $('.nav.navbar-nav li.' + hrType).addClass('active');
+      $('.nav.navbar-nav li').removeClass('active');
+      $('.nav.navbar-nav li.' + hrType).addClass('active');
 
-    // create data
-    $('#' + hrType + '-new').on('click', function(e) {
-       dataNew(hrType);
-       $('#data-sample').hide();
-    });
+      // create data
+      $('#' + hrType + '-new').on('click', function(e) {
+         dataNew(hrType);
+         $('#data-sample').hide();
+      });
 
-    // upload data
-    if ('contacts' == hrType) { //contacts
-      $('#csv-data').on('click', function () {
-        CSV.
-          begin('#csv-data').
-          call( function() {
-            var d = new Date();
-            t = d.getTime();
-          }).
-          // init data & check columns
-          initContacts().
-          // display data
-          handsontable('contacts').
-          // data validation
-          validateTable().
-          // enable download
-          call(enableDownload()).
-          call( function() {
-            var d = new Date();
-            console.log( "Run time: " + (d.getTime() - t));
-          }).
-          go();
-        $('#data-sample').hide();
+      // upload data
+      if ('contacts' == hrType) { //contacts
+        $('#csv-data').on('click', function () {
+          CSV
+            .begin('#csv-data')
+            // init data & check columns
+            .initContacts()
+            // display data
+            .handsontable('contacts')
+            // data validation
+            .validateTable()
+            // enable download
+            .call(enableDownload())
+            .go();
+          $('#data-sample').hide();
+        });
+      }
+      else if ('activities'  == hrType) { // activities
+        $('#csv-data').on('click', function () {
+          CSV.
+            begin('#csv-data').
+            call( function() {
+              var d = new Date();
+              t = d.getTime();
+            }).
+            // init data & check columns
+            initActivities().
+            // display data
+            handsontable('activities').
+            // data validation
+            validateActivities().
+            // enable download
+            call( enableDownload() ).
+            call( function() {
+              var d = new Date();
+              console.log( "Run time: " + (d.getTime() - t));
+            }).
+            go();
+          $('#data-sample').hide();
       });
     }
-    else if ('activities'  == hrType) { // activities
-      $('#csv-data').on('click', function () {
-        CSV.
-          begin('#csv-data').
-          call( function() {
-            var d = new Date();
-            t = d.getTime();
-          }).
-          // init data & check columns
-          initActivities().
-          // display data
-          handsontable('activities').
-          // data validation
-          validateActivities().
-          // enable download
-          call( enableDownload() ).
-          call( function() {
-            var d = new Date();
-            console.log( "Run time: " + (d.getTime() - t));
-          }).
-          go();
-        $('#data-sample').hide();
+
+    $('#' + hrType + '-upload').attr( "disabled", false );
+    $('#' + hrType + '-new').attr( "disabled", false );
+    $("h1 i").removeClass('glyphicon-refresh-animate').hide();
+
+    })
+  .fail(function () {
+      $("h1 i").removeClass('glyphicon-refresh-animate').hide();
+      alert("The answer is 42");
     });
-  }
-
-  $('#' + hrType + '-upload').attr( "disabled", false );
-  $('#' + hrType + '-new').attr( "disabled", false );
-  $("h1 i").removeClass('glyphicon-refresh-animate').hide();
-
-  });
 
 });

@@ -61,7 +61,7 @@ var hrlator = (function () {
 
     // double check cookie (already done in server side indeed)
     var server = jQuery.cookie('hrlator-server');
-    if (!_servers.server) {
+    if (!_servers[server]) {
       for(var _server in _servers) break;
       server = _server;
     }
@@ -83,7 +83,7 @@ var hrlator = (function () {
     var jqxhrClusters = $.ajax({
       url: self.serverUrlBase + '/clusters.xml',
       error: function() {
-        alert('hrlator init ERROR loading from ' + _serverUrlBase + '/clusters.xml');
+        alert('hrlator init ERROR loading from ' + self.serverUrlBase + '/clusters.xml');
       },
       success: function(result) {
         // parse result with jQuery and extract relevant field
@@ -96,9 +96,9 @@ var hrlator = (function () {
 
     // get organizations from server
     var jqxhrOrganizations = $.ajax({
-      url: self.serverUrlBase + '/organizations.xml',
+      url: self.serverUrlBase + '/organizations/xml',
       error: function() {
-        alert('hrlator init ERROR loading from ' + _serverUrlBase + '/organizations.xml');
+        alert('hrlator init ERROR loading from ' + self.serverUrlBase + '/organizations.xml');
       },
       success: function(result) {
         // parse result with jQuery and extract relevant field
@@ -109,20 +109,24 @@ var hrlator = (function () {
       },
     });
 
-    $.when(jqxhrDictionary, jqxhrClusters, jqxhrOrganizations).done(function (jqxhrDictionary, jqxhrClusters, jqxhrOrganizations) {
-      // autocomplete organization
-      self.autoComplete.organization = self.organizations.
-        map(function (element) { return element.Name } ).
-        concat( self.dictionary.
-          filter( function(element) { return (element.Type=='organizations'); }).
-          map(function (element) { return element.Initial }));
-      // autocomplete cluster
-      self.autoComplete.cluster = self.clusters.
-        map(function (element) { return element.Name } ).
-        concat( self.clusters.
-          map(function (element) { return element.Prefix }));
-      // resolve deferred so init.done() runs
-      deferred.resolve();
+    $.when(jqxhrDictionary, jqxhrClusters, jqxhrOrganizations)
+      .done(function (jqxhrDictionary, jqxhrClusters, jqxhrOrganizations) {
+        // autocomplete organization
+        self.autoComplete.organization = self.organizations.
+          map(function (element) { return element.Name } ).
+          concat( self.dictionary.
+            filter( function(element) { return (element.Type=='organizations'); }).
+            map(function (element) { return element.Initial }));
+        // autocomplete cluster
+        self.autoComplete.cluster = self.clusters.
+          map(function (element) { return element.Name } ).
+          concat( self.clusters.
+            map(function (element) { return element.Prefix }));
+        // resolve deferred so init.done() runs
+        deferred.resolve();
+      })
+    .fail(function() {
+      deferred.reject();
     });
 
     return deferred.promise();
@@ -172,6 +176,7 @@ var hrlator = (function () {
       valid: 'success',
       comments: []
     }
+
     $.each(clusters.data, function(j, cluster) {
       cluster = cluster.trim();
       var i = 0;
@@ -179,6 +184,7 @@ var hrlator = (function () {
         // check the list
         if (element.Name === cluster) {
           clusters.checked[j] = element.Name;
+          clusters.comments[j] = '';
           break;
         }
         // check the prefix
@@ -195,9 +201,11 @@ var hrlator = (function () {
         }
         // check for similarities
         else if (element.Name.indexOf(cluster)>=0) {
-          clusters.checked[j] = element.Name;
-          clusters.comments[j] = 'Cluster ' + cluster + ' replaced by ' + element.Name;
-          // keep looping because this could ba a false positive
+          if (!clusters.checked[j]) {
+            clusters.checked[j] = element.Name;
+            clusters.comments[j] = 'Cluster ' + cluster + ' replaced by ' + element.Name;
+            // keep looping because this could ba a false positive
+          }
         }
         i++;
       }
@@ -241,40 +249,40 @@ var hrlator = (function () {
     var organization = {
        data: row[cols_organization].trim(),
        checked: '',
+       dictionary: '',
        valid: 'success',
-       comment: ''
+       comment: '',
     }
 
     // 1 consult dictionary
     var i = 0;
     while (element = self.dictionary[i]) {
       if ('organizations' == element.Type && organization.data === element.Initial) {
-        organization.checked = element.Replacement;
+        organization.dictionary = element.Replacement;
         organization.comment = 'Organization found in dictionary (' + organization.data + ')';
         break;
       }
       i++;
     }
-    if (!organization.checked) {
-      i = 0;
-      while (element = self.organizations[i]) {
-        // 2 organization_exists
-        if (organization.data === element.Name) {
-          organization.checked = element.Name;
-          break;
-        }
-        // 3 find_organization_by_acronym
-        else if (organization.data === element.Acronym) {
-          organization.checked = element.Name;
-          organization.comment = 'Organization found by acronym (' + organization.data + ')';
-          break;
-        }
-        i++;
+    var organization_data = organization.dictionary ? organization.dictionary : organization.data;
+    i = 0;
+    while (element = self.organizations[i]) {
+      // 2 organization_exists
+      if (organization_data === element.Name) {
+        organization.checked = element.Name;
+        break;
       }
+      // 3 find_organization_by_acronym
+      else if (organization_data === element.Acronym) {
+        organization.checked = element.Name;
+        organization.comment = 'Organization found by acronym (' + organization.data + ')';
+        break;
+      }
+      i++;
     }
     if (!organization.checked) {
       organization.checked = organization.data;
-      organization.comment = 'Organization not found';
+      organization.comment = 'Organization ' + organization.data + ' not found';
       organization.valid = 'danger';
     }
 
@@ -468,12 +476,12 @@ var hrlator = (function () {
     // check empty row
     if (row.join('').length ===0) {
       row[cols.comments] = 'empty';
-      deferred.resolve();
-      return deferred.promise;
+      setTimeout(deferred.resolve, 100);
+      return deferred.promise();
     }
 
     // clear validation
-    validation = [];
+    var validation = [];
 
     // check email
     if (cols.email >= 0 && row[cols.email]) {
@@ -509,23 +517,47 @@ var hrlator = (function () {
         data:  row[cols.location].replace(/[,]/g,';').split(';'),
         checked: [],
         valid: 'success',
-        comments: []
+        comments: [],
+        requests: [],
+        deferred: $.Deferred()
       };
-      $.each(locations.data, function(j, location) {
-        location = location.trim();
-        if (location.length) {
-          var api_json = hrlator_api({'api': 'location_by_name', 'location': location});
-          promises.push( $.ajax({
-            url: 'index.php',
-            data: {'api': 'location_by_name', 'location': location},
-            success: function(jsonResult) {
-              if (jsonResult) {
-                validation[cols.location] = JSON.parse(jsonResult);
+      if (locations.data.length > 1) {
+        promises.push(locations.deferred);
+
+        $.each(locations.data, function(j, location) {
+          var location = location.trim();
+          if (location.length) {
+            locations.requests.push( $.ajax({
+              url: hrlator.serverUrlBase + '/locations/xml',
+              data: {'name': location},
+              success: function(result) {
+                // parse result with jQuery and extract relevant field from XML
+                _locations = $('taxonomy_term_data', result).
+                  filter(function(i, element) { return ($(element).find('Name').text().toLowerCase() == location.toLowerCase()); }).
+                  map( function(i, element) {
+                    var loc = {}
+                    $(element).children().each(function(i, element) { loc[$(element).prop("tagName")] = $(element).text(); });
+                    return loc;
+                  });
+                if (_locations.length < 1) {
+                  locations.valid = 'danger';
+                  locations.comments.push('Location ' + location + ' not found');
+                }
+              },
+              error: function(result) {
+                locations.valid = (locations.valid != 'danger') ? 'alert' : locations.valid;
+                locations.comments.push('Location ' + location + ' not checked');
               }
-            }
-          }) );
-        }
-      });
+            }) );
+          }
+        });
+
+        $.when.apply(this, locations.requests).done(function () {
+          validation[cols.location] = { valid: locations.valid, comment: locations.comments.join('; ') };
+          locations.deferred.resolve();
+        });
+
+      }
     }
 
     // validate phone
@@ -609,7 +641,7 @@ var hrlator = (function () {
               if (_user_profiles.length > 0) {
                 validation[cols.lastName] = {
                   valid: 'danger',
-                  comment: 'Contact already exists in the database. See ' + hrlator.serverUrlBase + '/profile/' + $(_user_profiles).find('profileId').text()};
+                  comment: 'Contact already exists in the database. See ' + hrlator.serverUrlBase + '/profile/' + _user_profiles[0].profileId};
               }
               else {
                 validation[cols.lastName] = {valid: 'success'};
@@ -636,7 +668,7 @@ var hrlator = (function () {
     row[cols.valid] = 'validating';
 
     // http://stackoverflow.com/questions/5627284/pass-in-an-array-of-deferreds-to-when
-    $.when.apply($, promises).done(function () {
+    $.when.apply(this, promises).done(function () {
       var valid = 'success';
       var comments = [];
       for (var j in validation) {
@@ -655,6 +687,12 @@ var hrlator = (function () {
 
     return deferred.promise();
 
+  }
+
+  var dataStats = function() {
+    var stats = {};
+    self.data.rows.forEach(function(row) { stats[row[self.data.cols.valid]]++ ||  (stats[row[self.data.cols.valid]] = 1) });
+    return stats
   }
 
   // contacts headers
@@ -705,6 +743,7 @@ var hrlator = (function () {
     init: init,
     showStatus: showStatus,
     newData: newData,
+    dataStats: dataStats,
 
     // Contacts
     validateContactsRow: validateContactsRow,
