@@ -91,7 +91,7 @@ h1 .glyphicon.glyphicon-refresh {
 }
 
 #hottable.handsontable tr.hrlator-validating td,
-tbody tr.blink {
+tbody tr.blink, .blink {
   animation-name: blinker;
   animation-iteration-count: infinite;
   animation-timing-function: ease-in-out;

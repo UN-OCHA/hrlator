@@ -24,11 +24,19 @@ function validateContacts() {
 
   var timer = setInterval(function() {
     shared.ht.render();
-    hrlator.showStatus('Validated ' + rowsValidated + '/' + rows.length, Math.round(rowsValidated * 100 /rows.length));
-//console.log('Validated ' + rowsValidated, hrlator.dataStats());
+    var stats = hrlator.dataStats();
+    var total = 0;
+    var message = {log: "", progress: {}};
+    for (k in stats) total = total + stats[k];
+    for (k in stats) {
+      message.progress[k] = {
+        width: Math.round(stats[k] * 100 / total),
+        text: stats[k]
+      }
+    }
+    message.log = {text: 'Validated ' + (total - stats.validating) + '/' + total};
+    hrlatorStatus(message);
   }, 300);
-
-  $("h1 i").addClass('glyphicon-refresh-animate').show();
 
   for (var i=1; i < rows.length; i++) {
     validationRows.push(hrlator.data.validateRow(rows[i]));
@@ -266,14 +274,26 @@ var extension = {
   // validate data
   'validateTable': function() {
     $("h1 i").addClass('glyphicon-refresh-animate').show();
+    hrlatorStatus({log: {text: 'validating'}});
+
     var shared = this; // pick up shared object from this, will be set internally by func.apply
-    hrlator.showStatus('Validating', 0);
+
     // hic sunt leones
     shared.rowToValidate = 1;
     $.when(shared.validate())
       .always(function() {
-        shared.ht.render();
-        hrlator.showStatus('', 0);
+        var message = {log: "", progress: {}};
+        var stats = hrlator.dataStats();
+        var total = 0;
+        var strStats = [];
+        for (k in stats) {
+          total = total + stats[k];
+          strStats.push( k + ': ' + stats[k]);
+        }
+        strStats.unshift('Processed: ' + total);
+        message.log = {text: strStats.join(' - ')};
+        hrlatorStatus(message);
+
         $("h1 i").removeClass('glyphicon-refresh-animate').hide();
         return shared.nextTask();
       });
@@ -408,6 +428,7 @@ $(document).ready(function () {
 
       $('.nav.navbar-nav li').removeClass('active');
       $('.nav.navbar-nav li.' + hrType).addClass('active');
+      hrlatorStatus({log: {text: 'ready'}});
 
       // create data
       $('#' + hrType + '-new').on('click', function(e) {

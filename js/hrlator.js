@@ -82,7 +82,7 @@ var hrlator = (function () {
     // get cluster from server
     var jqxhrClusters = $.ajax({
       url: self.serverUrlBase + '/clusters.xml',
-      error: function() {
+      error: function(jqXHR, textStatus, errorThrown) {
         alert('hrlator init ERROR loading from ' + self.serverUrlBase + '/clusters.xml');
       },
       success: function(result) {
@@ -97,7 +97,7 @@ var hrlator = (function () {
     // get organizations from server
     var jqxhrOrganizations = $.ajax({
       url: self.serverUrlBase + '/organizations/xml',
-      error: function() {
+      error: function(jqXHR, textStatus, errorThrown) {
         alert('hrlator init ERROR loading from ' + self.serverUrlBase + '/organizations.xml');
       },
       success: function(result) {
@@ -691,8 +691,10 @@ var hrlator = (function () {
 
   var dataStats = function() {
     var stats = {};
-    self.data.rows.forEach(function(row) { stats[row[self.data.cols.valid]]++ ||  (stats[row[self.data.cols.valid]] = 1) });
-    return stats
+    self.data.rows
+      .filter(function(el, i) { return (i > 0) && el[self.data.cols.valid] })
+      .forEach(function(row) { stats[row[self.data.cols.valid]]++ ||  (stats[row[self.data.cols.valid]] = 1) });
+    return stats;
   }
 
   // contacts headers
@@ -763,7 +765,8 @@ var hrlator = (function () {
       rows: [ [] ],
       headers: [],
       cols: {},
-      validateRow: ''
+      validateRow: '',
+      stats: dataStats,
     },
 
     schema: _schema,
@@ -782,6 +785,30 @@ var hrlator = (function () {
   return self;
 
 })();
+
+function hrlatorStatus(message) {
+  if (message.progress) {
+    for (key in message.progress) {
+      $('#hrlator-show .progress-bar-' + key)
+        .width( message.progress[key].width + '%')
+        .find('span').text(message.progress[key].text);
+    }
+    $('#hrlator-show .progress').show();
+  }
+  else {
+    $('#hrlator-show .progress').hide();
+  }
+  if (message.log) {
+    $('#hrlator-show .log span')
+      .removeClass().addClass(message.log.class)
+      .text(message.log.text)
+      .show();
+  }
+  else {
+    $('#hrlator-show .log span').hide();
+  }
+}
+
 
 $(document).ready(function () {
 
