@@ -690,11 +690,24 @@ var hrlator = (function () {
   }
 
   var dataStats = function() {
+    var message = {log: "", strStats: [], progress: {}};
     var stats = {};
+    var total = 0;
     self.data.rows
       .filter(function(el, i) { return (i > 0) && el[self.data.cols.valid] })
-      .forEach(function(row) { stats[row[self.data.cols.valid]]++ ||  (stats[row[self.data.cols.valid]] = 1) });
-    return stats;
+      .forEach(function(row) {
+        stats[row[self.data.cols.valid]]++ ||  (stats[row[self.data.cols.valid]] = 1);
+        total++});
+
+    for (k in stats) {
+      message.strStats.push( k + ': ' + stats[k]);
+      message.progress[k] = {
+        width: Math.round(stats[k] * 100 / total),
+        text: stats[k]
+      }
+    }
+    message.log = {text: message.strStats.join(' - ')};
+    return {stats: stats, total: total, message: message};
   }
 
   // contacts headers

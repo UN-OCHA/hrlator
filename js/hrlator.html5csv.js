@@ -25,16 +25,7 @@ function validateContacts() {
   var timer = setInterval(function() {
     shared.ht.render();
     var stats = hrlator.dataStats();
-    var total = 0;
-    var message = {log: "", progress: {}};
-    for (k in stats) total = total + stats[k];
-    for (k in stats) {
-      message.progress[k] = {
-        width: Math.round(stats[k] * 100 / total),
-        text: stats[k]
-      }
-    }
-    message.log = {text: 'Validated ' + (total - stats.validating) + '/' + total};
+    var message = stats.message;
     hrlatorStatus(message);
   }, 300);
 
@@ -282,16 +273,8 @@ var extension = {
     shared.rowToValidate = 1;
     $.when(shared.validate())
       .always(function() {
-        var message = {log: "", progress: {}};
         var stats = hrlator.dataStats();
-        var total = 0;
-        var strStats = [];
-        for (k in stats) {
-          total = total + stats[k];
-          strStats.push( k + ': ' + stats[k]);
-        }
-        strStats.unshift('Processed: ' + total);
-        message.log = {text: strStats.join(' - ')};
+        var message = stats.message;
         hrlatorStatus(message);
 
         $("h1 i").removeClass('glyphicon-refresh-animate').hide();
