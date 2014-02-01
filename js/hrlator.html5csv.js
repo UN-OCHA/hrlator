@@ -275,6 +275,7 @@ var extension = {
       .always(function() {
         var stats = hrlator.dataStats();
         var message = stats.message;
+        message.log.text = 'Validation completed - ' + message.log.text;
         hrlatorStatus(message);
 
         $("h1 i").removeClass('glyphicon-refresh-animate').hide();
@@ -430,9 +431,9 @@ $(document).ready(function () {
             .handsontable('contacts')
             // data validation
             .validateTable()
-            // enable download
-            .call(enableDownload())
             .go();
+            // enable download
+            enableDownload();
           $('#data-sample').hide();
         });
       }
@@ -450,13 +451,13 @@ $(document).ready(function () {
             handsontable('activities').
             // data validation
             validateActivities().
-            // enable download
-            call( enableDownload() ).
             call( function() {
               var d = new Date();
               console.log( "Run time: " + (d.getTime() - t));
             }).
             go();
+            // enable download
+            enableDownload();
           $('#data-sample').hide();
       });
     }

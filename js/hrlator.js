@@ -345,7 +345,11 @@ var hrlator = (function () {
       row[self.data.cols.valid] = 'validating';
       self.ht.render();
       var rowValidated = self.data.validateRow(row);
-      rowValidated.done(self.ht.render);
+      rowValidated.done(function() {
+        var stats = hrlator.dataStats();
+        hrlatorStatus(stats.message);
+        self.ht.render();
+      });
     }
   }
 
@@ -514,7 +518,7 @@ var hrlator = (function () {
     // 1 find_location_by_name
     if (cols.location >= 0 && row[cols.location]) {
       locations = {
-        data:  row[cols.location].replace(/[,]/g,';').split(';'),
+        data:  row[cols.location].trim().replace(/[,]/g,';').split(';').filter(function(e){return e}),
         checked: [],
         valid: 'success',
         comments: [],
