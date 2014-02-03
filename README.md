@@ -25,3 +25,7 @@ either the database file and the parent directory are writeable by Apache
 * prefixfree - http://leaverou.github.io/prefixfree
   add data-noprefix for remote css
 * jquery cookies - https://github.com/carhartl/jquery-cookie
+
+# TODO
+* check if ajaxQueue is needed (http://learn.jquery.com/effects/uses-of-queue-and-dequeue/)
+* use validateTable for activities flow
