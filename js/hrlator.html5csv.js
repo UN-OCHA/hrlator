@@ -412,7 +412,7 @@ $(document).ready(function () {
 
       $('.nav.navbar-nav li').removeClass('active');
       $('.nav.navbar-nav li.' + hrType).addClass('active');
-      hrlatorStatus({log: {text: 'ready'}});
+      hrlatorStatus({log: {text: 'Ready'}});
 
       // create data
       $('#' + hrType + '-new').on('click', function(e) {

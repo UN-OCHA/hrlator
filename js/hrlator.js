@@ -3,6 +3,8 @@
  */
 var hrlator = (function () {
 
+  "use strict";
+
   // handsontable
   var ht;
   var _ht_rowLastEdited = -1;
@@ -15,7 +17,7 @@ var hrlator = (function () {
       getRenderFunction: function() {
         return function(instance, td, row, col, prop, value, cellProperties) {
           Handsontable.TextRenderer.apply(this, arguments);
-          tdcheck = instance.getDataAtCell(row, self.data.cols.valid);
+          var tdcheck = instance.getDataAtCell(row, self.data.cols.valid);
           // add class to parent
           $(td).parent().removeClass().addClass("hrlator-" + tdcheck);
           return td;
@@ -180,6 +182,7 @@ var hrlator = (function () {
     $.each(clusters.data, function(j, cluster) {
       cluster = cluster.trim();
       var i = 0;
+      var element;
       while (element = self.clusters[i]) {
         // check the list
         if (element.Name === cluster) {
@@ -256,6 +259,7 @@ var hrlator = (function () {
 
     // 1 consult dictionary
     var i = 0;
+    var element;
     while (element = self.dictionary[i]) {
       if ('organizations' == element.Type && organization.data === element.Initial) {
         organization.dictionary = element.Replacement;
@@ -517,7 +521,7 @@ var hrlator = (function () {
     // validate location
     // 1 find_location_by_name
     if (cols.location >= 0 && row[cols.location]) {
-      locations = {
+      var locations = {
         data:  row[cols.location].trim().replace(/[,]/g,';').split(';').filter(function(e){return e}),
         checked: [],
         valid: 'success',
@@ -526,7 +530,6 @@ var hrlator = (function () {
         deferred: $.Deferred()
       };
       if (locations.data.length > 1) {
-        promises.push(locations.deferred);
 
         $.each(locations.data, function(j, location) {
           var location = location.trim();
@@ -561,6 +564,7 @@ var hrlator = (function () {
           locations.deferred.resolve();
         });
 
+        promises.push(locations.deferred);
       }
     }
 
@@ -569,7 +573,7 @@ var hrlator = (function () {
     if (cols.phone >= 0 && row[cols.phone]) {
       // cleanup numbers and split
       // phones = phones.replace(/[,\/]/g,';').replace(/-/g,' ').replace(/[^0-9+(); ]/, '');
-      phones = {
+      var phones = {
         data: row[cols.phone].toString().
           replace(/[,\/]/g,';').replace(/-/g,' ').replace(/[^0-9+(); ]/, '').
           split(";"),
@@ -578,7 +582,7 @@ var hrlator = (function () {
         comments: []
       }
       $.each(phones.data, function(j, phone) {
-        phone = phone.trim();
+        var phone = phone.trim();
         if (phone.length) {
 
           var phoneParsed = phoneUtil.parse(phone, hrlator.countryCode);
@@ -703,7 +707,7 @@ var hrlator = (function () {
         stats[row[self.data.cols.valid]]++ ||  (stats[row[self.data.cols.valid]] = 1);
         total++});
 
-    for (k in stats) {
+    for (var k in stats) {
       message.strStats.push( k + ': ' + stats[k]);
       message.progress[k] = {
         width: Math.round(stats[k] * 100 / total),
