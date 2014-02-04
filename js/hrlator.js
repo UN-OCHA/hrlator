@@ -539,7 +539,7 @@ var hrlator = (function () {
               data: {'name': location},
               success: function(result) {
                 // parse result with jQuery and extract relevant field from XML
-                _locations = $('taxonomy_term_data', result).
+                var _locations = $('taxonomy_term_data', result).
                   filter(function(i, element) { return ($(element).find('Name').text().toLowerCase() == location.toLowerCase()); }).
                   map( function(i, element) {
                     var loc = {}
