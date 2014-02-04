@@ -379,7 +379,7 @@ var hrlator = (function () {
     }
 
     // clear validation
-    validation = [];
+    var validation = [];
 
     // validate organization
     if (cols.Organizations >=0 && row[cols.Organizations]) {
