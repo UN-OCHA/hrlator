@@ -24,6 +24,7 @@
   color: #b94a48;
 }
 
+#hottable.handsontable tr.hrlator-warning td,
 #hottable.handsontable tr.hrlator-alert td {
   background-color: #fcf8e3;
   border-color: #fbeed5;

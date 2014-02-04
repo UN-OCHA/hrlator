@@ -262,6 +262,7 @@ window.CSV = (function(){
 	    var fileSuccess = function(evt){
 		try {
 		    shared.data.rows = shared.parseCSV(evt.target.result);
+        shared.data.meta.file = f;
 		} catch(e){
 		    shared.finalCallback("CSV: shared.fromFile fileSuccess handler error: "+e);
 		}

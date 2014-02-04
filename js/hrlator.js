@@ -308,7 +308,7 @@ var hrlator = (function () {
     var dataParsed = Date.parse(date.data);
 
     if (dataParsed) {
-      date.valid = 'alert';
+      date.valid = 'warning';
       // date is OK
       if (countSep == 2) {
         date.checked = dataParsed.toString("yyyy/MM/dd");
@@ -552,7 +552,7 @@ var hrlator = (function () {
                 }
               },
               error: function(result) {
-                locations.valid = (locations.valid != 'danger') ? 'alert' : locations.valid;
+                locations.valid = (locations.valid != 'danger') ? 'warning' : locations.valid;
                 locations.comments.push('Location ' + location + ' not checked');
               }
             }) );
@@ -656,7 +656,7 @@ var hrlator = (function () {
               }
             },
             error: function(result) {
-              validation[cols.lastName] = {valid: 'alert', comment: 'Network error on contact validation with ' + hrlator.serverUrlBase};
+              validation[cols.lastName] = {valid: 'warning', comment: 'Network error on contact validation with ' + hrlator.serverUrlBase};
             }
           }) );
         }
@@ -788,6 +788,7 @@ var hrlator = (function () {
       cols: {},
       validateRow: '',
       stats: dataStats,
+      filename: ''
     },
 
     schema: _schema,

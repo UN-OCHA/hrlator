@@ -19,13 +19,12 @@ function validateContacts() {
   var data = shared.data;
   var rows = data.rows;
   var validationRows = [];
-  var rowsValidated = 1;
   var deferred = $.Deferred();
 
   var timer = setInterval(function() {
-    shared.ht.render();
     var stats = hrlator.dataStats();
     var message = stats.message;
+    shared.ht.render();
     hrlatorStatus(message);
   }, 300);
 
@@ -45,9 +44,27 @@ function validateActivities() {
   var shared = this;
   var data = shared.data;
   var rows = data.rows;
+  var validationRows = [];
+  var deferred = $.Deferred();
 
-  var rowToValidate = shared.rowToValidate;
+  var timer = setInterval(function() {
+    var stats = hrlator.dataStats();
+    var message = stats.message;
+    shared.ht.render();
+    hrlatorStatus(message);
+  }, 300);
 
+  for (var i=1; i < rows.length; i++) {
+    validationRows.push(hrlator.data.validateRow(rows[i]));
+  }
+
+  $.when.apply($, validationRows).done(function () {
+    clearInterval(timer);
+    deferred.resolve();
+  });
+
+  return deferred.promise();
+/*
   if (rowToValidate < rows.length) {
     row = rows[rowToValidate];
     if (row.join('').length > 0) {
@@ -55,7 +72,7 @@ function validateActivities() {
       shared.ht.render();
       hrlator.data.validateRow(row);
     }
-    hrlator.showStatus('Validating ' + shared.rowToValidate + '/' + rows.length, (shared.rowToValidate * 100 /rows.length));
+//    hrlator.showStatus('Validating ' + shared.rowToValidate + '/' + rows.length, (shared.rowToValidate * 100 /rows.length));
     shared.rowToValidate++;
     window.setTimeout((function(caller) { return function() { caller.validate(); } })(shared), 50);
   }
@@ -64,6 +81,7 @@ function validateActivities() {
     shared.ht.render();
     return shared.nextTask();
   }
+*/
 }
 
 function insertColumn(rows, col, colName, data) {
@@ -169,7 +187,8 @@ var extension = {
       rows: data,
       cols: shared.data.cols,
       headers: shared.data.rows[0],
-      validateRow: hrlator.validateContactsRow
+      validateRow: hrlator.validateContactsRow,
+      filename: shared.data.meta.file.name
     }
 
     // set validation function
@@ -250,10 +269,9 @@ var extension = {
       rows: data,
       cols: shared.data.cols,
       headers: shared.data.rows[0],
-      validateRow: hrlator.validateActivitiesRow
+      validateRow: hrlator.validateActivitiesRow,
+      filename: shared.data.meta.file.name
     }
-
-    hrlator.showStatus('', 0);
 
     // set validation function
     shared.validate = validateActivities;
@@ -441,20 +459,12 @@ $(document).ready(function () {
         $('#csv-data').on('click', function () {
           CSV.
             begin('#csv-data').
-            call( function() {
-              var d = new Date();
-              t = d.getTime();
-            }).
             // init data & check columns
             initActivities().
             // display data
             handsontable('activities').
             // data validation
-            validateActivities().
-            call( function() {
-              var d = new Date();
-              console.log( "Run time: " + (d.getTime() - t));
-            }).
+            validateTable().
             go();
             // enable download
             enableDownload();
