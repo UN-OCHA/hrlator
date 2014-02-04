@@ -347,12 +347,20 @@ function enableDownload() {
       CSV.begin(data).download('hrlator-' + hrType + '.csv').go();
     });
   $('.log span.hr-download').on('click', function(e) {
+    // get status clicked
     var re = /label-(\w*)/g;
     var res = re.exec(this.className);
     var status = res.pop(0);
-    var data = hrlator.data.rows.filter(function (e) {return (e[hrlator.data.cols.valid]==status)}).slice(0);
-    data.unshift(hrlator.data.headers);
-    CSV.begin(data).download('hrlator-' + hrType + '-' + status + '.csv').go();
+    var stats = hrlator.dataStats();
+    // show modal
+    $('#hrlator-show-modal h4').text('Filter by ' + status + ' (' + stats.stats[status] + '/' + stats.total + ')');
+    $('#hrlator-show-modal').modal();
+    $('#hrlator-show-modal button.btn-primary').on('click', function() {
+      // set data for download
+      var data = hrlator.data.rows.filter(function (e) {return (e[hrlator.data.cols.valid]==status)}).slice(0);
+      data.unshift(hrlator.data.headers);
+      CSV.begin(data).download('hrlator-' + hrType + '-' + status + '.csv').go();
+    });
   });
 }
 
