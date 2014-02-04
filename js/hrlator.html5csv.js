@@ -13,7 +13,7 @@ function hrlator_api(api_data) {
   });
   return jsonResult;
 }
-
+/*
 function validateContacts() {
   var shared = this;
   var data = shared.data;
@@ -64,26 +64,8 @@ function validateActivities() {
   });
 
   return deferred.promise();
-/*
-  if (rowToValidate < rows.length) {
-    row = rows[rowToValidate];
-    if (row.join('').length > 0) {
-      row[hrlator.data.cols.valid] = 'validating';
-      shared.ht.render();
-      hrlator.data.validateRow(row);
-    }
-//    hrlator.showStatus('Validating ' + shared.rowToValidate + '/' + rows.length, (shared.rowToValidate * 100 /rows.length));
-    shared.rowToValidate++;
-    window.setTimeout((function(caller) { return function() { caller.validate(); } })(shared), 50);
-  }
-  else {
-    hrlator.showStatus('', 0);
-    shared.ht.render();
-    return shared.nextTask();
-  }
-*/
 }
-
+*/
 function insertColumn(rows, col, colName, data) {
   data = typeof data !== 'string' ? '' : data;
   rows[0].splice(col, 0, colName);
@@ -192,7 +174,7 @@ var extension = {
     }
 
     // set validation function
-    shared.validate = validateContacts;
+    //shared.validate = validateContacts;
 
     $("h1 i").removeClass('glyphicon-refresh-animate').hide();
 
@@ -274,7 +256,7 @@ var extension = {
     }
 
     // set validation function
-    shared.validate = validateActivities;
+    //shared.validate = validateActivities;
 
     $("h1 i").removeClass('glyphicon-refresh-animate').hide();
     return shared.nextTask();
@@ -282,42 +264,42 @@ var extension = {
 
   // validate data
   'validateTable': function() {
+
+    var shared = this; // pick up shared object from this, will be set internally by func.apply
+
+    // hic sunt leones
+    shared.rowToValidate = 1;
+
+    var data = shared.data;
+    var rows = data.rows;
+    var validationRows = [];
+    var deferred = $.Deferred();
+
+    var timer = setInterval(function() {
+      var stats = hrlator.dataStats();
+      var message = stats.message;
+      shared.ht.render();
+      hrlatorStatus(message);
+    }, 300);
+
+    for (var i=1; i < rows.length; i++) {
+      validationRows.push(hrlator.data.validateRow(rows[i]));
+    }
+
     $("h1 i").addClass('glyphicon-refresh-animate').show();
-    hrlatorStatus({log: {text: 'validating'}});
 
-    var shared = this; // pick up shared object from this, will be set internally by func.apply
+    $.when.apply($, validationRows).done(function () {
+      var stats = hrlator.dataStats();
+      var message = stats.message;
 
-    // hic sunt leones
-    shared.rowToValidate = 1;
-    $.when(shared.validate())
-      .always(function() {
-        var stats = hrlator.dataStats();
-        var message = stats.message;
-        message.log.text = 'Validation completed - ' + message.log.text;
-        hrlatorStatus(message);
+      clearInterval(timer);
+      message.log.text = 'Validation completed - ' + message.log.text;
+      hrlatorStatus(message);
 
-        $("h1 i").removeClass('glyphicon-refresh-animate').hide();
-        return shared.nextTask();
-      });
-  },
+      $("h1 i").removeClass('glyphicon-refresh-animate').hide();
+      return shared.nextTask();
 
-  // validate data
-  'validateContacts': function() {
-console.log('validateContacts: ' + template);
-    var shared = this; // pick up shared object from this, will be set internally by func.apply
-    hrlator.showStatus('Validating', 0);
-    // hic sunt leones
-    shared.rowToValidate = 1;
-    shared.validate();
-  },
-
-  // validate data
-  'validateActivities': function() {
-    var shared = this; // pick up shared object from this, will be set internally by func.apply
-    hrlator.showStatus('Validating', 0);
-    // hic sunt leones
-    shared.rowToValidate = 1;
-    shared.validate();
+    });
   },
 
   // render data in handsontable

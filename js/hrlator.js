@@ -708,7 +708,7 @@ var hrlator = (function () {
         total++});
 
     for (var k in stats) {
-      message.strStats.push( k + ': ' + stats[k]);
+      message.strStats.push( '<span class="label label-'+k+'">' + k + ': ' + stats[k] + '</span>');
       message.progress[k] = {
         width: Math.round(stats[k] * 100 / total),
         text: stats[k]
@@ -727,7 +727,7 @@ var hrlator = (function () {
         {column: 'firstName',    out: true,  header: 'First name'},
         {column: 'lastName',     out: true,  header: 'Last name'},
         {column: 'fullName',     out: false, header: 'Full name'},
-        {column: 'name',         out: false, header: 'Name'},
+        {lolumn: 'name',         out: false, header: 'Name'},
         {column: 'email',        out: true,  header: 'Email'},
         {column: 'phone',        out: true,  header: 'Telephones'},
         {column: 'organization', out: true,  header: 'Organization', autoComplete: 'organization'},
@@ -823,7 +823,7 @@ function hrlatorStatus(message) {
   if (message.log) {
     $('#hrlator-show .log span')
       .removeClass().addClass(message.log.class)
-      .text(message.log.text)
+      .html(message.log.text)
       .show();
   }
   else {
