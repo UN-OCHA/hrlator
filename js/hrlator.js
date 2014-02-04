@@ -369,6 +369,7 @@ var hrlator = (function () {
   // HRLator Activities row validation
   var validateActivitiesRow = function(row) {
 
+    var deferred = $.Deferred();
     var cols = self.data.cols;
 //console.log(row);
 
@@ -471,7 +472,9 @@ var hrlator = (function () {
 
     _ht_validated = true;
 
-    return valid;
+    setTimeout(deferred.resolve, 100);
+
+    return deferred.promise();
   }
 
   // HRLator contacts row validation
@@ -708,7 +711,7 @@ var hrlator = (function () {
         total++});
 
     for (var k in stats) {
-      message.strStats.push( '<span class="label label-'+k+'">' + k + ': ' + stats[k] + '</span>');
+      message.strStats.push( '<span class="label label-'+k+' hr-download">' + k + ': ' + stats[k] + '</span>');
       message.progress[k] = {
         width: Math.round(stats[k] * 100 / total),
         text: stats[k]

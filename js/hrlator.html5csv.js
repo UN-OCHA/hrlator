@@ -13,59 +13,7 @@ function hrlator_api(api_data) {
   });
   return jsonResult;
 }
-/*
-function validateContacts() {
-  var shared = this;
-  var data = shared.data;
-  var rows = data.rows;
-  var validationRows = [];
-  var deferred = $.Deferred();
 
-  var timer = setInterval(function() {
-    var stats = hrlator.dataStats();
-    var message = stats.message;
-    shared.ht.render();
-    hrlatorStatus(message);
-  }, 300);
-
-  for (var i=1; i < rows.length; i++) {
-    validationRows.push(hrlator.data.validateRow(rows[i]));
-  }
-
-  $.when.apply($, validationRows).done(function () {
-    clearInterval(timer);
-    deferred.resolve();
-  });
-
-  return deferred.promise();
-}
-
-function validateActivities() {
-  var shared = this;
-  var data = shared.data;
-  var rows = data.rows;
-  var validationRows = [];
-  var deferred = $.Deferred();
-
-  var timer = setInterval(function() {
-    var stats = hrlator.dataStats();
-    var message = stats.message;
-    shared.ht.render();
-    hrlatorStatus(message);
-  }, 300);
-
-  for (var i=1; i < rows.length; i++) {
-    validationRows.push(hrlator.data.validateRow(rows[i]));
-  }
-
-  $.when.apply($, validationRows).done(function () {
-    clearInterval(timer);
-    deferred.resolve();
-  });
-
-  return deferred.promise();
-}
-*/
 function insertColumn(rows, col, colName, data) {
   data = typeof data !== 'string' ? '' : data;
   rows[0].splice(col, 0, colName);
@@ -398,6 +346,14 @@ function enableDownload() {
       data.unshift(hrlator.data.headers);
       CSV.begin(data).download('hrlator-' + hrType + '.csv').go();
     });
+  $('.log span.hr-download').on('click', function(e) {
+    var re = /label-(\w*)/g;
+    var res = re.exec(this.className);
+    var status = res.pop(0);
+    var data = hrlator.data.rows.filter(function (e) {return (e[hrlator.data.cols.valid]==status)}).slice(0);
+    data.unshift(hrlator.data.headers);
+    CSV.begin(data).download('hrlator-' + hrType + '-' + status + '.csv').go();
+  });
 }
 
 $(document).ready(function () {
@@ -431,25 +387,41 @@ $(document).ready(function () {
             .handsontable('contacts')
             // data validation
             .validateTable()
-            .go();
-            // enable download
-            enableDownload();
+            .go(function(e,D) {
+              if (e) {
+                alert('Oops, an error!');
+                console.log(e);
+                return e;
+              }
+              else {
+                // enable download
+                enableDownload();
+              }
+            });
           $('#data-sample').hide();
         });
       }
       else if ('activities'  == hrType) { // activities
         $('#csv-data').on('click', function () {
-          CSV.
-            begin('#csv-data').
+          CSV
+            .begin('#csv-data')
             // init data & check columns
-            initActivities().
+            .initActivities()
             // display data
-            handsontable('activities').
+            .handsontable('activities')
             // data validation
-            validateTable().
-            go();
-            // enable download
-            enableDownload();
+            .validateTable()
+            .go(function(e,D) {
+              if (e) {
+                alert('Oops, an error!');
+                console.log(e);
+                return e;
+              }
+              else {
+                // enable download
+                enableDownload();
+              }
+            });
           $('#data-sample').hide();
       });
     }
