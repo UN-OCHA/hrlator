@@ -31,6 +31,10 @@
   color: #c09853;
 }
 
+.label-validating {
+  background-color: #5bc0de;
+}
+
 /**
  * Overflow panel
  * http://stackoverflow.com/questions/14926577/why-is-table-content-extending-beyond-containing-bootstrap-span-and-overlapp
