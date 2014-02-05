@@ -246,6 +246,7 @@ window.CSV = (function(){
 	    // if there are no quotes, this will just split on newline and comma
 	    // if there are quotes, then it has to be done one char at a time
 	    var newline="\n", quote='"', comma = ",", space=" ";
+	    comma = ((t.match(/,/g)||[]).length >= (t.match(/;/g)||[]).length) ? ',' : ';';
 	    var all; 
 	    if (t.indexOf(quote) === -1){
 		all = shared.easyParseCSV(t, comma, newline);
@@ -262,7 +263,7 @@ window.CSV = (function(){
 	    var fileSuccess = function(evt){
 		try {
 		    shared.data.rows = shared.parseCSV(evt.target.result);
-        shared.data.meta.file = f;
+		    shared.data.meta.file = f;
 		} catch(e){
 		    shared.finalCallback("CSV: shared.fromFile fileSuccess handler error: "+e);
 		}
