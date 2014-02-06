@@ -118,7 +118,7 @@ var extension = {
       cols: shared.data.cols,
       headers: shared.data.rows[0],
       validateRow: hrlator.validateContactsRow,
-      filename: shared.data.meta.file.name
+      filename: $('#csv-data').val().split("\\").pop()
     }
 
     // set validation function
