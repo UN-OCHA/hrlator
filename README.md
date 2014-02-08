@@ -18,14 +18,16 @@ either the database file and the parent directory are writeable by Apache
 * Handsontable - http://handsontable.com/demo/ajax.html
 * libphonenumber - http://code.google.com/p/libphonenumber
   Compiled http://stackoverflow.com/questions/18678031/how-to-host-the-google-libphonenumber-locally
-* html5csv - https://github.com/DrPaulBrewer/html5csv
 * datajs - http://www.datejs.com
   debug version from http://code.google.com/p/datejs/
   [98cd4af] patched in return values
 * prefixfree - http://leaverou.github.io/prefixfree
   add data-noprefix for remote css
 * jquery cookies - https://github.com/carhartl/jquery-cookie
+* csv.js - https://github.com/gkindel/CSV-JS
+* xls.js - https://github.com/SheetJS/js-xls
+
+* html5csv - https://github.com/DrPaulBrewer/html5csv
 
 # TODO
 * check if ajaxQueue is needed (http://learn.jquery.com/effects/uses-of-queue-and-dequeue/)
-* use validateTable for activities flow

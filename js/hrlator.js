@@ -26,6 +26,14 @@ var hrlator = (function () {
     }
   };
 
+  var htCellRenderer = function(instance, td, row, col, prop, value, cellProperties) {
+    Handsontable.TextRenderer.apply(this, arguments);
+    var tdcheck = instance.getDataAtCell(row, self.data.cols.valid);
+    // add class to parent
+    $(td).parent().removeClass().addClass("hrlator-" + tdcheck);
+    return td;
+  };
+
   // internal variables harcoded
   var _servers = {
     'PH': {serverUrlBase: 'https://philippines.humanitarianresponse.info', countryCode: 'PH'},
@@ -705,7 +713,7 @@ var hrlator = (function () {
     var stats = {};
     var total = 0;
     self.data.rows
-      .filter(function(el, i) { return (i > 0) && el[self.data.cols.valid] })
+      .filter(function(el) { return el[self.data.cols.valid] })
       .forEach(function(row) {
         stats[row[self.data.cols.valid]]++ ||  (stats[row[self.data.cols.valid]] = 1);
         total++});
@@ -730,7 +738,7 @@ var hrlator = (function () {
         {column: 'firstName',    out: true,  header: 'First name'},
         {column: 'lastName',     out: true,  header: 'Last name'},
         {column: 'fullName',     out: false, header: 'Full name'},
-        {lolumn: 'name',         out: false, header: 'Name'},
+        {column: 'name',         out: false, header: 'Name'},
         {column: 'email',        out: true,  header: 'Email'},
         {column: 'phone',        out: true,  header: 'Telephones'},
         {column: 'organization', out: true,  header: 'Organization', autoComplete: 'organization'},
@@ -763,6 +771,121 @@ var hrlator = (function () {
     }
   };
 
+  // set data cols from header
+  var setDataCols = function(type) {
+    var schema = _schema[self.data.type];
+    var header = self.data.rows[0].map(function(element) { return element.toLowerCase();} );
+    self.data.cols = {};
+    schema.columns.forEach(function(c) {
+      self.data.cols[c.column] = header.indexOf(c.header.toLowerCase());
+    });
+    return self.data.cols;
+  }
+
+  // insert data column and reset data cols
+  function insertColumn(col, colName, data) {
+    data = typeof data !== 'string' ? '' : data;
+    self.data.rows[0].splice(col, 0, colName);
+    for (var i=1; i<self.data.rows.length; i++) {
+      self.data.rows[i].splice(col, 0, data);
+    }
+    setDataCols();
+  }
+
+  // remove data column and reset data cols
+  function removeColumn(col) {
+    self.data.rows[0].splice(col, 1);
+    for (var i=1; i<self.data.rows.length; i++) {
+      self.data.rows[i].splice(col, 1);
+    }
+    setDataCols();
+  }
+
+  // preprocess data
+  // checks columns and set header
+  var preprocessData = function(rows) {
+
+    // load data (with header) for preprocess
+    self.data.rows = rows;
+    var cols = setDataCols();
+
+    if ('contacts' == self.data.type) {
+      // name/full name vs. first/last name
+      if (cols.fullName >= 0) {
+        if (cols.firstName < 0) {
+          insertColumn(cols.fullName+1, 'First name');
+        }
+        if (cols.lastName < 0) {
+          insertColumn(cols.firstName+1, 'Last name');
+        }
+      }
+      else if (cols.name >= 0) {
+        if (cols.firstName < 0) {
+          insertColumn(cols.name+1, 'First name');
+        }
+        if (cols.lastName < 0) {
+          insertColumn(cols.firstName+1, 'Last name');
+        }
+      }
+    }
+    else if ('activities' == self.data.type) {
+      // Acronym
+      if (cols.OrgAcronym < 0) {
+        insertColumn(cols.Organizations+1, 'Organizations Acronym');
+      }
+    }
+
+    // valid
+    if (cols.valid >= 0) {
+      removeColumn(cols.valid);
+    }
+    insertColumn(rows[0].length, 'valid');
+
+    // comments
+    if (cols.comments >= 0) {
+      removeColumn(cols.comments);
+    }
+    insertColumn(rows[0].length, 'comments');
+
+    // extract header after preprocess and set validation funtion
+    self.data.headers = self.data.rows.shift();
+    self.data.validateRow = self.validateRow[self.data.type];
+  }
+
+  // validate data
+  // return a promise
+  // and wait for every row to validate
+  var validateData = function() {
+    var rows = self.data.rows;
+    var validateRows = [];
+    var deferred = $.Deferred();
+
+    // show progress
+    var timer = setInterval(function() {
+      var stats = dataStats();
+      var message = stats.message;
+      self.ht.render();
+      hrlatorStatus(message);
+    }, 100);
+
+    for (var i=0; i < rows.length; i++) {
+      if (rows[i].join('').length > 0)
+        validateRows.push(self.data.validateRow(rows[i]));
+    }
+    $.when.apply(this, validateRows).done(function () {
+      var stats = dataStats();
+      var message = stats.message;
+      message.log.text = 'Validation completed - ' + message.log.text;
+      clearInterval(timer);
+      hrlatorStatus(message);
+      self.ht.render();
+      deferred.resolve();
+    });
+
+    return deferred.promise();
+
+  }
+
   // public
   var self = {
     // expose functions
@@ -770,6 +893,14 @@ var hrlator = (function () {
     showStatus: showStatus,
     newData: newData,
     dataStats: dataStats,
+    preprocessData: preprocessData,
+    validateData: validateData,
+    validateRow: {
+      contacts: validateContactsRow,
+      activities: validateActivitiesRow
+    },
+    htCellRenderer: htCellRenderer,
+    // preprocessActivities: preprocessActivities,
 
     // Contacts
     validateContactsRow: validateContactsRow,
@@ -786,6 +917,7 @@ var hrlator = (function () {
     // expose and init data
     ht: ht,
     data: {
+      type: '',
       rows: [ [] ],
       headers: [],
       cols: {},

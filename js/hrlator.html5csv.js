@@ -293,7 +293,7 @@ var extension = {
   }
 };
 
-CSV.extend(extension); // attach to list of known middleware
+//CSV.extend(extension); // attach to list of known middleware
 
 function sleep(milliseconds) {
   var start = new Date().getTime();
@@ -325,7 +325,33 @@ function dataNew(type) {
     contextMenu: true,
     persistantState: true,
     manualColumnResize: true,
-    afterSelectionEnd: hrlator.afterSelectionEnd, //afterSelectionEnd,
+    afterSelectionEnd: hrlator.afterSelectionEnd,
+    afterChange: hrlator.afterChange
+  });
+
+  hrlator.ht = $('div#hottable').handsontable('getInstance');
+
+  enableDownload();
+}
+
+// Show ht with data from hrlator.data object
+function showHt() {
+  $('div#hottable').handsontable({
+    data: hrlator.data.rows,
+    columns: hrlator.data.columns,
+    cells: function (row, col, prop) {
+      var cellProperties = {};
+      cellProperties.renderer = hrlator.htCellRenderer;
+      return cellProperties;
+    },
+    minSpareRows: 1,
+    height: 600,
+    colHeaders: hrlator.data.headers,
+    rowHeaders: true,
+    contextMenu: true,
+    persistantState: true,
+    manualColumnResize: true,
+    afterSelectionEnd: hrlator.afterSelectionEnd,
     afterChange: hrlator.afterChange
   });
 
@@ -333,6 +359,27 @@ function dataNew(type) {
   hrlator.showStatus('', 0);
 
   enableDownload();
+}
+
+function dataDownload(filename, data) {
+
+  var colDelim = ',';
+  var rowDelim = '\r\n';
+  var csvData = data.map(function (row) {
+    return row.map(function (cell) {
+      return cell ? '"' + cell.replace('"', '""') + '"' : '""';
+    }).join(colDelim);
+  }).join(rowDelim);
+
+  var a = document.createElement('a');
+  a.href = 'data:attachment/csv,'+encodeURIComponent(csvData);
+  a.target = '_blank';
+  a.id = 'dataURLdownloader';
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+
 }
 
 function enableDownload() {
@@ -344,7 +391,8 @@ function enableDownload() {
     on('click', function(e) {
       var data = hrlator.data.rows.slice(0);
       data.unshift(hrlator.data.headers);
-      CSV.begin(data).download('hrlator-' + hrType + '.csv').go();
+      dataDownload('hrlator-' + hrType + '.csv', data);
+      //CSV.begin(data).download('hrlator-' + hrType + '.csv').go();
     });
   $('.log span.hr-download').on('click', function(e) {
     // get status clicked
@@ -357,9 +405,10 @@ function enableDownload() {
     $('#hrlator-show-modal').modal();
     $('#hrlator-show-modal button.btn-primary').on('click', function() {
       // set data for download
-      var data = hrlator.data.rows.filter(function (e) {return (e[hrlator.data.cols.valid]==status)}).slice(0);
+      var data = hrlator.data.rows.filter(function (e) {return (e[hrlator.data.cols.valid]==status)});
       data.unshift(hrlator.data.headers);
-      CSV.begin(data).download('hrlator-' + hrType + '-' + status + '.csv').go();
+      dataDownload('hrlator-' + hrType + '.csv', data);
+      // CSV.begin(data).download('hrlator-' + hrType + '-' + status + '.csv').go();
     });
   });
 }
@@ -369,6 +418,7 @@ $(document).ready(function () {
   var t;
 
   var hrReady = hrlator.init();
+  $('#hrlator-show .log .blink').text('Loading from ' + hrlator.serverUrlBase);
   hrReady
     .done(function () {
 
@@ -385,31 +435,70 @@ $(document).ready(function () {
       });
 
       // upload data
-      if ('contacts' == hrType) { //contacts
-        $('#csv-data').on('click', function () {
-          CSV
-            .begin('#csv-data')
-            // init data & check columns
-            .initContacts()
-            // display data
-            .handsontable('contacts')
-            // data validation
-            .validateTable()
-            .go(function(e,D) {
-              if (e) {
-                alert('Oops, an error!');
-                console.log(e);
-                return e;
+      if ('contacts' == hrType || 'activities'  == hrType) {
+        $('#csv-data').on('change', function () {
+
+          //Retrieve the first (and only!) File from the FileList object
+          var f = this.files[0];
+
+          if (f) {
+            $("h1 i").addClass('glyphicon-refresh-animate').show();
+            hrlatorStatus({log: {text: 'Loading ' + f.name, class: 'blink'}});
+            var r = new FileReader();
+            r.onload = function(e) {
+              var contents = e.target.result;
+              hrlatorStatus({log: {text: 'Load data from ' + f.name, class: 'blink'}});
+              // loading file in rows
+              if ('application/vnd.ms-excel' == f.type || f.name.match(/xls$/)) { // excel 97 file
+                var cfb = XLS.CFB.read(contents, {type:"binary"});
+                var wb = XLS.parse_xlscfb(cfb);
+                var sheet = wb.Sheets[wb.SheetNames[0]];
+                var rows = [];
+                if(!sheet["!ref"]) return out;
+                var r = XLS.utils.decode_range(sheet["!ref"]);
+                for(var R = r.s.r; R <= r.e.r; ++R) {
+                  var row = [];
+                  for(var C = r.s.c; C <= r.e.c; ++C) {
+                    var val = sheet[XLS.utils.encode_cell({c:C,r:R})];
+                    if(!val) { row.push(""); continue; }
+                    // force text rendered
+                    if (val.t != 's') {
+                      val.t = 's';
+                      delete val.XF;
+                      delete val.w;
+                    }
+                    txt = XLS.utils.format_cell(val);
+                    row.push(String(txt).replace(/\\n/g,"\n").replace(/\\t/g,"\t").replace(/\\\\/g,"\\").replace(/\\\"/g,"\"\"").trim());
+                  }
+                  rows.push(row);
+                }
               }
               else {
-                // enable download
-                enableDownload();
+                var rows = CSV.parse(contents);
               }
-            });
-          $('#data-sample').hide();
+
+              // preprocess rows
+              $('#data-sample').hide();
+              hrlatorStatus({log: {text: 'Preprocessing data', class: 'blink'}});
+              hrlator.preprocessData(rows);
+              showHt();
+
+              // validate data
+              $.when(hrlator.validateData()).then(function () {
+                showHt();
+                enableDownload();
+                $("h1 i").addClass('glyphicon-refresh-animate').hide();
+              });
+            }
+            //r.readAsText(f);
+            r.readAsBinaryString(f);
+          } else {
+            alert("Failed to load file");
+          }
+
         });
       }
-      else if ('activities'  == hrType) { // activities
+      else if ('activitiesx'  == hrType) { // activities
         $('#csv-data').on('click', function () {
           CSV
             .begin('#csv-data')
