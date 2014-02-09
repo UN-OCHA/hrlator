@@ -361,6 +361,7 @@ function showHt() {
   enableDownload();
 }
 
+var supportHTM5download = null;
 function dataDownload(filename, data) {
 
   var colDelim = ',';
@@ -370,18 +371,29 @@ function dataDownload(filename, data) {
       return cell ? '"' + cell.replace('"', '""') + '"' : '""';
     }).join(colDelim);
   }).join(rowDelim);
+  var dataURL = 'data:text/plain,' + encodeURIComponent(csvData);
 
-  // use a.download to set file name
-  var a = document.getElementById('dataURLdownloader');
-  if (!a) {
-    a = document.createElement('a');
-    a.target = '_blank';
-    a.id = 'dataURLdownloader';
-    document.body.appendChild(a);
+  // check if HTML5 a download attribute is working
+  // Safari (Version 6.1.1) doesn't support
+  var supportHTM5download = (typeof $('a')[0].download === 'string');
+
+  if (supportHTM5download) {
+    // use a.download to set file name
+    var a = document.getElementById('dataURLdownloader');
+    if (!a) {
+      a = document.createElement('a');
+      a.target = '_blank';
+      a.id = 'dataURLdownloader';
+      document.body.appendChild(a);
+    }
+    a.href = dataURL;
+    a.download = filename;
+    a.click();
   }
-  a.href =  'data:attachment/csv,' + encodeURIComponent(csvData);
-  a.download = filename;
-  a.click();
+  else {
+    window.open(dataURL);
+  }
+  // return false;
 
 }
 
@@ -391,13 +403,13 @@ function enableDownload() {
   $('#' + hrType + '-upload').attr( 'disabled', true );
   $('#' + hrType + '-new').attr( 'disabled', true );
   $('#' + hrType + '-download').attr( 'disabled', false ).
+    unbind().
     on('click', function(e) {
       var data = hrlator.data.rows.slice(0);
       data.unshift(hrlator.data.headers);
       dataDownload('hrlator-' + hrType + '.csv', data);
-      //CSV.begin(data).download('hrlator-' + hrType + '.csv').go();
     });
-  $('.log span.hr-download').on('click', function(e) {
+  $('.log span.hr-download').unbind().on('click', function(e) {
     // get status clicked
     var re = /label-(\w*)/g;
     var res = re.exec(this.className);
@@ -406,12 +418,11 @@ function enableDownload() {
     // show modal
     $('#hrlator-show-modal h4').text('Filter by ' + status + ' (' + stats.stats[status] + '/' + stats.total + ')');
     $('#hrlator-show-modal').modal();
-    $('#hrlator-show-modal button.btn-primary').on('click', function() {
+    $('#hrlator-show-modal button.btn-primary').unbind().on('click', function() {
       // set data for download
       var data = hrlator.data.rows.filter(function (e) {return (e[hrlator.data.cols.valid]==status)});
       data.unshift(hrlator.data.headers);
-      dataDownload('hrlator-' + hrType + '.csv', data);
-      // CSV.begin(data).download('hrlator-' + hrType + '-' + status + '.csv').go();
+      dataDownload('hrlator-' + hrType + '-' + status + '.csv', data);
     });
   });
 }
@@ -438,102 +449,76 @@ $(document).ready(function () {
       });
 
       // upload data
-      if ('contacts' == hrType || 'activities'  == hrType) {
-        $('#csv-data').on('change', function () {
+      $('#csv-data').on('change', function () {
 
-          //Retrieve the first (and only!) File from the FileList object
-          var f = this.files[0];
+        //Retrieve the first (and only!) File from the FileList object
+        var f = this.files[0];
 
-          if (f) {
-            $("h1 i").addClass('glyphicon-refresh-animate').show();
-            hrlatorStatus({log: {text: 'Loading ' + f.name, class: 'blink'}});
-            var r = new FileReader();
-            r.onload = function(e) {
-              var contents = e.target.result;
-              hrlatorStatus({log: {text: 'Load data from ' + f.name, class: 'blink'}});
-              // loading file in rows
-              if ('application/vnd.ms-excel' == f.type || f.name.match(/xls$/)) { // excel 97 file
-                var cfb = XLS.CFB.read(contents, {type:"binary"});
-                var wb = XLS.parse_xlscfb(cfb);
-                var sheet = wb.Sheets[wb.SheetNames[0]];
-                var rows = [];
-                if(!sheet["!ref"]) return out;
-                var r = XLS.utils.decode_range(sheet["!ref"]);
-                for(var R = r.s.r; R <= r.e.r; ++R) {
-                  var row = [];
-                  for(var C = r.s.c; C <= r.e.c; ++C) {
-                    var val = sheet[XLS.utils.encode_cell({c:C,r:R})];
-                    if(!val) { row.push(""); continue; }
-                    // force text rendered
-                    if (val.t != 's') {
-                      val.t = 's';
-                      delete val.XF;
-                      delete val.w;
-                    }
-                    txt = XLS.utils.format_cell(val);
-                    row.push(String(txt).replace(/\\n/g,"\n").replace(/\\t/g,"\t").replace(/\\\\/g,"\\").replace(/\\\"/g,"\"\"").trim());
+        if (f) {
+          $("h1 i").addClass('glyphicon-refresh-animate').show();
+          hrlatorStatus({log: {text: 'Loading ' + f.name, class: 'blink'}});
+          var r = new FileReader();
+          r.onload = function(e) {
+            var contents = e.target.result;
+            hrlatorStatus({log: {text: 'Load data from ' + f.name, class: 'blink'}});
+            // loading file in rows
+            if ('application/vnd.ms-excel' == f.type || f.name.match(/xls$/)) { // excel 97 file
+              var cfb = XLS.CFB.read(contents, {type:"binary"});
+              var wb = XLS.parse_xlscfb(cfb);
+              var sheet = wb.Sheets[wb.SheetNames[0]];
+              var rows = [];
+              if(!sheet["!ref"]) return out;
+              var r = XLS.utils.decode_range(sheet["!ref"]);
+              for(var R = r.s.r; R <= r.e.r; ++R) {
+                var row = [];
+                for(var C = r.s.c; C <= r.e.c; ++C) {
+                  var val = sheet[XLS.utils.encode_cell({c:C,r:R})];
+                  if(!val) { row.push(""); continue; }
+                  // force text rendered
+                  if (val.t != 's') {
+                    val.t = 's';
+                    delete val.XF;
+                    delete val.w;
                   }
-                  rows.push(row);
+                  txt = XLS.utils.format_cell(val);
+                  row.push(String(txt).replace(/\\n/g,"\n").replace(/\\t/g,"\t").replace(/\\\\/g,"\\").replace(/\\\"/g,"\"\"").trim());
                 }
+                rows.push(row);
               }
-              else {
-                var rows = CSV.parse(contents);
-              }
-
-              // preprocess rows
-              $('#data-sample').hide();
-              hrlatorStatus({log: {text: 'Preprocessing data', class: 'blink'}});
-              hrlator.preprocessData(rows);
-              showHt();
-
-              // validate data
-              $.when(hrlator.validateData()).then(function () {
-                showHt();
-                enableDownload();
-                $("h1 i").addClass('glyphicon-refresh-animate').hide();
-              });
             }
-            //r.readAsText(f);
-            r.readAsBinaryString(f);
-          } else {
-            alert("Failed to load file");
-          }
+            else {
+              var rows = CSV.parse(contents);
+            }
 
-        });
-      }
-      else if ('activitiesx'  == hrType) { // activities
-        $('#csv-data').on('click', function () {
-          CSV
-            .begin('#csv-data')
-            // init data & check columns
-            .initActivities()
-            // display data
-            .handsontable('activities')
-            // data validation
-            .validateTable()
-            .go(function(e,D) {
-              if (e) {
-                alert('Oops, an error!');
-                console.log(e);
-                return e;
-              }
-              else {
-                // enable download
-                enableDownload();
-              }
+            // preprocess rows
+            $('#data-sample').hide();
+            hrlatorStatus({log: {text: 'Preprocessing data', class: 'blink'}});
+            hrlator.preprocessData(rows);
+            showHt();
+
+            // validate data
+            $.when(hrlator.validateData()).then(function () {
+              showHt();
+              enableDownload();
+              $("h1 i").addClass('glyphicon-refresh-animate').hide();
             });
-          $('#data-sample').hide();
-      });
-    }
+          }
+          //r.readAsText(f);
+          r.readAsBinaryString(f);
+        } else {
+          alert("Failed to load file");
+        }
 
-    $('#' + hrType + '-upload').attr( "disabled", false );
-    $('#' + hrType + '-new').attr( "disabled", false );
-    $("h1 i").removeClass('glyphicon-refresh-animate').hide();
+      });
+
+      $('#' + hrType + '-upload').attr( "disabled", false );
+      $('#' + hrType + '-new').attr( "disabled", false );
+      $("h1 i").removeClass('glyphicon-refresh-animate').hide();
 
     })
   .fail(function () {
       $("h1 i").removeClass('glyphicon-refresh-animate').hide();
-      alert("The answer is 42");
+      alert("Uh uh, something bad happened, please contact the webmaster.");
     });
 
 });
