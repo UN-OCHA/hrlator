@@ -371,14 +371,17 @@ function dataDownload(filename, data) {
     }).join(colDelim);
   }).join(rowDelim);
 
-  var a = document.createElement('a');
-  a.href = 'data:attachment/csv,'+encodeURIComponent(csvData);
-  a.target = '_blank';
-  a.id = 'dataURLdownloader';
+  // use a.download to set file name
+  var a = document.getElementById('dataURLdownloader');
+  if (!a) {
+    a = document.createElement('a');
+    a.target = '_blank';
+    a.id = 'dataURLdownloader';
+    document.body.appendChild(a);
+  }
+  a.href =  'data:attachment/csv,' + encodeURIComponent(csvData);
   a.download = filename;
-  document.body.appendChild(a);
   a.click();
-  document.body.removeChild(a);
 
 }
 

@@ -807,43 +807,43 @@ var hrlator = (function () {
 
     // load data (with header) for preprocess
     self.data.rows = rows;
-    var cols = setDataCols();
+    self.data.cols = setDataCols();
 
     if ('contacts' == self.data.type) {
       // name/full name vs. first/last name
-      if (cols.fullName >= 0) {
-        if (cols.firstName < 0) {
-          insertColumn(cols.fullName+1, 'First name');
+      if (self.data.cols.fullName >= 0) {
+        if (self.data.cols.firstName < 0) {
+          insertColumn(self.data.cols.fullName+1, 'First name');
         }
-        if (cols.lastName < 0) {
-          insertColumn(cols.firstName+1, 'Last name');
+        if (self.data.cols.lastName < 0) {
+          insertColumn(self.data.cols.firstName+1, 'Last name');
         }
       }
-      else if (cols.name >= 0) {
-        if (cols.firstName < 0) {
-          insertColumn(cols.name+1, 'First name');
+      else if (self.data.cols.name >= 0) {
+        if (self.data.cols.firstName < 0) {
+          insertColumn(self.data.cols.name+1, 'First name');
         }
-        if (cols.lastName < 0) {
-          insertColumn(cols.firstName+1, 'Last name');
+        if (self.data.cols.lastName < 0) {
+          insertColumn(self.data.cols.firstName+1, 'Last name');
         }
       }
     }
     else if ('activities' == self.data.type) {
       // Acronym
-      if (cols.OrgAcronym < 0) {
-        insertColumn(cols.Organizations+1, 'Organizations Acronym');
+      if (self.data.cols.OrgAcronym < 0) {
+        insertColumn(self.data.cols.Organizations+1, 'Organizations Acronym');
       }
     }
 
     // valid
-    if (cols.valid >= 0) {
-      removeColumn(cols.valid);
+    if (self.data.cols.valid >= 0) {
+      removeColumn(self.data.cols.valid);
     }
     insertColumn(rows[0].length, 'valid');
 
     // comments
-    if (cols.comments >= 0) {
-      removeColumn(cols.comments);
+    if (self.data.cols.comments >= 0) {
+      removeColumn(self.data.cols.comments);
     }
     insertColumn(rows[0].length, 'comments');
 
