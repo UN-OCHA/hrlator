@@ -423,6 +423,7 @@ function enableDownload() {
       var data = hrlator.data.rows.filter(function (e) {return (e[hrlator.data.cols.valid]==status)});
       data.unshift(hrlator.data.headers);
       dataDownload('hrlator-' + hrType + '-' + status + '.csv', data);
+      $('#hrlator-show-modal').modal('hide');
     });
   });
 }
