@@ -26,6 +26,8 @@ either the database file and the parent directory are writeable by Apache
 * jquery cookies - https://github.com/carhartl/jquery-cookie
 * csv.js - https://github.com/gkindel/CSV-JS
 * xls.js - https://github.com/SheetJS/js-xls
+* xlsx.js - https://github.com/SheetJS/js-xlsx
+* jszip.js - https://github.com/Stuk/jszip (needed by xlsx.js)
 
 * html5csv - https://github.com/DrPaulBrewer/html5csv
 

@@ -40,11 +40,34 @@ function loadRows(contents) {
   var f = hrlator.data.file;
   var rows = [];
 
-  if ('application/vnd.ms-excel' == f.type || f.name.match(/xls$/)) { // excel 97 file
+  // http://stackoverflow.com/questions/11832930/html-input-file-accept-attribute-file-type-csv
+  if ('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' == f.type || f.name.match(/xlsx$/)) { // excel 2010 xlsx) file
+    var wb = XLSX.read(contents, {type: 'binary'});
+    var sheet = wb.Sheets[wb.SheetNames[0]];
+    if(!sheet["!ref"]) return rows;
+    var r = XLSX.utils.decode_range(sheet["!ref"]);
+    for(var R = r.s.r; R <= r.e.r; ++R) {
+      var row = [];
+      for(var C = r.s.c; C <= r.e.c; ++C) {
+        var val = sheet[XLSX.utils.encode_cell({c:C,r:R})];
+        if(!val) { row.push(""); continue; }
+        // force text rendered
+        if (val.t != 's') {
+          val.t = 's';
+          delete val.XF;
+          delete val.w;
+        }
+        txt = XLS.utils.format_cell(val);
+        row.push(String(txt).replace(/\\n/g,"\n").replace(/\\t/g,"\t").replace(/\\\\/g,"\\").replace(/\\\"/g,"\"\"").trim());
+      }
+      rows.push(row);
+    }
+  }
+  else if ('application/vnd.ms-excel' == f.type || f.name.match(/xls$/)) { // excel 97 (xls) file
     var cfb = XLS.CFB.read(contents, {type:"binary"});
     var wb = XLS.parse_xlscfb(cfb);
     var sheet = wb.Sheets[wb.SheetNames[0]];
-    if(!sheet["!ref"]) return out;
+    if(!sheet["!ref"]) return rows;
     var r = XLS.utils.decode_range(sheet["!ref"]);
     for(var R = r.s.r; R <= r.e.r; ++R) {
       var row = [];
