@@ -923,7 +923,8 @@ var hrlator = (function () {
       cols: {},
       validateRow: '',
       stats: dataStats,
-      filename: ''
+      filename: '',
+      file: null
     },
 
     schema: _schema,

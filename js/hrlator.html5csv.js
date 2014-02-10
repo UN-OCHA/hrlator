@@ -304,6 +304,7 @@ function sleep(milliseconds) {
   }
 }
 
+// create empty data in hrlator
 function dataNew(type) {
 
   // setup data
@@ -332,6 +333,41 @@ function dataNew(type) {
   hrlator.ht = $('div#hottable').handsontable('getInstance');
 
   enableDownload();
+}
+
+// load data in rows from file
+function loadRows(contents) {
+  var f = hrlator.data.file;
+  var rows = [];
+
+  if ('application/vnd.ms-excel' == f.type || f.name.match(/xls$/)) { // excel 97 file
+    var cfb = XLS.CFB.read(contents, {type:"binary"});
+    var wb = XLS.parse_xlscfb(cfb);
+    var sheet = wb.Sheets[wb.SheetNames[0]];
+    if(!sheet["!ref"]) return out;
+    var r = XLS.utils.decode_range(sheet["!ref"]);
+    for(var R = r.s.r; R <= r.e.r; ++R) {
+      var row = [];
+      for(var C = r.s.c; C <= r.e.c; ++C) {
+        var val = sheet[XLS.utils.encode_cell({c:C,r:R})];
+        if(!val) { row.push(""); continue; }
+        // force text rendered
+        if (val.t != 's') {
+          val.t = 's';
+          delete val.XF;
+          delete val.w;
+        }
+        txt = XLS.utils.format_cell(val);
+        row.push(String(txt).replace(/\\n/g,"\n").replace(/\\t/g,"\t").replace(/\\\\/g,"\\").replace(/\\\"/g,"\"\"").trim());
+      }
+      rows.push(row);
+    }
+  }
+  else { // CSV
+    rows = CSV.parse(contents);
+  }
+
+  return rows;
 }
 
 // Show ht with data from hrlator.data object
@@ -393,7 +429,6 @@ function dataDownload(filename, data) {
   else {
     window.open(dataURL);
   }
-  // return false;
 
 }
 
@@ -456,40 +491,16 @@ $(document).ready(function () {
         var f = this.files[0];
 
         if (f) {
+          hrlator.data.file = f;
+          hrlator.data.filename = f.name
           $("h1 i").addClass('glyphicon-refresh-animate').show();
-          hrlatorStatus({log: {text: 'Loading ' + f.name, class: 'blink'}});
+          hrlatorStatus({log: {text: 'Loading ' + hrlator.data.filename, class: 'blink'}});
           var r = new FileReader();
           r.onload = function(e) {
-            var contents = e.target.result;
-            hrlatorStatus({log: {text: 'Load data from ' + f.name, class: 'blink'}});
-            // loading file in rows
-            if ('application/vnd.ms-excel' == f.type || f.name.match(/xls$/)) { // excel 97 file
-              var cfb = XLS.CFB.read(contents, {type:"binary"});
-              var wb = XLS.parse_xlscfb(cfb);
-              var sheet = wb.Sheets[wb.SheetNames[0]];
-              var rows = [];
-              if(!sheet["!ref"]) return out;
-              var r = XLS.utils.decode_range(sheet["!ref"]);
-              for(var R = r.s.r; R <= r.e.r; ++R) {
-                var row = [];
-                for(var C = r.s.c; C <= r.e.c; ++C) {
-                  var val = sheet[XLS.utils.encode_cell({c:C,r:R})];
-                  if(!val) { row.push(""); continue; }
-                  // force text rendered
-                  if (val.t != 's') {
-                    val.t = 's';
-                    delete val.XF;
-                    delete val.w;
-                  }
-                  txt = XLS.utils.format_cell(val);
-                  row.push(String(txt).replace(/\\n/g,"\n").replace(/\\t/g,"\t").replace(/\\\\/g,"\\").replace(/\\\"/g,"\"\"").trim());
-                }
-                rows.push(row);
-              }
-            }
-            else {
-              var rows = CSV.parse(contents);
-            }
+
+            // load data from file
+            hrlatorStatus({log: {text: 'Load data from ' + hrlator.data.filename, class: 'blink'}});
+            var rows = loadRows(e.target.result);
 
             // preprocess rows
             $('#data-sample').hide();
@@ -504,7 +515,6 @@ $(document).ready(function () {
               $("h1 i").addClass('glyphicon-refresh-animate').hide();
             });
           }
-          //r.readAsText(f);
           r.readAsBinaryString(f);
         } else {
           alert("Failed to load file");
