@@ -2,59 +2,46 @@
 {% block title %}HRLator{% endblock %}
 {% block content %}
 
-<h1>HRLator Activities <i class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></i></h1>
+<div class="container">
 
-<form class="form-horizontal" enctype="multipart/form-data" method="post" action="">
+  <h1>HRLator Activities <i class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></i></h1>
+  <script>hrType ='{{ hrType }}';</script>
 
-  <div class="form-group" id="hrlator-control">
-    <script>hrType = '{{ hrType }}';</script>
-    <div class="col-lg-offset-3 col-sm-6">
+  <div class="row form-group" id="hrlator-control">
+    <div class="col-lg-12">
       <span id="activities-upload" class="btn btn-large btn-default btn-file" disabled="disabled"><i class="glyphicon glyphicon-upload"></i> Load activities file<input type="file" id="csv-data" accept="text/csv,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"></span>
       <span id="activities-new" class="btn btn-large btn-default btn-file" disabled="disabled"><i class="glyphicon glyphicon-file"></i> Create activities file</span>
       <span id="activities-download" class="btn btn-large btn-default" disabled="disabled"><i class="glyphicon glyphicon-download"></i> Download activities file</span>
     </div>
+  </div>
 
+  <div class="row form-group">
     {% include 'hrlator-show.twig' %}
   </div>
 
+</div>
+
+<div class="container-fluid">
+
   <div class="row">
-    <div class="col-sm-12">
+    <div class="col-lg-12">
       <div id="hottable"></div>
-      <div id="table"></div>
-    </div>
-    <div id="data-sample" class="col-lg-offset-1 col-sm-10">
-      <strong>Expected data format</strong>
-      <table class="table table-striped table-bordered">
-        <thead>
-          <tr>
-            <th>Organizations</th>
-            <th>Clusters</th>
-            <th>Locations</th>
-            <th>Title</th>
-            <th>Primary Beneficiary</th>
-            <th>Number of primary beneficiaries</th>
-            <th>Status</th>
-            <th>Start Date</th>
-            <th>End Date</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Organization full name</td>
-            <td>Cluster full name</th>
-            <td>PCode (with country code ISO2 in front of it)</td>
-            <td>Title of the activity</td>
-            <td>Type of primary beneficiary</td>
-            <td>Number of primary beneficiaries</td>
-            <td>ongoing, planned or completed</td>
-            <td>eg 2013-10-01</td>
-            <td>eg 2013-10-01</td>
-          </tr>
-        </tbody>
-      </table>
     </div>
   </div>
 
-</form>
+  <div class="row">
+    <div id="data-sample" class="col-lg-offset-1 col-lg-10">
+      <div class="panel panel-default">
+        <div class="panel-heading">Expected data format</div>
+        <div class="panel panel-body">
+          <div class="div-overflow-auto">
+            {% include 'table-activities.twig' %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
 
 {% endblock %}

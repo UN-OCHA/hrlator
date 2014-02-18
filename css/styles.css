@@ -10,6 +10,9 @@
   width: 250px;
 }
 
+#hottable {
+  margin: 0 1em;
+}
 /* Bootstrap colors */
 #hottable.handsontable tr.hrlator-success td {
   background-color: #dff0d8;

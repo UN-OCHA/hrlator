@@ -3,7 +3,10 @@
 {% block content %}
     {% set tableWidth=6 %}
 
+<div class="container">
+
     <h2>HRLator Dictionary</h2>
+    <script>hrType ='{{ hrType }}';</script>
     <div class="row">
     <form class="form-horizontal" method="post" action="">
         <div class="form-group">
@@ -72,4 +75,5 @@
       var hr_clusters = null;
       var hr_dictionary = {{ dictionary | raw }};
     </script>
+</div>
 {% endblock %}
