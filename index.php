@@ -219,6 +219,7 @@ error_log("template: ". $template['template']);
     $rows = $dictionary->findAll();
     $parameters['rows'] = $rows;
     $parameters['dictionary'] = json_encode($rows);
+    $parameters['hrType'] = $template['template'];
   }
   elseif ($template['template'] == 'home' || $template['template'] == 'contacts' || $template['template'] == 'activities') {
     if ($template['template'] == 'home') {
