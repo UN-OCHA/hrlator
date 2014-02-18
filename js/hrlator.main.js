@@ -134,6 +134,7 @@ function dataDownload(filename, data) {
 
   // check if HTML5 a download attribute is working
   // Safari (Version 6.1.1) doesn't support
+  // http://stackoverflow.com/questions/12112844/how-to-detect-support-for-the-html5-download-attribute
   var supportHTM5download = (typeof $('a')[0].download === 'string');
 
   if (supportHTM5download) {
