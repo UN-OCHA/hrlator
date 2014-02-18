@@ -711,7 +711,7 @@ var hrlator = (function () {
   var dataStats = function() {
     var message = {log: "", strStats: [], progress: {}};
     var stats = {};
-    var total = 0;
+    var total = 0, totalWidth = 100;
     self.data.rows
       .filter(function(el) { return el[self.data.cols.valid] })
       .forEach(function(row) {
@@ -719,11 +719,13 @@ var hrlator = (function () {
         total++});
 
     for (var k in stats) {
-      message.strStats.push( '<span class="label label-'+k+' hr-download">' + k + ': ' + stats[k] + '</span>');
-      message.progress[k] = {
-        width: Math.round(stats[k] * 100 / total),
-        text: stats[k]
+      var width = Math.round(stats[k] * 100 / total);
+      totalWidth = totalWidth - width;
+      if (totalWidth<0) {
+        width = width + totalWidth;
       }
+      message.strStats.push( '<span class="label label-'+k+' hr-download">' + k + ': ' + stats[k] + '</span>');
+      message.progress[k] = { width: width, text: stats[k] };
     }
     message.log = {text: message.strStats.join(' - ')};
     return {stats: stats, total: total, message: message};
