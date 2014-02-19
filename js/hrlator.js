@@ -379,6 +379,7 @@ var hrlator = (function () {
 
     var deferred = $.Deferred();
     var cols = self.data.cols;
+    var promises = [];
 //console.log(row);
 
     // check empty row
@@ -421,7 +422,6 @@ var hrlator = (function () {
         }
       });
 
-      //validation[cols.PrimBen] = {valid: 'success', comment: 'checked'};
       validation[cols.PrimBen] = {valid: PrimBen.valid, comment: PrimBen.comment};
 
     }
@@ -464,23 +464,57 @@ var hrlator = (function () {
       validation[cols.DateEnd] = validateDate(row, cols.DateEnd, 'End date');
     }
 
-    // Ok, let's check the row
-    var valid = 'success';
-    var comments = [];
-    for (var j in validation) {
-      if (valid != 'danger') {
-        valid = (validation[j].valid != 'success') ? validation[j].valid : valid;
-      }
-      if (validation[j].comment) {
-        comments.push(validation[j].comment);
-      }
+    // location by pcode
+    if (cols.Locations >= 0 && row[cols.Locations].trim()) {
+      var location = row[cols.Locations].trim();
+      var _location;
+      promises.push( $.ajax({
+        url: hrlator.serverUrlBase + '/locations/xml',
+        data: {'field_location_pcode_value': location},
+        success: function(result) {
+          // parse result with jQuery and extract relevant field from XML
+          _location = $('taxonomy_term_data', result)
+            .filter( function(i, element) {
+              return ($(element).find('Pcode').text().toLowerCase() == location.toLowerCase());})
+            .map( function(i, element) {
+              var l = {};
+              $(element).children().each(function(i, element) {
+                l[$(element).prop("tagName")] = $(element).text();
+              });
+              return l;
+            });
+          if (_location.length == 0) {
+            validation[cols.Locations] = { valid: 'danger', comment: 'Location code ' + location + ' not found' };
+          }
+        },
+        error: function(result) {
+          validation[cols.Locations] = { valid: 'warning', comment: 'Network error on location code validation' };
+        }
+      }));
     }
-    row[cols.valid] = valid;
-    row[cols.comments] = comments.join('; ');
 
-    _ht_validated = true;
+    // Ok, let's check the row
+    row[cols.valid] = 'validating';
 
-    setTimeout(deferred.resolve, 100);
+    // wait for validations
+    $.when.apply(this, promises).done(function () {
+      var valid = 'success';
+      var comments = [];
+      for (var j in validation) {
+        if (valid != 'danger') {
+          valid = (validation[j].valid != 'success') ? validation[j].valid : valid;
+        }
+        if (validation[j].comment) {
+          comments.push(validation[j].comment);
+        }
+      }
+      row[cols.valid] = valid;
+      row[cols.comments] = comments.join('; ');
+
+      _ht_validated = true;
+
+      deferred.resolve();
+    });
 
     return deferred.promise();
   }
@@ -721,6 +755,7 @@ var hrlator = (function () {
     for (var k in stats) {
       var width = Math.round(stats[k] * 100 / total);
       totalWidth = totalWidth - width;
+      // fix width sum to 100%
       if (totalWidth<0) {
         width = width + totalWidth;
       }
