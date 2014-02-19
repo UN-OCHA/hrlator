@@ -901,6 +901,7 @@ var hrlator = (function () {
     var timer = setInterval(function() {
       var stats = dataStats();
       var message = stats.message;
+      message.log.text = 'Validating ' + self.data.filename + ': ' + message.log.text;
       self.ht.render();
       hrlatorStatus(message);
     }, 100);
@@ -912,7 +913,7 @@ var hrlator = (function () {
     $.when.apply(this, validateRows).done(function () {
       var stats = dataStats();
       var message = stats.message;
-      message.log.text = 'Validation completed - ' + message.log.text;
+      message.log.text = 'Validation of ' + self.data.filename + ' completed: ' + message.log.text;
       clearInterval(timer);
       hrlatorStatus(message);
       self.ht.render();
