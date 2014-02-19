@@ -39,6 +39,24 @@
 }
 
 /**
+ * Open modal is shifting body content to the left #9855
+ * https://github.com/twbs/bootstrap/issues/9855
+ * Temporary fix: https://github.com/twbs/bootstrap/issues/9855#issuecomment-28515309
+ **/
+body {
+  overflow-y: scroll;
+}
+
+body.modal-open {
+  overflow-y: scroll;
+  margin: 0;
+}
+
+.modal {
+  overflow: auto;
+}
+
+/**
  * Overflow panel
  * http://stackoverflow.com/questions/14926577/why-is-table-content-extending-beyond-containing-bootstrap-span-and-overlapp
  */
