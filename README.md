@@ -32,5 +32,4 @@ either the database file and the parent directory are writeable by Apache
 * html5csv - https://github.com/DrPaulBrewer/html5csv
 
 # TODO
-* use cache for ajax requests
 * check if ajaxQueue is needed (http://learn.jquery.com/effects/uses-of-queue-and-dequeue/)
