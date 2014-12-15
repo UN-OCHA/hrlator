@@ -1,4 +1,5 @@
 $(document).ready(function(){
+    console.log(GetURLParameter('api_path'));
     $('button').click(function(){
 	var path = $('#api_path').val();
         if(path == '')
@@ -22,6 +23,21 @@ $(document).ready(function(){
 	});
     });
 });
+
+function GetURLParameter(sParam)
+{
+    var sPageURL = window.location.search.substring(1);
+    var sURLVariables = sPageURL.split('&');
+    for (var i = 0; i < sURLVariables.length; i++) 
+    {
+        var sParameterName = sURLVariables[i].split('=');
+        if (sParameterName[0] == sParam) 
+        {
+            return sParameterName[1];
+        }
+    }
+}
+
 
 function JSONToCSVConvertor(JSONData, ReportTitle, ShowLabel) {
     //If JSONData is not an object then JSON.parse will parse the JSON string in an Object
