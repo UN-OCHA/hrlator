@@ -1,26 +1,30 @@
 $(document).ready(function(){
-    console.log(GetURLParameter('api_path'));
+    var jsonCallback = function (data) {
+      var apiData = data.data;
+      // Pager loop
+      while(data.next) {
+        delete data; // Reset data
+        $.ajax({
+          url: data.next.href,
+          async:false
+        })
+        .done(function(dataPager) {
+          data = dataPager;
+          apiData = apiData.concat(data.data);
+        });
+      }
+      JSONToCSVConvertor(apiData, "", true);
+    };
+    var path = GetURLParameter('api_path');
+    if (path != '') {
+      $.getJSON('http://www.humanitarianresponse.info' + path, jsonCallback);
+    }
     $('button').click(function(){
 	var path = $('#api_path').val();
         if(path == '')
             return;
 
-        $.getJSON('http://www.humanitarianresponse.info' + path, function(data) {
-	      var apiData = data.data;
-	      // Pager loop
-	      while(data.next) {
-		delete data; // Reset data
-		$.ajax({
-		  url: data.next.href,
-		  async:false
-		})
-		.done(function(dataPager) {
-		  data = dataPager;
-		  apiData = apiData.concat(data.data);
-		});
-	       }
-               JSONToCSVConvertor(apiData, "", true);
-	});
+        $.getJSON('http://www.humanitarianresponse.info' + path, jsonCallback);
     });
 });
 
