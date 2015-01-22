@@ -75,8 +75,8 @@ function JSONToCSVConvertor(JSONData, ReportTitle, ShowLabel) {
         
         //2nd loop will extract each column and convert it in string comma-seprated
         for (var index in arrData[i]) {
-            if (typeof arrData[i][index] == 'object') {
-              console.log(arrData[i][index].label);
+            if (typeof arrData[i][index] == 'object' && arrData[i][index] != null && arrData[i][index].label != null) {
+              row += '"' + arrData[i][index].label + '",';
             }
             else {
               row += '"' + arrData[i][index] + '",';
