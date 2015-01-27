@@ -4,6 +4,8 @@ if (!isset($_GET['from'])) {
 
 $last_monday = date('Y-m-d', strtotime('last monday'));
 $next_monday = date('Y-m-d', strtotime('next monday'));
+$op_data = get_api_data('http://www.humanitarianresponse.info/api/v1.0/operations');
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -38,7 +40,13 @@ $next_monday = date('Y-m-d', strtotime('next monday'));
             </div>
             <label for="operation">Operation:</label>
             <div>
-              <input type="text" name="operation" />
+              <select name="operation">
+                <?php
+                foreach ($op_data as $operation) {
+                  echo '<option value="'.$operation->id.'">'.$operation->label.'</option>';
+                }
+                ?>
+              </select>
             </div>
 	  </div>
 	  <input type="submit" value="Generate File" />
@@ -50,16 +58,7 @@ $next_monday = date('Y-m-d', strtotime('next monday'));
 else {
   // Download json in an array
   $path = 'http://www.humanitarianresponse.info/api/v1.0/events?filter[operation]='.$_GET['operation'].'&filter[date][value][0]='.$_GET['from'].'&filter[date][value][1]='.$_GET['to'].'&filter[date][operator]="BETWEEN"';
-  $raw = file_get_contents($path);
-  $data = json_decode($raw);
-  $api_data = $data->data;
-  while (isset($data->next)) {
-    $raw = file_get_contents($data->next->href);
-    $data = json_decode($raw);
-    foreach ($data->data as $item) {
-      $api_data[] = $item;
-    }
-  }
+  $api_data = get_api_data($path);
   // Set the headers we need for this to work
   header('Content-Type: text/csv; charset=utf-8');
   header('Content-Disposition: attachment; filename=events.csv');
@@ -109,3 +108,17 @@ function compare_events($a, $b) {
   return ($atime < $btime) ? -1 : 1;
 }
 
+function get_api_data($path) {
+  $api_data = array();
+  $raw = file_get_contents($path);
+  $data = json_decode($raw);
+  $api_data = $data->data;
+  while (isset($data->next)) {
+    $raw = file_get_contents($data->next->href);
+    $data = json_decode($raw);
+    foreach ($data->data as $item) {
+      $api_data[] = $item;
+    }
+  }
+  return $api_data;
+}
