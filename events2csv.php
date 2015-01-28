@@ -63,7 +63,7 @@ else {
   header('Content-Type: text/csv; charset=utf-8');
   header('Content-Disposition: attachment; filename=events.csv');
   $out = fopen('php://output', 'w');
-  $headers = array('Date', 'Hour', 'Description');
+  $headers = array('date.value', 'Date', 'Hour', 'label', 'address.thoroughfare', 'address.locality', 'address.country', 'contacts.name', 'contacts.email', 'meeting_minutes.url');
   fputcsv($out, $headers);
   $lines = array();
   foreach ($api_data as $line) {
@@ -87,8 +87,22 @@ function json2csv_get_events($item, $from, $to) {
   foreach ($item->date as $date) {
     $dtime = strtotime($date->{'value'});
     if ($dtime >= $ftime && $dtime <= $ttime) {
+      // Explode date and time
       $explode = explode(' ', $date->{'value'});
-      $returns[] = array($explode[0], $explode[1], $item->label);
+      // Take the first contact if it exists
+      $contact = new stdClass();
+      $contact->{'name'} = NULL;
+      $contact->email = NULL;
+      if (!empty($item->contacts)) {
+        $contact = $item->contacts[0];
+      }
+      $minutes = new stdClass();
+      $minutes->url = NULL;
+      if (!empty($item->meeting_minutes)) {
+        $minutes_array = get_api_data($item->meeting_minutes[0]->self);
+        $minutes = reset($minutes_array);
+      }
+      $returns[] = array($date->{'value'}, $explode[0], $explode[1], $item->label, $item->address->thoroughfare, $item->address->locality, $item->address->country, $contact->{'name'}, $contact->email, $minutes->url);
     }
   }
   return $returns;
